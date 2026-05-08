@@ -5,7 +5,7 @@ import type { JSX } from "react";
  * is a plain anchor pointing at the Lambda's `/start` route, which sets
  * the HttpOnly state cookie server-side and 302s to Strava.
  */
-export const STRAVA_START_URL = "https://api.lepre.dev/v1/auth/strava/start";
+export const STRAVA_START_URL = "https://api.lepre.run/v1/auth/strava/start";
 
 export function Home(): JSX.Element {
   return (

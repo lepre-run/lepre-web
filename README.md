@@ -1,6 +1,6 @@
 # lepre-web
 
-Vite + React + TypeScript single-page app on AWS Amplify at `lepre.dev`.
+Vite + React + TypeScript single-page app on AWS Amplify at `lepre.run`.
 
 Three pages (slice 1):
 
