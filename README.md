@@ -20,6 +20,10 @@ npm run lint         # biome
 npm run build        # tsc + vite build
 ```
 
+TypeScript 7 uses the native (Go) compiler. For editor diagnostics that
+match CI, use an editor with TypeScript 7 LSP support (VS Code needs the
+TypeScript Native extension).
+
 ## Deploy
 
 Amplify's GitHub source integration triggers on push to `main`. Build
