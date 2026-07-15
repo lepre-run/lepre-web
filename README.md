@@ -2,16 +2,27 @@
 
 Local-first Vite + React application deployed on AWS Amplify at `lepre.run`.
 
-After Strava authorization, the app synchronizes the minimum workout record
-into IndexedDB:
+After Strava authorization, the app synchronizes the workout entity into
+IndexedDB:
 
 ```ts
-{ id, date, name }
+{ id, performedAt, name, durationSeconds, distanceMeters }
 ```
 
-The Strava activity id exists only to make updates and deletions idempotent.
-Workout content is not stored by the backend. The UI can read its local data
-while offline and synchronizes when opened or when the user requests it.
+The UI reads only from IndexedDB and can therefore render while offline.
+Synchronization updates that local source of truth when the app opens or the
+user requests it. Workout content is never stored by the backend.
+
+Code follows the Clean Architecture dependency rule:
+
+- `src/domain` contains immutable entities and value objects.
+- `src/application` contains use cases and outbound ports.
+- `src/infrastructure` contains HTTP and IndexedDB adapters.
+- `src/composition` wires concrete adapters into use cases.
+- `src/pages` contains React presentation.
+
+IndexedDB schema version 2 deliberately resets the pre-entity development
+schema; there is no production migration because the app has no users yet.
 
 ## Local verification
 

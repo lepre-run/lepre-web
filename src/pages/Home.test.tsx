@@ -2,15 +2,13 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Home, STRAVA_START_URL } from "./Home";
 
-vi.mock("../api", () => ({
-  disconnect: vi.fn().mockResolvedValue(undefined),
-  hasSession: vi.fn().mockResolvedValue(false),
-  synchronize: vi.fn().mockResolvedValue([]),
-}));
-
-vi.mock("../data/workouts", () => ({
-  clearWorkouts: vi.fn().mockResolvedValue(undefined),
-  listWorkouts: vi.fn().mockResolvedValue([]),
+vi.mock("../composition/application", () => ({
+  application: {
+    disconnectProvider: vi.fn().mockResolvedValue({ kind: "disconnected" }),
+    loadUser: vi.fn().mockResolvedValue({ kind: "disconnected" }),
+    listWorkouts: vi.fn().mockResolvedValue({ kind: "loaded", workouts: [] }),
+    synchronizeWorkouts: vi.fn().mockResolvedValue({ kind: "synchronized" }),
+  },
 }));
 
 describe("Home", () => {

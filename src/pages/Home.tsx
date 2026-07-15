@@ -1,62 +1,95 @@
 import { type JSX, useCallback, useEffect, useState } from "react";
-import { disconnect, hasSession, synchronize } from "../api";
-import { type Workout, clearWorkouts, listWorkouts } from "../data/workouts";
+import { application } from "../composition/application";
+import type { User } from "../domain/user";
+import type { Workout } from "../domain/workout";
+import { STRAVA_START_URL } from "../infrastructure/api/lepre-backend";
 
-export const STRAVA_START_URL = "https://api.lepre.run/v1/auth/strava/start";
+export { STRAVA_START_URL };
 
-type ConnectionState = "checking" | "connected" | "disconnected" | "offline";
+type ScreenState =
+  | Readonly<{ kind: "checking" }>
+  | Readonly<{ kind: "disconnected" }>
+  | Readonly<{
+      kind: "ready";
+      user: User;
+      availability: "online" | "offline" | "reauthorization-required";
+    }>;
+
+type Notice = Readonly<{ kind: "none" }> | Readonly<{ kind: "error"; message: string }>;
+
+function duration(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainder = seconds % 60;
+  return hours > 0
+    ? `${hours}:${minutes.toString().padStart(2, "0")}:${remainder.toString().padStart(2, "0")}`
+    : `${minutes}:${remainder.toString().padStart(2, "0")}`;
+}
 
 export function Home(): JSX.Element {
-  const [connection, setConnection] = useState<ConnectionState>("checking");
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [screen, setScreen] = useState<ScreenState>({ kind: "checking" });
+  const [workouts, setWorkouts] = useState<ReadonlyArray<Workout>>([]);
   const [syncing, setSyncing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<Notice>({ kind: "none" });
+
+  const refreshWorkouts = useCallback(async (): Promise<void> => {
+    const result = await application.listWorkouts();
+    if (result.kind === "loaded") setWorkouts(result.workouts);
+  }, []);
 
   const sync = useCallback(async (): Promise<void> => {
     setSyncing(true);
-    setError(null);
-    try {
-      setWorkouts(await synchronize(setWorkouts));
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Could not synchronize workouts");
-    } finally {
-      setSyncing(false);
+    setNotice({ kind: "none" });
+    const result = await application.synchronizeWorkouts(refreshWorkouts);
+    if (result.kind === "reauthorization-required") {
+      setNotice({ kind: "error", message: "Reconnect Strava to synchronize workouts." });
     }
-  }, []);
+    if (result.kind === "provider-unavailable") {
+      setNotice({ kind: "error", message: "Could not synchronize workouts right now." });
+    }
+    setSyncing(false);
+  }, [refreshWorkouts]);
 
   useEffect(() => {
     let active = true;
     void (async () => {
-      const local = await listWorkouts().catch(() => []);
+      await refreshWorkouts();
       if (!active) return;
-      setWorkouts(local);
-      try {
-        const connected = await hasSession();
-        if (!active) return;
-        setConnection(connected ? "connected" : "disconnected");
-        if (connected) await sync();
-      } catch {
-        if (active) setConnection(local.length > 0 ? "offline" : "disconnected");
+      const user = await application.loadUser();
+      if (!active) return;
+      if (user.kind === "disconnected") {
+        setScreen({ kind: "disconnected" });
+        return;
       }
+      setScreen({
+        kind: "ready",
+        user: user.user,
+        availability:
+          user.kind === "connected"
+            ? "online"
+            : user.kind === "offline"
+              ? "offline"
+              : "reauthorization-required",
+      });
+      if (user.kind === "connected") await sync();
     })();
     return () => {
       active = false;
     };
-  }, [sync]);
+  }, [refreshWorkouts, sync]);
 
   async function handleDisconnect(): Promise<void> {
-    setError(null);
-    try {
-      await disconnect();
-      await clearWorkouts();
+    setNotice({ kind: "none" });
+    const result = await application.disconnectProvider();
+    if (result.kind === "disconnected") {
       setWorkouts([]);
-      setConnection("disconnected");
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Could not disconnect Strava");
+      setScreen({ kind: "disconnected" });
+    } else {
+      setNotice({ kind: "error", message: "Could not disconnect Strava." });
     }
   }
 
-  if (connection === "checking") {
+  if (screen.kind === "checking") {
     return (
       <main>
         <h1>lepre</h1>
@@ -65,7 +98,7 @@ export function Home(): JSX.Element {
     );
   }
 
-  if (connection === "disconnected") {
+  if (screen.kind === "disconnected") {
     return (
       <main>
         <h1>lepre</h1>
@@ -78,21 +111,29 @@ export function Home(): JSX.Element {
   return (
     <main>
       <h1>lepre</h1>
-      {connection === "offline" && <p>You are offline. Showing workouts stored on this device.</p>}
-      {error !== null && <p role="alert">{error}</p>}
+      <p>
+        {screen.user.firstName} {screen.user.lastName} · {screen.user.connection.provider}
+      </p>
+      {screen.availability === "offline" && (
+        <p>You are offline. Showing workouts stored on this device.</p>
+      )}
+      {screen.availability === "reauthorization-required" && (
+        <p>Reconnect Strava to synchronize. Local workouts remain available.</p>
+      )}
+      {notice.kind === "error" && <p role="alert">{notice.message}</p>}
       <p>{workouts.length} workouts stored on this device.</p>
       <p>
         <button
           type="button"
           onClick={() => void sync()}
-          disabled={syncing || connection === "offline"}
+          disabled={syncing || screen.availability !== "online"}
         >
           {syncing ? "Syncing…" : "Sync now"}
         </button>{" "}
         <button
           type="button"
           onClick={() => void handleDisconnect()}
-          disabled={syncing || connection === "offline"}
+          disabled={syncing || screen.availability === "offline"}
         >
           Disconnect Strava
         </button>
@@ -103,9 +144,12 @@ export function Home(): JSX.Element {
         <ol>
           {workouts.map((workout) => (
             <li key={workout.id}>
-              <time dateTime={workout.date}>{new Date(workout.date).toLocaleDateString()}</time>
+              <time dateTime={workout.performedAt}>
+                {new Date(workout.performedAt).toLocaleDateString()}
+              </time>
               {" — "}
-              {workout.name}
+              {workout.name} · {(workout.distanceMeters / 1000).toFixed(2)} km ·{" "}
+              {duration(workout.durationSeconds)}
             </li>
           ))}
         </ol>
