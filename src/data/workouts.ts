@@ -62,10 +62,11 @@ function openDatabase(): Promise<IDBDatabase> {
 export async function listWorkouts(): Promise<Workout[]> {
   const database = await openDatabase();
   const transaction = database.transaction(WORKOUTS_STORE, "readonly");
+  const done = transactionDone(transaction);
   const workouts = await requestResult(
     transaction.objectStore(WORKOUTS_STORE).getAll() as IDBRequest<Workout[]>,
   );
-  await transactionDone(transaction);
+  await done;
   database.close();
   return workouts.sort((left, right) => right.date.localeCompare(left.date));
 }
@@ -73,10 +74,11 @@ export async function listWorkouts(): Promise<Workout[]> {
 export async function syncState(): Promise<SyncState> {
   const database = await openDatabase();
   const transaction = database.transaction(META_STORE, "readonly");
+  const done = transactionDone(transaction);
   const state = await requestResult(
     transaction.objectStore(META_STORE).get(SYNC_KEY) as IDBRequest<SyncState | undefined>,
   );
-  await transactionDone(transaction);
+  await done;
   database.close();
   return state ?? { after: 0, cursor: 0 };
 }
@@ -84,6 +86,7 @@ export async function syncState(): Promise<SyncState> {
 export async function applySync(payload: SyncPayload): Promise<Workout[]> {
   const database = await openDatabase();
   const transaction = database.transaction([WORKOUTS_STORE, META_STORE], "readwrite");
+  const done = transactionDone(transaction);
   const workoutStore = transaction.objectStore(WORKOUTS_STORE);
   for (const workout of payload.workouts) {
     workoutStore.put({ id: workout.id, date: workout.date, name: workout.name });
@@ -96,7 +99,7 @@ export async function applySync(payload: SyncPayload): Promise<Workout[]> {
       .objectStore(META_STORE)
       .put({ after: payload.syncedAt, cursor: payload.cursor } satisfies SyncState, SYNC_KEY);
   }
-  await transactionDone(transaction);
+  await done;
   database.close();
   return listWorkouts();
 }
@@ -104,8 +107,9 @@ export async function applySync(payload: SyncPayload): Promise<Workout[]> {
 export async function clearWorkouts(): Promise<void> {
   const database = await openDatabase();
   const transaction = database.transaction([WORKOUTS_STORE, META_STORE], "readwrite");
+  const done = transactionDone(transaction);
   transaction.objectStore(WORKOUTS_STORE).clear();
   transaction.objectStore(META_STORE).clear();
-  await transactionDone(transaction);
+  await done;
   database.close();
 }
