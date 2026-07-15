@@ -1,15 +1,11 @@
 import type { JSX } from "react";
+import { Home } from "./Home";
 
 /**
  * `GET /connected` — the Lambda redirects here on a successful Strava
- * connection. Slice 1 only renders a static success message; no name
- * lookup, no `/me` endpoint.
+ * connection. It renders the same local-first home screen, which verifies
+ * the new session and performs the first import.
  */
 export function Connected(): JSX.Element {
-  return (
-    <main>
-      <h1>Connected ✓</h1>
-      <p>Your Strava account is now linked.</p>
-    </main>
-  );
+  return <Home />;
 }

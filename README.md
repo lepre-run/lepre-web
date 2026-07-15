@@ -1,35 +1,26 @@
 # lepre-web
 
-Vite + React + TypeScript single-page app on AWS Amplify at `lepre.run`.
+Local-first Vite + React application deployed on AWS Amplify at `lepre.run`.
 
-Three pages (slice 1):
+After Strava authorization, the app synchronizes the minimum workout record
+into IndexedDB:
 
-- `/` — `Join with Strava` button (anchor → Lambda `/v1/auth/strava/start`)
-- `/connected` — static success page
-- `/connect-failed?reason=…&id=…` — error page with closed reason-slug set
+```ts
+{ id, date, name }
+```
 
-See `~/opt/adventures/lepre-api/plans/001-strava-join.md` for the ADR.
+The Strava activity id exists only to make updates and deletions idempotent.
+Workout content is not stored by the backend. The UI can read its local data
+while offline and synchronizes when opened or when the user requests it.
 
-## Local
+## Local verification
 
 ```bash
 npm ci
-npm run dev          # vite dev server
-npm test             # vitest run
-npm run lint         # biome
-npm run build        # tsc + vite build
+npm run lint
+npm test -- --run
+npm run build
 ```
 
-TypeScript 7 uses the native (Go) compiler. For editor diagnostics that
-match CI, use an editor with TypeScript 7 LSP support (VS Code needs the
-TypeScript Native extension).
-
-## Deploy
-
-Amplify's GitHub source integration triggers on push to `main`. Build
-command (set on the Amplify app, not in this repo): `npm ci && npm run lint
-&& npm test -- --run && npm run build`. Output: `dist/`.
-
-There is no GitHub Actions workflow in this repo for slice 1 — Amplify's
-build runs the lint + tests before deploying. A PR-only workflow is a
-follow-up once branching matters.
+Amplify builds and deploys `main`. The production branch remains protected by
+Amplify basic authentication during development.

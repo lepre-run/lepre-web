@@ -12,6 +12,7 @@ const REASON_MESSAGES: Readonly<Record<string, string>> = {
   state_invalid: "The link expired or didn't match. Please try again.",
   missing_code: "Strava didn't return an authorization code.",
   strava_exchange_failed: "We couldn't reach Strava. Please try again.",
+  strava_not_configured: "The Strava connection is not configured yet.",
   scope_insufficient: "We need all three permissions to connect your account.",
   db_failure: "Something went wrong on our side. Please try again.",
   unknown: "Something went wrong. Please try again.",
