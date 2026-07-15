@@ -9,11 +9,13 @@ export interface SyncState {
   cursor: number;
 }
 
-interface SyncPayload {
+export interface SyncPayload {
   workouts: Workout[];
   deletedIds: number[];
   syncedAt: number;
   cursor: number;
+  snapshot: number;
+  nextPage: number | null;
 }
 
 const DATABASE_NAME = "lepre";
@@ -89,9 +91,11 @@ export async function applySync(payload: SyncPayload): Promise<Workout[]> {
   for (const id of payload.deletedIds) {
     workoutStore.delete(id);
   }
-  transaction
-    .objectStore(META_STORE)
-    .put({ after: payload.syncedAt, cursor: payload.cursor } satisfies SyncState, SYNC_KEY);
+  if (payload.nextPage === null) {
+    transaction
+      .objectStore(META_STORE)
+      .put({ after: payload.syncedAt, cursor: payload.cursor } satisfies SyncState, SYNC_KEY);
+  }
   await transactionDone(transaction);
   database.close();
   return listWorkouts();

@@ -16,7 +16,7 @@ export function Home(): JSX.Element {
     setSyncing(true);
     setError(null);
     try {
-      setWorkouts(await synchronize());
+      setWorkouts(await synchronize(setWorkouts));
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Could not synchronize workouts");
     } finally {
