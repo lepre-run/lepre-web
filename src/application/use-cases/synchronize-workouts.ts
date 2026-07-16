@@ -16,7 +16,8 @@ export function createSynchronizeWorkouts(
 ): SynchronizeWorkouts {
   return async (afterBatch) => {
     const state = await store.synchronizationState();
-    let continuation: SynchronizationContinuationRequest = { kind: "first" };
+    let continuation: SynchronizationContinuationRequest =
+      state.kind === "importing" ? { kind: "next", token: state.token } : { kind: "first" };
     while (true) {
       const result = await backend.fetchWorkoutBatch(state, continuation);
       if (result.kind === "reauthorization-required") return result;

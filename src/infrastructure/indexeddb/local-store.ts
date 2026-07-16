@@ -4,13 +4,13 @@ import type {
   SynchronizationState,
 } from "../../application/model";
 import type { LocalStore } from "../../application/ports";
-import type { SynchronizationCheckpoint } from "../../domain/identity";
+import type { ContinuationToken, SynchronizationCheckpoint } from "../../domain/identity";
 import { createProviderConnection } from "../../domain/provider-connection";
 import { type User, createUser } from "../../domain/user";
 import { type Workout, createWorkout } from "../../domain/workout";
 
 const DATABASE_NAME = "lepre";
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 3;
 const USER_STORE = "user";
 const WORKOUT_STORE = "workouts";
 const META_STORE = "meta";
@@ -34,11 +34,23 @@ type StoredWorkoutRecord = Readonly<{
   id: string;
   performedAt: string;
   name: string;
+  description: string;
+  sport: string;
   durationSeconds: number;
+  elapsedDurationSeconds: number;
   distanceMeters: number;
+  laps: ReadonlyArray<{
+    index: number;
+    name: string;
+    movingDurationSeconds: number;
+    elapsedDurationSeconds: number;
+    distanceMeters: number;
+  }>;
 }>;
 
-type StoredSynchronizationRecord = Readonly<{ checkpoint: string }>;
+type StoredSynchronizationRecord =
+  | Readonly<{ kind: "importing"; token: string }>
+  | Readonly<{ kind: "incremental"; checkpoint: string }>;
 
 function requestResult<Value>(request: IDBRequest<Value>): Promise<Value> {
   return new Promise((resolve, reject) => {
@@ -107,7 +119,17 @@ function userRecord(user: User): StoredUserRecord {
 }
 
 function workoutRecord(workout: Workout): StoredWorkoutRecord {
-  return { ...workout };
+  return {
+    id: workout.id,
+    performedAt: workout.performedAt,
+    name: workout.name,
+    description: workout.description,
+    sport: workout.sport,
+    durationSeconds: workout.durationSeconds,
+    elapsedDurationSeconds: workout.elapsedDurationSeconds,
+    distanceMeters: workout.distanceMeters,
+    laps: workout.laps,
+  };
 }
 
 async function loadUser(): Promise<StoredUser> {
@@ -151,10 +173,12 @@ async function synchronizationState(): Promise<SynchronizationState> {
   database.close();
   return record === undefined
     ? { kind: "initial" }
-    : {
-        kind: "incremental",
-        checkpoint: record.checkpoint as SynchronizationCheckpoint,
-      };
+    : record.kind === "importing"
+      ? { kind: "importing", token: record.token as ContinuationToken }
+      : {
+          kind: "incremental",
+          checkpoint: record.checkpoint as SynchronizationCheckpoint,
+        };
 }
 
 async function applySynchronizationBatch(batch: SynchronizationBatch): Promise<void> {
@@ -164,14 +188,11 @@ async function applySynchronizationBatch(batch: SynchronizationBatch): Promise<v
   const workouts = transaction.objectStore(WORKOUT_STORE);
   for (const workout of batch.upserted) workouts.put(workoutRecord(workout));
   for (const id of batch.removed) workouts.delete(id);
-  if (batch.continuation.kind === "complete") {
-    transaction
-      .objectStore(META_STORE)
-      .put(
-        { checkpoint: batch.continuation.checkpoint } satisfies StoredSynchronizationRecord,
-        SYNC_KEY,
-      );
-  }
+  const synchronizationRecord: StoredSynchronizationRecord =
+    batch.continuation.kind === "complete"
+      ? { kind: "incremental", checkpoint: batch.continuation.checkpoint }
+      : { kind: "importing", token: batch.continuation.token };
+  transaction.objectStore(META_STORE).put(synchronizationRecord, SYNC_KEY);
   await done;
   database.close();
 }

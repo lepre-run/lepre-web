@@ -26,6 +26,18 @@ function duration(seconds: number): string {
     : `${minutes}:${remainder.toString().padStart(2, "0")}`;
 }
 
+function distance(meters: number): string {
+  return meters >= 1_000 ? `${(meters / 1_000).toFixed(2)} km` : `${Math.round(meters)} m`;
+}
+
+function pace(seconds: number, meters: number): string {
+  if (seconds <= 0 || meters <= 0) return "—";
+  const secondsPerKilometer = Math.round((seconds / meters) * 1_000);
+  const minutes = Math.floor(secondsPerKilometer / 60);
+  const remainder = secondsPerKilometer % 60;
+  return `${minutes}:${remainder.toString().padStart(2, "0")} /km`;
+}
+
 export function Home(): JSX.Element {
   const [screen, setScreen] = useState<ScreenState>({ kind: "checking" });
   const [workouts, setWorkouts] = useState<ReadonlyArray<Workout>>([]);
@@ -91,7 +103,7 @@ export function Home(): JSX.Element {
 
   if (screen.kind === "checking") {
     return (
-      <main>
+      <main className="shell shell--centered">
         <h1>lepre</h1>
         <p>Opening your local workouts…</p>
       </main>
@@ -100,56 +112,126 @@ export function Home(): JSX.Element {
 
   if (screen.kind === "disconnected") {
     return (
-      <main>
-        <h1>lepre</h1>
-        <p>Connect your Strava account to keep a local list of your runs.</p>
-        <a href={STRAVA_START_URL}>Connect with Strava</a>
+      <main className="shell shell--centered">
+        <p className="wordmark">lepre</p>
+        <h1>Train with direction.</h1>
+        <p className="lede">See the structure inside every run, not just its average.</p>
+        <a className="primary-action" href={STRAVA_START_URL}>
+          Connect with Strava
+        </a>
       </main>
     );
   }
 
   return (
-    <main>
-      <h1>lepre</h1>
-      <p>
-        {screen.user.firstName} {screen.user.lastName} · {screen.user.connection.provider}
-      </p>
+    <main className="shell">
+      <header className="app-header">
+        <div>
+          <p className="wordmark">lepre</p>
+          <p className="runner-name">
+            {screen.user.firstName} {screen.user.lastName}
+          </p>
+        </div>
+        <div className="header-actions">
+          <button
+            type="button"
+            onClick={() => void sync()}
+            disabled={syncing || screen.availability !== "online"}
+          >
+            {syncing ? "Syncing…" : "Sync"}
+          </button>
+          <button
+            className="quiet-action"
+            type="button"
+            onClick={() => void handleDisconnect()}
+            disabled={syncing || screen.availability === "offline"}
+          >
+            Disconnect
+          </button>
+        </div>
+      </header>
       {screen.availability === "offline" && (
-        <p>You are offline. Showing workouts stored on this device.</p>
+        <p className="notice">You are offline. Showing workouts stored on this device.</p>
       )}
       {screen.availability === "reauthorization-required" && (
-        <p>Reconnect Strava to synchronize. Local workouts remain available.</p>
+        <p className="notice">Reconnect Strava to synchronize. Local workouts remain available.</p>
       )}
-      {notice.kind === "error" && <p role="alert">{notice.message}</p>}
-      <p>{workouts.length} workouts stored on this device.</p>
-      <p>
-        <button
-          type="button"
-          onClick={() => void sync()}
-          disabled={syncing || screen.availability !== "online"}
-        >
-          {syncing ? "Syncing…" : "Sync now"}
-        </button>{" "}
-        <button
-          type="button"
-          onClick={() => void handleDisconnect()}
-          disabled={syncing || screen.availability === "offline"}
-        >
-          Disconnect Strava
-        </button>
-      </p>
+      {notice.kind === "error" && (
+        <p className="notice notice--error" role="alert">
+          {notice.message}
+        </p>
+      )}
+      <div className="feed-heading">
+        <div>
+          <p className="eyebrow">Workout feed</p>
+          <h1>Your training, stage by stage.</h1>
+        </div>
+        <p className="workout-count">{workouts.length} stored locally</p>
+      </div>
       {workouts.length === 0 ? (
-        <p>No workouts found.</p>
+        <div className="empty-state">
+          <h2>{syncing ? "Importing your recent runs…" : "No runs found"}</h2>
+          <p>Completed workouts will appear here after their laps have been classified.</p>
+        </div>
       ) : (
-        <ol>
+        <ol className="workout-feed">
           {workouts.map((workout) => (
-            <li key={workout.id}>
-              <time dateTime={workout.performedAt}>
-                {new Date(workout.performedAt).toLocaleDateString()}
-              </time>
-              {" — "}
-              {workout.name} · {(workout.distanceMeters / 1000).toFixed(2)} km ·{" "}
-              {duration(workout.durationSeconds)}
+            <li className="workout-feed__item" key={workout.id}>
+              <article className="workout-card">
+                <header className="workout-card__header">
+                  <div>
+                    <p className={`workout-type workout-type--${workout.classification.kind}`}>
+                      {workout.classification.label}
+                    </p>
+                    <h2>{workout.name}</h2>
+                  </div>
+                  <dl className="workout-summary">
+                    <div>
+                      <dt>Date</dt>
+                      <dd>
+                        <time dateTime={workout.performedAt}>
+                          {new Date(workout.performedAt).toLocaleDateString(undefined, {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </time>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Distance</dt>
+                      <dd>{distance(workout.distanceMeters)}</dd>
+                    </div>
+                  </dl>
+                </header>
+                {workout.description.trim().length > 0 && (
+                  <p className="workout-description">{workout.description}</p>
+                )}
+                <div className="lap-section">
+                  <div className="lap-section__heading">
+                    <h3>Lap structure</h3>
+                    <span>{duration(workout.durationSeconds)} moving</span>
+                  </div>
+                  {workout.laps.length === 0 ? (
+                    <p className="no-laps">Strava did not provide lap data for this run.</p>
+                  ) : (
+                    <ol className="lap-list">
+                      {workout.laps.map((lap) => {
+                        const isCore = workout.classification.coreLapIndexes.includes(lap.index);
+                        return (
+                          <li className={isCore ? "lap lap--core" : "lap"} key={lap.index}>
+                            <span className="lap__index">{lap.index}</span>
+                            <span className="lap__name">{lap.name}</span>
+                            <span>{distance(lap.distanceMeters)}</span>
+                            <span>{duration(lap.movingDurationSeconds)}</span>
+                            <strong>{pace(lap.movingDurationSeconds, lap.distanceMeters)}</strong>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  )}
+                </div>
+              </article>
             </li>
           ))}
         </ol>

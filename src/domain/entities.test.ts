@@ -27,17 +27,42 @@ describe("domain entities", () => {
       id: "strava:7",
       performedAt: "2026-07-15T06:00:00Z",
       name: "Morning Run",
+      description: "Easy morning",
+      sport: "Run",
       durationSeconds: 3_601,
+      elapsedDurationSeconds: 3_700,
       distanceMeters: 10_050.5,
+      laps: [
+        {
+          index: 1,
+          name: "Lap 1",
+          movingDurationSeconds: 3_601,
+          elapsedDurationSeconds: 3_700,
+          distanceMeters: 10_050.5,
+        },
+      ],
     });
     expect(result).toEqual({
       kind: "created",
       workout: {
         id: "strava:7",
-        performedAt: "2026-07-15T06:00:00.000Z",
+        performedAt: "2026-07-15T06:00:00Z",
         name: "Morning Run",
+        description: "Easy morning",
+        sport: "Run",
         durationSeconds: 3_601,
+        elapsedDurationSeconds: 3_700,
         distanceMeters: 10_050.5,
+        laps: [
+          {
+            index: 1,
+            name: "Lap 1",
+            movingDurationSeconds: 3_601,
+            elapsedDurationSeconds: 3_700,
+            distanceMeters: 10_050.5,
+          },
+        ],
+        classification: { kind: "free-run", label: "Free run", coreLapIndexes: [] },
       },
     });
   });
@@ -48,8 +73,12 @@ describe("domain entities", () => {
         id: "",
         performedAt: "invalid",
         name: "",
+        description: "",
+        sport: "Ride",
         durationSeconds: -1,
+        elapsedDurationSeconds: -1,
         distanceMeters: -1,
+        laps: [],
       }),
     ).toEqual({ kind: "invalid-workout" });
   });

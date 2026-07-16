@@ -1,0 +1,306 @@
+:root {
+  color: #172019;
+  background: #f3f0e8;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: radial-gradient(circle at 86% 4%, rgba(188, 220, 92, 0.2), transparent 28rem), #f3f0e8;
+}
+
+button,
+a {
+  font: inherit;
+}
+
+button,
+.primary-action {
+  border: 1px solid #172019;
+  border-radius: 999px;
+  background: #172019;
+  color: #f9f7f0;
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+
+.quiet-action {
+  background: transparent;
+  color: #172019;
+}
+
+.primary-action {
+  display: inline-block;
+  margin-top: 1rem;
+  text-decoration: none;
+}
+
+.shell {
+  width: min(100% - 2rem, 960px);
+  margin: 0 auto;
+  padding: 2rem 0 5rem;
+}
+
+.shell--centered {
+  display: grid;
+  min-height: 100vh;
+  align-content: center;
+  justify-items: start;
+  max-width: 680px;
+}
+
+.shell--centered h1 {
+  max-width: 10ch;
+  margin: 0;
+  font-size: clamp(3rem, 10vw, 6rem);
+  line-height: 0.94;
+  letter-spacing: -0.07em;
+}
+
+.wordmark,
+.eyebrow {
+  margin: 0;
+  color: #496333;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.wordmark {
+  font-size: 1.15rem;
+}
+
+.lede {
+  max-width: 35rem;
+  color: #526056;
+  font-size: 1.15rem;
+}
+
+.app-header,
+.feed-heading,
+.workout-card__header,
+.lap-section__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.app-header {
+  padding-bottom: 4rem;
+}
+
+.runner-name {
+  margin: 0.3rem 0 0;
+  color: #687269;
+  font-size: 0.82rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.feed-heading {
+  align-items: end;
+  margin-bottom: 1.4rem;
+}
+
+.feed-heading h1 {
+  margin: 0.25rem 0 0;
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.workout-count {
+  flex: none;
+  margin: 0;
+  color: #687269;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.76rem;
+}
+
+.notice,
+.empty-state {
+  margin: 0 0 1.5rem;
+  border: 1px solid #c8c5b9;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.45);
+  padding: 1rem 1.2rem;
+}
+
+.notice--error {
+  border-color: #bb715e;
+}
+
+.workout-feed {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.workout-card {
+  overflow: hidden;
+  border: 1px solid #d0cdc1;
+  border-radius: 22px;
+  background: rgba(251, 250, 245, 0.88);
+  box-shadow: 0 10px 40px rgba(32, 43, 34, 0.05);
+}
+
+.workout-card__header {
+  align-items: start;
+  padding: 1.5rem 1.5rem 1.25rem;
+}
+
+.workout-type {
+  margin: 0 0 0.35rem;
+  color: #496333;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.workout-type--unknown {
+  color: #8b5d4e;
+}
+
+.workout-card h2 {
+  margin: 0;
+  font-size: clamp(1.45rem, 4vw, 2.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.workout-summary {
+  display: flex;
+  flex: none;
+  gap: 1.5rem;
+  margin: 0;
+}
+
+.workout-summary dt {
+  color: #7b817b;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+}
+
+.workout-summary dd {
+  margin: 0.18rem 0 0;
+  font-weight: 700;
+}
+
+.workout-description {
+  max-width: 46rem;
+  margin: -0.4rem 1.5rem 1.3rem;
+  color: #59625a;
+  line-height: 1.6;
+}
+
+.lap-section {
+  border-top: 1px solid #dcd9ce;
+  background: rgba(235, 234, 226, 0.55);
+  padding: 1.1rem 1.5rem 1.4rem;
+}
+
+.lap-section__heading {
+  margin-bottom: 0.8rem;
+}
+
+.lap-section__heading h3 {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lap-section__heading span,
+.no-laps {
+  color: #747b74;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.72rem;
+}
+
+.lap-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lap {
+  display: grid;
+  grid-template-columns: 2rem minmax(5rem, 1fr) repeat(3, minmax(4.7rem, auto));
+  gap: 0.8rem;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  color: #59625a;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.72rem;
+}
+
+.lap--core {
+  border-color: #cad8a9;
+  background: #eff4df;
+  color: #26341f;
+}
+
+.lap__index {
+  color: #8a908a;
+}
+
+.lap__name {
+  overflow: hidden;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lap strong {
+  text-align: right;
+}
+
+@media (max-width: 680px) {
+  .app-header,
+  .feed-heading,
+  .workout-card__header {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .workout-summary {
+    width: 100%;
+  }
+
+  .lap {
+    grid-template-columns: 1.2rem minmax(3.5rem, 1fr) 3.3rem 3rem 4.5rem;
+    gap: 0.25rem;
+    padding-inline: 0.4rem;
+    font-size: 0.64rem;
+  }
+}

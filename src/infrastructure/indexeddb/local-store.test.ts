@@ -33,8 +33,20 @@ describe("IndexedDB local store", () => {
       id: "strava:7",
       performedAt: "2026-07-15T06:00:00Z",
       name: "Morning Run",
+      description: "",
+      sport: "Run",
       durationSeconds: 2_400,
+      elapsedDurationSeconds: 2_450,
       distanceMeters: 8_000,
+      laps: [
+        {
+          index: 1,
+          name: "Lap 1",
+          movingDurationSeconds: 2_400,
+          elapsedDurationSeconds: 2_450,
+          distanceMeters: 8_000,
+        },
+      ],
     });
     if (workout.kind !== "created") throw new Error("expected workout");
     await indexedDbLocalStore.reconcileUser(connectedUser("user-1", "connection-1"));
@@ -59,8 +71,20 @@ describe("IndexedDB local store", () => {
       id: "strava:7",
       performedAt: "2026-07-15T06:00:00Z",
       name: "Morning Run",
+      description: "",
+      sport: "Run",
       durationSeconds: 2_400,
+      elapsedDurationSeconds: 2_450,
       distanceMeters: 8_000,
+      laps: [
+        {
+          index: 1,
+          name: "Lap 1",
+          movingDurationSeconds: 2_400,
+          elapsedDurationSeconds: 2_450,
+          distanceMeters: 8_000,
+        },
+      ],
     });
     if (workout.kind !== "created") throw new Error("expected workout");
     await indexedDbLocalStore.reconcileUser(connectedUser("user-1", "connection-1"));
@@ -68,6 +92,10 @@ describe("IndexedDB local store", () => {
       upserted: [workout.workout],
       removed: [],
       continuation: { kind: "more", token: "next" as never },
+    });
+    await expect(indexedDbLocalStore.synchronizationState()).resolves.toEqual({
+      kind: "importing",
+      token: "next",
     });
     await indexedDbLocalStore.reconcileUser(connectedUser("user-2", "connection-2"));
 

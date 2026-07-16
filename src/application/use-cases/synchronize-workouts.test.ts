@@ -11,8 +11,20 @@ describe("SynchronizeWorkouts", () => {
       id: "strava:7",
       performedAt: "2026-07-15T06:00:00Z",
       name: "Morning Run",
+      description: "",
+      sport: "Run",
       durationSeconds: 2_400,
+      elapsedDurationSeconds: 2_450,
       distanceMeters: 8_000,
+      laps: [
+        {
+          index: 1,
+          name: "Lap 1",
+          movingDurationSeconds: 2_400,
+          elapsedDurationSeconds: 2_450,
+          distanceMeters: 8_000,
+        },
+      ],
     });
     if (workout.kind !== "created") throw new Error("expected workout");
     const first = {
@@ -54,5 +66,28 @@ describe("SynchronizeWorkouts", () => {
       },
     );
     expect(afterBatch).toHaveBeenCalledTimes(2);
+  });
+
+  it("resumes an interrupted import from its stored continuation", async () => {
+    const store = {
+      synchronizationState: vi.fn().mockResolvedValue({ kind: "importing", token: "resume" }),
+      applySynchronizationBatch: vi.fn().mockResolvedValue(undefined),
+    } as unknown as LocalStore;
+    const fetchWorkoutBatch = vi.fn().mockResolvedValue({
+      kind: "received",
+      batch: {
+        upserted: [],
+        removed: [],
+        continuation: { kind: "complete", checkpoint: "done" },
+      },
+    });
+    const backend = { fetchWorkoutBatch } as unknown as BackendGateway;
+
+    await createSynchronizeWorkouts(store, backend)(async () => undefined);
+
+    expect(fetchWorkoutBatch).toHaveBeenCalledWith(
+      { kind: "importing", token: "resume" },
+      { kind: "next", token: "resume" },
+    );
   });
 });

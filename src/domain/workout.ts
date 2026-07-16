@@ -1,11 +1,27 @@
+import { type WorkoutClassification, classifyWorkout } from "./classifier";
 import type { DistanceMeters, DurationSeconds, Instant, WorkoutId, WorkoutName } from "./identity";
+
+export type RunSport = "Run" | "TrailRun" | "VirtualRun";
+
+export type Lap = Readonly<{
+  index: number;
+  name: string;
+  movingDurationSeconds: number;
+  elapsedDurationSeconds: number;
+  distanceMeters: number;
+}>;
 
 export type Workout = Readonly<{
   id: WorkoutId;
   performedAt: Instant;
   name: WorkoutName;
+  description: string;
+  sport: RunSport;
   durationSeconds: DurationSeconds;
+  elapsedDurationSeconds: DurationSeconds;
   distanceMeters: DistanceMeters;
+  laps: ReadonlyArray<Lap>;
+  classification: WorkoutClassification;
 }>;
 
 export type CreateWorkoutResult =
@@ -16,31 +32,67 @@ export function createWorkout(input: {
   id: string;
   performedAt: string;
   name: string;
+  description: string;
+  sport: string;
   durationSeconds: number;
+  elapsedDurationSeconds: number;
   distanceMeters: number;
+  laps: ReadonlyArray<{
+    index: number;
+    name: string;
+    movingDurationSeconds: number;
+    elapsedDurationSeconds: number;
+    distanceMeters: number;
+  }>;
 }): CreateWorkoutResult {
   const id = input.id.trim();
-  const name = input.name.trim();
+  const name = input.name;
   const timestamp = Date.parse(input.performedAt);
   const validDuration = Number.isInteger(input.durationSeconds) && input.durationSeconds >= 0;
+  const validElapsedDuration =
+    Number.isInteger(input.elapsedDurationSeconds) && input.elapsedDurationSeconds >= 0;
   const validDistance = Number.isFinite(input.distanceMeters) && input.distanceMeters >= 0;
+  const validSport = ["Run", "TrailRun", "VirtualRun"].includes(input.sport);
+  const validLaps = input.laps.every(
+    (lap) =>
+      Number.isInteger(lap.index) &&
+      lap.index >= 1 &&
+      lap.name.trim().length > 0 &&
+      Number.isInteger(lap.movingDurationSeconds) &&
+      lap.movingDurationSeconds >= 0 &&
+      Number.isInteger(lap.elapsedDurationSeconds) &&
+      lap.elapsedDurationSeconds >= 0 &&
+      Number.isFinite(lap.distanceMeters) &&
+      lap.distanceMeters >= 0,
+  );
   if (
     id.length === 0 ||
-    name.length === 0 ||
+    name.trim().length === 0 ||
     !Number.isFinite(timestamp) ||
     !validDuration ||
-    !validDistance
+    !validElapsedDuration ||
+    !validDistance ||
+    !validSport ||
+    !validLaps
   ) {
     return { kind: "invalid-workout" };
   }
   return {
     kind: "created",
-    workout: {
-      id: id as WorkoutId,
-      performedAt: new Date(timestamp).toISOString() as Instant,
-      name: name as WorkoutName,
-      durationSeconds: input.durationSeconds as DurationSeconds,
-      distanceMeters: input.distanceMeters as DistanceMeters,
-    },
+    workout: (() => {
+      const laps = input.laps.map((lap) => ({ ...lap }));
+      return {
+        id: id as WorkoutId,
+        performedAt: input.performedAt as Instant,
+        name: name as WorkoutName,
+        description: input.description,
+        sport: input.sport as RunSport,
+        durationSeconds: input.durationSeconds as DurationSeconds,
+        elapsedDurationSeconds: input.elapsedDurationSeconds as DurationSeconds,
+        distanceMeters: input.distanceMeters as DistanceMeters,
+        laps,
+        classification: classifyWorkout(laps),
+      };
+    })(),
   };
 }

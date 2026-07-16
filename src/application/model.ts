@@ -6,6 +6,7 @@ export type StoredUser = Readonly<{ kind: "found"; user: User }> | Readonly<{ ki
 
 export type SynchronizationState =
   | Readonly<{ kind: "initial" }>
+  | Readonly<{ kind: "importing"; token: ContinuationToken }>
   | Readonly<{ kind: "incremental"; checkpoint: SynchronizationCheckpoint }>;
 
 export type SynchronizationContinuationRequest =

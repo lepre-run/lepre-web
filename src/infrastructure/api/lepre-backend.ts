@@ -34,8 +34,18 @@ type WorkoutDto = Readonly<{
   id: string;
   performedAt: string;
   name: string;
+  description: string;
+  sport: string;
   durationSeconds: number;
+  elapsedDurationSeconds: number;
   distanceMeters: number;
+  laps: ReadonlyArray<{
+    index: number;
+    name: string;
+    movingDurationSeconds: number;
+    elapsedDurationSeconds: number;
+    distanceMeters: number;
+  }>;
 }>;
 
 type BatchDto = Readonly<{
