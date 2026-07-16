@@ -19,6 +19,7 @@ export type LocalStore = Readonly<{
 
 export type WorkoutSourceResult =
   | Readonly<{ kind: "received"; batch: SynchronizationBatch }>
+  | Readonly<{ kind: "rate-limited"; retryAfterSeconds: number }>
   | Readonly<{ kind: "reauthorization-required" }>
   | Readonly<{ kind: "unavailable" }>;
 

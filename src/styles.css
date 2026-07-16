@@ -138,6 +138,7 @@ button:disabled {
 
 .notice,
 .empty-state {
+  display: block;
   margin: 0 0 1.5rem;
   border: 1px solid #c8c5b9;
   border-radius: 14px;

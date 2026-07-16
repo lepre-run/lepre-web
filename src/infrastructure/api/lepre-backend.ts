@@ -56,6 +56,10 @@ type BatchDto = Readonly<{
     | Readonly<{ kind: "complete"; checkpoint: string }>;
 }>;
 
+type RateLimitDto = Readonly<{
+  retryAfterSeconds?: number;
+}>;
+
 function userFromDto(dto: UserDto): User {
   const connection = createProviderConnection(dto.connection);
   if (connection.kind !== "created") throw new Error("invalid provider connection response");
@@ -108,6 +112,21 @@ async function fetchWorkoutBatch(
     return { kind: "unavailable" };
   }
   if (response.status === 401) return { kind: "reauthorization-required" };
+  if (response.status === 429) {
+    const headerSeconds = Number(response.headers.get("Retry-After"));
+    let bodySeconds = Number.NaN;
+    try {
+      bodySeconds = Number(((await response.json()) as RateLimitDto).retryAfterSeconds);
+    } catch {
+      // The Retry-After header remains the fallback for a malformed error body.
+    }
+    const retryAfterSeconds = Number.isFinite(bodySeconds)
+      ? bodySeconds
+      : Number.isFinite(headerSeconds) && headerSeconds > 0
+        ? headerSeconds
+        : 15 * 60;
+    return { kind: "rate-limited", retryAfterSeconds: Math.max(1, retryAfterSeconds) };
+  }
   if (!response.ok) return { kind: "unavailable" };
   try {
     return { kind: "received", batch: batchFromDto((await response.json()) as BatchDto) };

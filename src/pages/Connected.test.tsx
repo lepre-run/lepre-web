@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Connected } from "./Connected";
+
+const synchronizeWorkouts = vi.hoisted(() => vi.fn());
 
 const workout = vi.hoisted(() => ({
   id: "strava:7",
@@ -36,14 +38,18 @@ vi.mock("../composition/application", () => ({
       },
     }),
     listWorkouts: vi.fn().mockResolvedValue({ kind: "loaded", workouts: [workout] }),
-    synchronizeWorkouts: vi.fn().mockImplementation(async (afterBatch: () => Promise<void>) => {
-      await afterBatch();
-      return { kind: "synchronized" };
-    }),
+    synchronizeWorkouts,
   },
 }));
 
 describe("Connected", () => {
+  beforeEach(() => {
+    synchronizeWorkouts.mockImplementation(async (afterBatch: () => Promise<void>) => {
+      await afterBatch();
+      return { kind: "synchronized" };
+    });
+  });
+
   it("renders the complete local workout entity", async () => {
     render(<Connected />);
     const cardHeading = await screen.findByRole("heading", { name: "Morning Run" });
@@ -53,5 +59,16 @@ describe("Connected", () => {
     expect(screen.getByText(/1 stored locally/i)).toBeInTheDocument();
     expect(screen.getByText("Free run")).toBeInTheDocument();
     expect(screen.getByText("Track session")).toBeInTheDocument();
+  });
+
+  it("shows a retryable pause when Strava reaches its request limit", async () => {
+    synchronizeWorkouts.mockResolvedValue({ kind: "rate-limited", retryAfterSeconds: 900 });
+
+    render(<Connected />);
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Import paused and will resume automatically in about 15 minutes",
+    );
+    expect(screen.getByRole("button", { name: "Paused" })).toBeDisabled();
   });
 });

@@ -90,4 +90,23 @@ describe("SynchronizeWorkouts", () => {
       { kind: "next", token: "resume" },
     );
   });
+
+  it("returns a retryable pause without changing the checkpoint", async () => {
+    const applySynchronizationBatch = vi.fn();
+    const store = {
+      synchronizationState: vi.fn().mockResolvedValue({ kind: "initial" }),
+      applySynchronizationBatch,
+    } as unknown as LocalStore;
+    const backend = {
+      fetchWorkoutBatch: vi.fn().mockResolvedValue({
+        kind: "rate-limited",
+        retryAfterSeconds: 900,
+      }),
+    } as unknown as BackendGateway;
+
+    await expect(createSynchronizeWorkouts(store, backend)(async () => undefined)).resolves.toEqual(
+      { kind: "rate-limited", retryAfterSeconds: 900 },
+    );
+    expect(applySynchronizationBatch).not.toHaveBeenCalled();
+  });
 });

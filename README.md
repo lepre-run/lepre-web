@@ -27,7 +27,9 @@ The UI reads only from IndexedDB and can therefore render while offline.
 Synchronization updates that local source of truth when the app opens or the
 user requests it. Initial import covers one year in newest-first batches and
 persists its continuation after every batch. Workout content is never stored by
-the backend, and classification runs only in the browser.
+the backend, and classification runs only in the browser. When Strava reaches a
+request limit, the import keeps its checkpoint, shows a paused state and resumes
+automatically after the API's retry interval.
 
 Code follows the Clean Architecture dependency rule:
 

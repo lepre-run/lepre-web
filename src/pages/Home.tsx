@@ -15,7 +15,10 @@ type ScreenState =
       availability: "online" | "offline" | "reauthorization-required";
     }>;
 
-type Notice = Readonly<{ kind: "none" }> | Readonly<{ kind: "error"; message: string }>;
+type Notice =
+  | Readonly<{ kind: "none" }>
+  | Readonly<{ kind: "paused"; message: string }>
+  | Readonly<{ kind: "error"; message: string }>;
 
 function duration(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
@@ -43,6 +46,7 @@ export function Home(): JSX.Element {
   const [workouts, setWorkouts] = useState<ReadonlyArray<Workout>>([]);
   const [syncing, setSyncing] = useState(false);
   const [notice, setNotice] = useState<Notice>({ kind: "none" });
+  const [retryAt, setRetryAt] = useState<number | null>(null);
 
   const refreshWorkouts = useCallback(async (): Promise<void> => {
     const result = await application.listWorkouts();
@@ -59,8 +63,28 @@ export function Home(): JSX.Element {
     if (result.kind === "provider-unavailable") {
       setNotice({ kind: "error", message: "Could not synchronize workouts right now." });
     }
+    if (result.kind === "rate-limited") {
+      const minutes = Math.max(1, Math.ceil(result.retryAfterSeconds / 60));
+      setRetryAt(Date.now() + result.retryAfterSeconds * 1_000);
+      setNotice({
+        kind: "paused",
+        message: `Strava’s request limit was reached. Import paused and will resume automatically in about ${minutes} minutes.`,
+      });
+    }
     setSyncing(false);
   }, [refreshWorkouts]);
+
+  useEffect(() => {
+    if (retryAt === null) return;
+    const timeout = window.setTimeout(
+      () => {
+        setRetryAt(null);
+        void sync();
+      },
+      Math.max(0, retryAt - Date.now()),
+    );
+    return () => window.clearTimeout(timeout);
+  }, [retryAt, sync]);
 
   useEffect(() => {
     let active = true;
@@ -136,9 +160,9 @@ export function Home(): JSX.Element {
           <button
             type="button"
             onClick={() => void sync()}
-            disabled={syncing || screen.availability !== "online"}
+            disabled={syncing || retryAt !== null || screen.availability !== "online"}
           >
-            {syncing ? "Syncing…" : "Sync"}
+            {syncing ? "Syncing…" : retryAt !== null ? "Paused" : "Sync"}
           </button>
           <button
             className="quiet-action"
@@ -161,6 +185,7 @@ export function Home(): JSX.Element {
           {notice.message}
         </p>
       )}
+      {notice.kind === "paused" && <output className="notice">{notice.message}</output>}
       <div className="feed-heading">
         <div>
           <p className="eyebrow">Workout feed</p>
