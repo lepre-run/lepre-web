@@ -11,8 +11,8 @@ import type {
   WorkoutId,
 } from "../../domain/identity";
 import { createProviderConnection } from "../../domain/provider-connection";
-import { type User, createUser } from "../../domain/user";
-import { type Workout, createWorkout } from "../../domain/workout";
+import { createUser, type User } from "../../domain/user";
+import { createWorkout, type Workout } from "../../domain/workout";
 
 export const API_BASE_URL = "https://api.lepre.run/v1";
 export const STRAVA_START_URL = `${API_BASE_URL}/auth/strava/start`;

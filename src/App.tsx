@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 import { Route, Routes } from "react-router-dom";
-import { ConnectFailed } from "./pages/ConnectFailed";
 import { Connected } from "./pages/Connected";
+import { ConnectFailed } from "./pages/ConnectFailed";
 import { Home } from "./pages/Home";
 
 export function App(): JSX.Element {

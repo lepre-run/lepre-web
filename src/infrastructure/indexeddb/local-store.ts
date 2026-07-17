@@ -6,8 +6,8 @@ import type {
 import type { LocalStore } from "../../application/ports";
 import type { ContinuationToken, SynchronizationCheckpoint } from "../../domain/identity";
 import { createProviderConnection } from "../../domain/provider-connection";
-import { type User, createUser } from "../../domain/user";
-import { type Workout, createWorkout } from "../../domain/workout";
+import { createUser, type User } from "../../domain/user";
+import { createWorkout, type Workout } from "../../domain/workout";
 
 const DATABASE_NAME = "lepre";
 const DATABASE_VERSION = 3;

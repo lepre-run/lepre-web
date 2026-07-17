@@ -1,4 +1,4 @@
-import { http, HttpResponse, delay } from "msw";
+import { delay, HttpResponse, http } from "msw";
 import { API_BASE_URL } from "../infrastructure/api/lepre-backend";
 import { mockUser, mockWorkouts } from "./fixtures";
 

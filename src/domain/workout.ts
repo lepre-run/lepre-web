@@ -1,4 +1,4 @@
-import { type WorkoutClassification, classifyWorkout } from "./classifier";
+import { classifyWorkout, type WorkoutClassification } from "./classifier";
 import type { DistanceMeters, DurationSeconds, Instant, WorkoutId, WorkoutName } from "./identity";
 
 export type RunSport = "Run" | "TrailRun" | "VirtualRun";
