@@ -1,6 +1,15 @@
 :root {
-  color: #172019;
-  background: #f3f0e8;
+  --color-carbon: #101512;
+  --color-lab-paper: #f3f5ee;
+  --color-instrument: #657069;
+  --color-kinetic: #b7f000;
+  --color-threshold: #ff5630;
+  --color-line: #cbd2cc;
+  --color-surface: #fbfcf8;
+  --color-surface-muted: #e9ede5;
+
+  color: var(--color-carbon);
+  background: var(--color-lab-paper);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   font-synthesis: none;
@@ -14,7 +23,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: radial-gradient(circle at 86% 4%, rgba(188, 220, 92, 0.2), transparent 28rem), #f3f0e8;
+  background: radial-gradient(circle at 86% 4%, rgba(183, 240, 0, 0.14), transparent 28rem),
+    var(--color-lab-paper);
 }
 
 button,
@@ -24,10 +34,10 @@ a {
 
 button,
 .primary-action {
-  border: 1px solid #172019;
+  border: 1px solid var(--color-carbon);
   border-radius: 999px;
-  background: #172019;
-  color: #f9f7f0;
+  background: var(--color-carbon);
+  color: var(--color-lab-paper);
   padding: 0.7rem 1rem;
   font-weight: 700;
   cursor: pointer;
@@ -40,12 +50,15 @@ button:disabled {
 
 .quiet-action {
   background: transparent;
-  color: #172019;
+  color: var(--color-carbon);
 }
 
 .primary-action {
   display: inline-block;
   margin-top: 1rem;
+  border-color: var(--color-kinetic);
+  background: var(--color-kinetic);
+  color: var(--color-carbon);
   text-decoration: none;
 }
 
@@ -74,7 +87,7 @@ button:disabled {
 .wordmark,
 .eyebrow {
   margin: 0;
-  color: #496333;
+  color: var(--color-carbon);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -82,12 +95,36 @@ button:disabled {
 }
 
 .wordmark {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
   font-size: 1.15rem;
+}
+
+.wordmark::before {
+  width: 0.62rem;
+  height: 0.62rem;
+  background: var(--color-kinetic);
+  content: "";
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--color-instrument);
+}
+
+.eyebrow::before {
+  width: 1.5rem;
+  height: 2px;
+  background: var(--color-kinetic);
+  content: "";
 }
 
 .lede {
   max-width: 35rem;
-  color: #526056;
+  color: var(--color-instrument);
   font-size: 1.15rem;
 }
 
@@ -107,7 +144,7 @@ button:disabled {
 
 .runner-name {
   margin: 0.3rem 0 0;
-  color: #687269;
+  color: var(--color-instrument);
   font-size: 0.82rem;
 }
 
@@ -131,7 +168,7 @@ button:disabled {
 .workout-count {
   flex: none;
   margin: 0;
-  color: #687269;
+  color: var(--color-instrument);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.76rem;
 }
@@ -140,14 +177,14 @@ button:disabled {
 .empty-state {
   display: block;
   margin: 0 0 1.5rem;
-  border: 1px solid #c8c5b9;
+  border: 1px solid var(--color-line);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.45);
+  background: var(--color-surface);
   padding: 1rem 1.2rem;
 }
 
 .notice--error {
-  border-color: #bb715e;
+  border-color: var(--color-threshold);
 }
 
 .workout-feed {
@@ -160,10 +197,10 @@ button:disabled {
 
 .workout-card {
   overflow: hidden;
-  border: 1px solid #d0cdc1;
+  border: 1px solid var(--color-line);
   border-radius: 22px;
-  background: rgba(251, 250, 245, 0.88);
-  box-shadow: 0 10px 40px rgba(32, 43, 34, 0.05);
+  background: var(--color-surface);
+  box-shadow: 0 10px 40px rgba(16, 21, 18, 0.06);
 }
 
 .workout-card__header {
@@ -173,7 +210,7 @@ button:disabled {
 
 .workout-type {
   margin: 0 0 0.35rem;
-  color: #496333;
+  color: var(--color-carbon);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.78rem;
   font-weight: 500;
@@ -181,7 +218,7 @@ button:disabled {
 }
 
 .workout-type--unknown {
-  color: #8b5d4e;
+  color: #b22f17;
 }
 
 .workout-card h2 {
@@ -199,7 +236,7 @@ button:disabled {
 }
 
 .workout-summary dt {
-  color: #7b817b;
+  color: var(--color-instrument);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.65rem;
   text-transform: uppercase;
@@ -213,13 +250,13 @@ button:disabled {
 .workout-description {
   max-width: 46rem;
   margin: -0.4rem 1.5rem 1.3rem;
-  color: #59625a;
+  color: var(--color-instrument);
   line-height: 1.6;
 }
 
 .lap-section {
-  border-top: 1px solid #dcd9ce;
-  background: rgba(235, 234, 226, 0.55);
+  border-top: 1px solid var(--color-line);
+  background: var(--color-surface-muted);
   padding: 1.1rem 1.5rem 1.4rem;
 }
 
@@ -236,7 +273,7 @@ button:disabled {
 
 .lap-section__heading span,
 .no-laps {
-  color: #747b74;
+  color: var(--color-instrument);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.72rem;
 }
@@ -257,19 +294,19 @@ button:disabled {
   border: 1px solid transparent;
   border-radius: 10px;
   padding: 0.55rem 0.7rem;
-  color: #59625a;
+  color: var(--color-instrument);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.72rem;
 }
 
 .lap--core {
-  border-color: #cad8a9;
-  background: #eff4df;
-  color: #26341f;
+  border-color: #98c800;
+  background: rgba(183, 240, 0, 0.16);
+  color: var(--color-carbon);
 }
 
 .lap__index {
-  color: #8a908a;
+  color: var(--color-instrument);
 }
 
 .lap__name {

@@ -51,5 +51,18 @@ npm test -- --run
 npm run build
 ```
 
+## Local mocked feed
+
+Run the frontend with a browser-level mock of the Lepre API:
+
+```bash
+npm run dev:mock
+```
+
+Open the Vite URL shown in the terminal. The mock API returns a connected
+runner and synchronizes representative interval, progressive, tempo, unknown,
+and free runs into the same IndexedDB store used by the production application.
+Normal `npm run dev` and production builds do not start the mock worker.
+
 Amplify builds and deploys `main`. The production branch remains protected by
 Amplify basic authentication during development.
