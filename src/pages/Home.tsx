@@ -1,7 +1,15 @@
 import { type JSX, useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { application } from "../composition/application";
 import type { User } from "../domain/user";
 import type { Workout } from "../domain/workout";
+import {
+  formatClassification,
+  formatDistance,
+  formatDuration,
+  formatPace,
+  formatWorkoutDate,
+} from "../i18n/formatters";
 import { STRAVA_START_URL } from "../infrastructure/api/lepre-backend";
 
 export { STRAVA_START_URL };
@@ -20,28 +28,9 @@ type Notice =
   | Readonly<{ kind: "paused"; message: string }>
   | Readonly<{ kind: "error"; message: string }>;
 
-function duration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainder = seconds % 60;
-  return hours > 0
-    ? `${hours}:${minutes.toString().padStart(2, "0")}:${remainder.toString().padStart(2, "0")}`
-    : `${minutes}:${remainder.toString().padStart(2, "0")}`;
-}
-
-function distance(meters: number): string {
-  return meters >= 1_000 ? `${(meters / 1_000).toFixed(2)} km` : `${Math.round(meters)} m`;
-}
-
-function pace(seconds: number, meters: number): string {
-  if (seconds <= 0 || meters <= 0) return "—";
-  const secondsPerKilometer = Math.round((seconds / meters) * 1_000);
-  const minutes = Math.floor(secondsPerKilometer / 60);
-  const remainder = secondsPerKilometer % 60;
-  return `${minutes}:${remainder.toString().padStart(2, "0")} /km`;
-}
-
 export function Home(): JSX.Element {
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage ?? i18n.language;
   const [screen, setScreen] = useState<ScreenState>({ kind: "checking" });
   const [workouts, setWorkouts] = useState<ReadonlyArray<Workout>>([]);
   const [syncing, setSyncing] = useState(false);
@@ -58,21 +47,21 @@ export function Home(): JSX.Element {
     setNotice({ kind: "none" });
     const result = await application.synchronizeWorkouts(refreshWorkouts);
     if (result.kind === "reauthorization-required") {
-      setNotice({ kind: "error", message: "Reconnect Strava to synchronize workouts." });
+      setNotice({ kind: "error", message: t("notices.reconnectError") });
     }
     if (result.kind === "provider-unavailable") {
-      setNotice({ kind: "error", message: "Could not synchronize workouts right now." });
+      setNotice({ kind: "error", message: t("notices.synchronizationError") });
     }
     if (result.kind === "rate-limited") {
       const minutes = Math.max(1, Math.ceil(result.retryAfterSeconds / 60));
       setRetryAt(Date.now() + result.retryAfterSeconds * 1_000);
       setNotice({
         kind: "paused",
-        message: `Strava’s request limit was reached. Import paused and will resume automatically in about ${minutes} minutes.`,
+        message: t("notices.rateLimited", { count: minutes }),
       });
     }
     setSyncing(false);
-  }, [refreshWorkouts]);
+  }, [refreshWorkouts, t]);
 
   useEffect(() => {
     if (retryAt === null) return;
@@ -121,7 +110,7 @@ export function Home(): JSX.Element {
       setWorkouts([]);
       setScreen({ kind: "disconnected" });
     } else {
-      setNotice({ kind: "error", message: "Could not disconnect Strava." });
+      setNotice({ kind: "error", message: t("notices.disconnectError") });
     }
   }
 
@@ -129,7 +118,7 @@ export function Home(): JSX.Element {
     return (
       <main className="shell shell--centered">
         <h1>lepre</h1>
-        <p>Opening your local workouts…</p>
+        <p>{t("home.opening")}</p>
       </main>
     );
   }
@@ -138,10 +127,10 @@ export function Home(): JSX.Element {
     return (
       <main className="shell shell--centered">
         <p className="wordmark">lepre</p>
-        <h1>Train with direction.</h1>
-        <p className="lede">See the structure inside every run, not just its average.</p>
+        <h1>{t("home.heroTitle")}</h1>
+        <p className="lede">{t("home.heroDescription")}</p>
         <a className="primary-action" href={STRAVA_START_URL}>
-          Connect with Strava
+          {t("home.connectStrava")}
         </a>
       </main>
     );
@@ -162,7 +151,11 @@ export function Home(): JSX.Element {
             onClick={() => void sync()}
             disabled={syncing || retryAt !== null || screen.availability !== "online"}
           >
-            {syncing ? "Syncing…" : retryAt !== null ? "Paused" : "Sync"}
+            {syncing
+              ? t("actions.syncing")
+              : retryAt !== null
+                ? t("actions.paused")
+                : t("actions.sync")}
           </button>
           <button
             className="quiet-action"
@@ -170,15 +163,13 @@ export function Home(): JSX.Element {
             onClick={() => void handleDisconnect()}
             disabled={syncing || screen.availability === "offline"}
           >
-            Disconnect
+            {t("actions.disconnect")}
           </button>
         </div>
       </header>
-      {screen.availability === "offline" && (
-        <p className="notice">You are offline. Showing workouts stored on this device.</p>
-      )}
+      {screen.availability === "offline" && <p className="notice">{t("notices.offline")}</p>}
       {screen.availability === "reauthorization-required" && (
-        <p className="notice">Reconnect Strava to synchronize. Local workouts remain available.</p>
+        <p className="notice">{t("notices.reauthorization")}</p>
       )}
       {notice.kind === "error" && (
         <p className="notice notice--error" role="alert">
@@ -188,15 +179,15 @@ export function Home(): JSX.Element {
       {notice.kind === "paused" && <output className="notice">{notice.message}</output>}
       <div className="feed-heading">
         <div>
-          <p className="eyebrow">Workout feed</p>
-          <h1>Your training, stage by stage.</h1>
+          <p className="eyebrow">{t("feed.eyebrow")}</p>
+          <h1>{t("feed.title")}</h1>
         </div>
-        <p className="workout-count">{workouts.length} stored locally</p>
+        <p className="workout-count">{t("feed.storedCount", { count: workouts.length })}</p>
       </div>
       {workouts.length === 0 ? (
         <div className="empty-state">
-          <h2>{syncing ? "Importing your recent runs…" : "No runs found"}</h2>
-          <p>Completed workouts will appear here after their laps have been classified.</p>
+          <h2>{syncing ? t("feed.importing") : t("feed.emptyTitle")}</h2>
+          <p>{t("feed.emptyDescription")}</p>
         </div>
       ) : (
         <ol className="workout-feed">
@@ -206,26 +197,22 @@ export function Home(): JSX.Element {
                 <header className="workout-card__header">
                   <div>
                     <p className={`workout-type workout-type--${workout.classification.kind}`}>
-                      {workout.classification.label}
+                      {formatClassification(workout.classification, t, language)}
                     </p>
                     <h2>{workout.name}</h2>
                   </div>
                   <dl className="workout-summary">
                     <div>
-                      <dt>Date</dt>
+                      <dt>{t("workout.date")}</dt>
                       <dd>
                         <time dateTime={workout.performedAt}>
-                          {new Date(workout.performedAt).toLocaleDateString(undefined, {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
+                          {formatWorkoutDate(workout.performedAt, language)}
                         </time>
                       </dd>
                     </div>
                     <div>
-                      <dt>Distance</dt>
-                      <dd>{distance(workout.distanceMeters)}</dd>
+                      <dt>{t("workout.distance")}</dt>
+                      <dd>{formatDistance(workout.distanceMeters, language)}</dd>
                     </div>
                   </dl>
                 </header>
@@ -234,11 +221,13 @@ export function Home(): JSX.Element {
                 )}
                 <div className="lap-section">
                   <div className="lap-section__heading">
-                    <h3>Lap structure</h3>
-                    <span>{duration(workout.durationSeconds)} moving</span>
+                    <h3>{t("workout.lapStructure")}</h3>
+                    <span>
+                      {formatDuration(workout.durationSeconds)} {t("workout.moving")}
+                    </span>
                   </div>
                   {workout.laps.length === 0 ? (
-                    <p className="no-laps">Strava did not provide lap data for this run.</p>
+                    <p className="no-laps">{t("workout.noLaps")}</p>
                   ) : (
                     <ol className="lap-list">
                       {workout.laps.map((lap) => {
@@ -247,9 +236,11 @@ export function Home(): JSX.Element {
                           <li className={isCore ? "lap lap--core" : "lap"} key={lap.index}>
                             <span className="lap__index">{lap.index}</span>
                             <span className="lap__name">{lap.name}</span>
-                            <span>{distance(lap.distanceMeters)}</span>
-                            <span>{duration(lap.movingDurationSeconds)}</span>
-                            <strong>{pace(lap.movingDurationSeconds, lap.distanceMeters)}</strong>
+                            <span>{formatDistance(lap.distanceMeters, language)}</span>
+                            <span>{formatDuration(lap.movingDurationSeconds)}</span>
+                            <strong>
+                              {formatPace(lap.movingDurationSeconds, lap.distanceMeters)}
+                            </strong>
                           </li>
                         );
                       })}

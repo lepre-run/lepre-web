@@ -30,7 +30,9 @@ describe("workout classifier", () => {
 
     expect(classifyWorkout(laps)).toMatchObject({
       kind: "intervals",
-      label: "4 × 1 km intervals with 400 m recovery",
+      repetitions: 4,
+      work: { kind: "distance", meters: 1_000 },
+      recovery: { kind: "distance", meters: 400 },
       coreLapIndexes: [2, 3, 4, 5, 6, 7, 8],
     });
   });
@@ -43,7 +45,7 @@ describe("workout classifier", () => {
         lap(3, 2_000, 290),
         lap(4, 2_000, 270),
       ]),
-    ).toMatchObject({ kind: "progressive", label: "4-stage progressive run" });
+    ).toMatchObject({ kind: "progressive", stageCount: 4 });
   });
 
   it("recognizes a sustained tempo core between easier running", () => {
@@ -55,13 +57,13 @@ describe("workout classifier", () => {
         lap(4, 1_000, 268),
         lap(5, 2_000, 345),
       ]),
-    ).toMatchObject({ kind: "tempo", label: "3 km tempo", coreLapIndexes: [2, 3, 4] });
+    ).toMatchObject({ kind: "tempo", distanceMeters: 3_000, coreLapIndexes: [2, 3, 4] });
   });
 
   it("recognizes deliberately varied steady stages", () => {
     expect(
       classifyWorkout([lap(1, 1_000, 300), lap(2, 2_000, 302), lap(3, 1_000, 298)]),
-    ).toMatchObject({ kind: "steady-structured-run", label: "Steady structured run" });
+    ).toMatchObject({ kind: "steady-structured-run" });
   });
 
   it("recognizes repeated equal-distance hill efforts and returns", () => {
@@ -73,7 +75,7 @@ describe("workout classifier", () => {
         lap(4, 400, 265),
         lap(5, 400, 365),
       ]),
-    ).toMatchObject({ kind: "repeated-hills", label: "3 repeated hills with jog recovery" });
+    ).toMatchObject({ kind: "repeated-hills", repetitions: 3 });
   });
 
   it("keeps consistent automatic laps as a free run", () => {
@@ -84,7 +86,7 @@ describe("workout classifier", () => {
         lap(3, 1_000, 298),
         lap(4, 1_000, 301),
       ]),
-    ).toEqual({ kind: "free-run", label: "Free run", coreLapIndexes: [] });
+    ).toEqual({ kind: "free-run", coreLapIndexes: [] });
   });
 
   it("prefers unknown for irregular unsupported lap data", () => {

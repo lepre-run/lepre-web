@@ -64,5 +64,14 @@ runner and synchronizes representative interval, progressive, tempo, unknown,
 and free runs into the same IndexedDB store used by the production application.
 Normal `npm run dev` and production builds do not start the mock worker.
 
+## Localization
+
+English is the default and fallback interface language; Italian is available as
+an additional presentation locale. Domain and stored workout data remain
+language-neutral: classifications contain stable English identifiers and
+structured numeric parameters, while React presentation formatters produce
+translated labels, dates, measurements and plurals. Activity names,
+descriptions and lap names received from Strava are displayed unchanged.
+
 Amplify builds and deploys `main`. The production branch remains protected by
 Amplify basic authentication during development.

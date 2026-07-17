@@ -1,4 +1,5 @@
 import type { JSX } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 
 /**
@@ -7,33 +8,41 @@ import { Link, useSearchParams } from "react-router-dom";
  * unrecognised value renders a generic fallback so adding a new slug on
  * the Lambda before the frontend update doesn't crash the page.
  */
-const REASON_MESSAGES: Readonly<Record<string, string>> = {
-  user_denied: "You declined the Strava authorization.",
-  state_invalid: "The link expired or didn't match. Please try again.",
-  missing_code: "Strava didn't return an authorization code.",
-  strava_exchange_failed: "We couldn't reach Strava. Please try again.",
-  strava_not_configured: "The Strava connection is not configured yet.",
-  scope_insufficient: "We need all three permissions to connect your account.",
-  db_failure: "Something went wrong on our side. Please try again.",
-  unknown: "Something went wrong. Please try again.",
+const REASON_MESSAGE_KEYS = {
+  user_denied: "connectFailed.reasons.userDenied",
+  state_invalid: "connectFailed.reasons.stateInvalid",
+  missing_code: "connectFailed.reasons.missingCode",
+  strava_exchange_failed: "connectFailed.reasons.stravaExchangeFailed",
+  strava_not_configured: "connectFailed.reasons.stravaNotConfigured",
+  scope_insufficient: "connectFailed.reasons.scopeInsufficient",
+  db_failure: "connectFailed.reasons.databaseFailure",
+  unknown: "connectFailed.reasons.unknown",
 } as const;
 
-const FALLBACK_MESSAGE = "Something went wrong. Please try again.";
+type KnownReason = keyof typeof REASON_MESSAGE_KEYS;
+
+function messageKey(reason: string): (typeof REASON_MESSAGE_KEYS)[KnownReason] {
+  return reason in REASON_MESSAGE_KEYS
+    ? REASON_MESSAGE_KEYS[reason as KnownReason]
+    : REASON_MESSAGE_KEYS.unknown;
+}
 
 export function ConnectFailed(): JSX.Element {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const reason = params.get("reason") ?? "unknown";
   const id = params.get("id");
-  const message = REASON_MESSAGES[reason] ?? FALLBACK_MESSAGE;
 
   return (
     <main>
-      <h1>Connect failed</h1>
-      <p>{message}</p>
+      <h1>{t("connectFailed.title")}</h1>
+      <p>{t(messageKey(reason))}</p>
       <p>
-        <Link to="/">Try again</Link>
+        <Link to="/">{t("connectFailed.tryAgain")}</Link>
       </p>
-      {id !== null && id.length > 0 && <p data-testid="ref-id">ref: {id}</p>}
+      {id !== null && id.length > 0 && (
+        <p data-testid="ref-id">{t("connectFailed.reference", { id })}</p>
+      )}
     </main>
   );
 }

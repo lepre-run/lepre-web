@@ -9,13 +9,29 @@ export type WorkoutType =
   | "free-run"
   | "unknown";
 
-export type WorkoutClassification = Readonly<{
-  kind: WorkoutType;
-  label: string;
-  coreLapIndexes: ReadonlyArray<number>;
-}>;
+type ClassificationBase = Readonly<{ coreLapIndexes: ReadonlyArray<number> }>;
 
-type Candidate = WorkoutClassification & Readonly<{ score: number }>;
+export type StageMeasure =
+  | Readonly<{ kind: "distance"; meters: number }>
+  | Readonly<{ kind: "duration"; seconds: number }>;
+
+export type WorkoutClassification =
+  | (ClassificationBase & Readonly<{ kind: "progressive"; stageCount: number }>)
+  | (ClassificationBase &
+      Readonly<{
+        kind: "intervals";
+        repetitions: number;
+        work: StageMeasure;
+        recovery: StageMeasure;
+      }>)
+  | (ClassificationBase & Readonly<{ kind: "tempo"; distanceMeters: number }>)
+  | (ClassificationBase & Readonly<{ kind: "repeated-hills"; repetitions: number }>)
+  | (ClassificationBase & Readonly<{ kind: "steady-structured-run" }>)
+  | (ClassificationBase & Readonly<{ kind: "free-run" }>)
+  | (ClassificationBase & Readonly<{ kind: "unknown" }>);
+
+type Candidate = Exclude<WorkoutClassification, { kind: "free-run" | "unknown" }> &
+  Readonly<{ score: number }>;
 
 const STRUCTURED_THRESHOLD = 0.72;
 
@@ -41,25 +57,12 @@ function range(start: number, end: number): ReadonlyArray<number> {
   return Array.from({ length: end - start + 1 }, (_, offset) => start + offset);
 }
 
-function formatDistance(meters: number): string {
-  if (meters < 950) return `${Math.round(meters / 10) * 10} m`;
-  const kilometers = meters / 1000;
-  const digits = Math.abs(kilometers - Math.round(kilometers)) < 0.05 ? 0 : 1;
-  return `${kilometers.toFixed(digits)} km`;
-}
-
-function formatDuration(seconds: number): string {
-  const rounded = Math.round(seconds / 5) * 5;
-  if (rounded < 60) return `${rounded} sec`;
-  const minutes = Math.floor(rounded / 60);
-  const remainder = rounded % 60;
-  return remainder === 0 ? `${minutes} min` : `${minutes}:${remainder.toString().padStart(2, "0")}`;
-}
-
-function repeatedStageLabel(laps: ReadonlyArray<Lap>): string {
+function repeatedStage(laps: ReadonlyArray<Lap>): StageMeasure {
   const distances = laps.map((lap) => lap.distanceMeters);
-  if (coefficientOfVariation(distances) <= 0.12) return formatDistance(mean(distances));
-  return formatDuration(mean(laps.map((lap) => lap.movingDurationSeconds)));
+  if (coefficientOfVariation(distances) <= 0.12) {
+    return { kind: "distance", meters: mean(distances) };
+  }
+  return { kind: "duration", seconds: mean(laps.map((lap) => lap.movingDurationSeconds)) };
 }
 
 function alternatingCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<Candidate> {
@@ -96,7 +99,9 @@ function alternatingCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<Candidat
         if (workPace < recoveryPace) {
           candidates.push({
             kind: "intervals",
-            label: `${work.length} × ${repeatedStageLabel(work)} intervals with ${repeatedStageLabel(recovery)} recovery`,
+            repetitions: work.length,
+            work: repeatedStage(work),
+            recovery: repeatedStage(recovery),
             coreLapIndexes: indexes.map((index) => laps[index].index),
             score,
           });
@@ -106,7 +111,7 @@ function alternatingCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<Candidat
           if (!equalOutAndBackDistance) continue;
           candidates.push({
             kind: "repeated-hills",
-            label: `${work.length} repeated hills with jog recovery`,
+            repetitions: work.length,
             coreLapIndexes: indexes.map((index) => laps[index].index),
             score: score - 0.04,
           });
@@ -133,7 +138,7 @@ function progressiveCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<Candidat
       if (improvement < 0.1 || regressions > 0 || meaningfulSteps < stages.length - 1) continue;
       candidates.push({
         kind: "progressive",
-        label: `${stages.length}-stage progressive run`,
+        stageCount: stages.length,
         coreLapIndexes: stages.map((lap) => lap.index),
         score: Math.min(0.94, 0.7 + improvement + stages.length * 0.01),
       });
@@ -158,7 +163,7 @@ function tempoCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<Candidate> {
       if (separation < 0.12) continue;
       candidates.push({
         kind: "tempo",
-        label: `${formatDistance(coreDistance)} tempo`,
+        distanceMeters: coreDistance,
         coreLapIndexes: core.map((lap) => lap.index),
         score: Math.min(0.91, 0.68 + separation + Math.min(core.length, 4) * 0.01),
       });
@@ -174,19 +179,18 @@ function steadyStructuredCandidate(laps: ReadonlyArray<Lap>): Candidate | undefi
   if (paceVariation > 0.07 || distanceVariation < 0.18) return undefined;
   return {
     kind: "steady-structured-run",
-    label: "Steady structured run",
     coreLapIndexes: laps.map((lap) => lap.index),
     score: 0.74 + Math.min(0.08, distanceVariation / 5),
   };
 }
 
 export function classifyWorkout(laps: ReadonlyArray<Lap>): WorkoutClassification {
-  if (laps.length <= 1) return { kind: "free-run", label: "Free run", coreLapIndexes: [] };
+  if (laps.length <= 1) return { kind: "free-run", coreLapIndexes: [] };
   const validLaps = laps.filter(
     (lap) => lap.distanceMeters > 0 && lap.movingDurationSeconds > 0 && Number.isFinite(pace(lap)),
   );
   if (validLaps.length !== laps.length) {
-    return { kind: "unknown", label: "Unknown workout", coreLapIndexes: [] };
+    return { kind: "unknown", coreLapIndexes: [] };
   }
   const candidates = [
     ...alternatingCandidates(laps),
@@ -204,7 +208,7 @@ export function classifyWorkout(laps: ReadonlyArray<Lap>): WorkoutClassification
     return classification;
   }
   if (coefficientOfVariation(laps.map(pace)) <= 0.1) {
-    return { kind: "free-run", label: "Free run", coreLapIndexes: [] };
+    return { kind: "free-run", coreLapIndexes: [] };
   }
-  return { kind: "unknown", label: "Unknown workout", coreLapIndexes: [] };
+  return { kind: "unknown", coreLapIndexes: [] };
 }

@@ -62,7 +62,7 @@ describe("domain entities", () => {
             distanceMeters: 10_050.5,
           },
         ],
-        classification: { kind: "free-run", label: "Free run", coreLapIndexes: [] },
+        classification: { kind: "free-run", coreLapIndexes: [] },
       },
     });
   });

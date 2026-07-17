@@ -22,7 +22,7 @@ const workout = vi.hoisted(() => ({
       distanceMeters: 8_000,
     },
   ],
-  classification: { kind: "free-run", label: "Free run", coreLapIndexes: [] },
+  classification: { kind: "free-run", coreLapIndexes: [] },
 }));
 
 vi.mock("../composition/application", () => ({
