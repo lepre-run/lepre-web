@@ -1,6 +1,15 @@
-import { type FormEvent, type JSX, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type CSSProperties,
+  type FormEvent,
+  type JSX,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { application } from "../composition/application";
+import { appearanceForLap, type LapAppearance } from "../domain/lap-appearance";
 import type { User } from "../domain/user";
 import type { Workout } from "../domain/workout";
 import {
@@ -13,6 +22,7 @@ import {
   formatClassification,
   formatDistance,
   formatDuration,
+  formatLapRole,
   formatPace,
   formatWorkoutDate,
 } from "../i18n/formatters";
@@ -34,6 +44,14 @@ type Notice =
   | Readonly<{ kind: "none" }>
   | Readonly<{ kind: "paused"; message: string }>
   | Readonly<{ kind: "error"; message: string }>;
+
+type LapStyle = CSSProperties & Readonly<{ "--lap-progress"?: string }>;
+
+function styleForLap(appearance: LapAppearance): LapStyle | undefined {
+  return appearance.progressiveIntensity === undefined
+    ? undefined
+    : { "--lap-progress": `${appearance.progressiveIntensity * 100}%` };
+}
 
 export function Home(): JSX.Element {
   const { t, i18n } = useTranslation();
@@ -322,22 +340,39 @@ export function Home(): JSX.Element {
                   {workout.laps.length === 0 ? (
                     <p className="no-laps">{t("workout.noLaps")}</p>
                   ) : (
-                    <ol className="lap-list">
-                      {workout.laps.map((lap) => {
-                        const isCore = workout.structure.coreLapIndexes.includes(lap.index);
-                        return (
-                          <li className={isCore ? "lap lap--core" : "lap"} key={lap.index}>
-                            <span className="lap__index">{lap.index}</span>
-                            <span className="lap__name">{lap.name}</span>
-                            <span>{formatDistance(lap.distanceMeters, language)}</span>
-                            <span>{formatDuration(lap.movingDurationSeconds)}</span>
-                            <strong>
-                              {formatPace(lap.movingDurationSeconds, lap.distanceMeters)}
-                            </strong>
-                          </li>
-                        );
-                      })}
-                    </ol>
+                    <>
+                      {workout.structure.kind === "progressive" && (
+                        <p className="progressive-legend">{t("workout.progressiveLegend")}</p>
+                      )}
+                      <ol className="lap-list">
+                        {workout.laps.map((lap) => {
+                          const appearance = appearanceForLap(workout, lap);
+                          const progressiveClass =
+                            appearance.progressiveIntensity === undefined
+                              ? ""
+                              : " lap--progressive";
+                          return (
+                            <li
+                              className={`lap lap--${appearance.role}${progressiveClass}`}
+                              data-lap-role={appearance.role}
+                              key={lap.index}
+                              style={styleForLap(appearance)}
+                            >
+                              <span className="lap__index">{lap.index}</span>
+                              <span className="lap__identity">
+                                <span className="lap__name">{lap.name}</span>
+                                <span className="lap__role">{formatLapRole(appearance, t)}</span>
+                              </span>
+                              <span>{formatDistance(lap.distanceMeters, language)}</span>
+                              <span>{formatDuration(lap.movingDurationSeconds)}</span>
+                              <strong>
+                                {formatPace(lap.movingDurationSeconds, lap.distanceMeters)}
+                              </strong>
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    </>
                   )}
                 </div>
               </article>

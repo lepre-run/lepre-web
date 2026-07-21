@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { formatClassification, formatDistance, formatWorkoutDate } from "./formatters";
+import {
+  formatClassification,
+  formatDistance,
+  formatLapRole,
+  formatWorkoutDate,
+} from "./formatters";
 import { i18n } from "./i18n";
 
 const intervalWorkout = {
@@ -31,6 +36,7 @@ describe("presentation formatters", () => {
     );
     expect(i18n.t("feed.storedCount", { count: 1 })).toBe("1 stored locally");
     expect(i18n.t("feed.storedCount", { count: 5 })).toBe("5 stored locally");
+    expect(formatLapRole({ role: "work", progressiveStage: 3 }, i18n.t)).toBe("Stage 3");
   });
 
   it("can render the same presentation in Italian", () => {
@@ -42,5 +48,6 @@ describe("presentation formatters", () => {
     );
     expect(t("feed.storedCount", { count: 1 })).toBe("1 allenamento salvato in locale");
     expect(t("feed.storedCount", { count: 5 })).toBe("5 allenamenti salvati in locale");
+    expect(formatLapRole({ role: "recovery" }, t)).toBe("Recupero");
   });
 });

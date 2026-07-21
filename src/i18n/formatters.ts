@@ -1,5 +1,6 @@
 import type { TFunction } from "i18next";
 import type { ActualWorkoutStructure, StageMeasure } from "../domain/actual-workout-structure";
+import type { LapAppearance } from "../domain/lap-appearance";
 import { DEFAULT_LANGUAGE, localeFor } from "./i18n";
 
 function decimal(
@@ -95,4 +96,11 @@ export function formatClassification(
     case "unknown":
       return t("classification.unknown");
   }
+}
+
+export function formatLapRole(appearance: LapAppearance, t: TFunction): string {
+  if (appearance.progressiveStage !== undefined) {
+    return t("lapRole.stage", { stage: appearance.progressiveStage });
+  }
+  return t(`lapRole.${appearance.role}`);
 }

@@ -76,6 +76,7 @@ describe("Connected", () => {
     expect(screen.getByText(/1 stored locally/i)).toBeInTheDocument();
     expect(screen.getByText("Free run")).toBeInTheDocument();
     expect(screen.getByText("Track session")).toBeInTheDocument();
+    expect(screen.getByText("Run").closest("li")).toHaveAttribute("data-lap-role", "main");
   });
 
   it("shows a retryable pause when Strava reaches its request limit", async () => {

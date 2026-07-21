@@ -38,6 +38,16 @@ export const english = {
     lapStructure: "Lap structure",
     moving: "moving",
     noLaps: "Strava did not provide lap data for this run.",
+    progressiveLegend: "Slower → faster",
+  },
+  lapRole: {
+    warmup: "Warm-up",
+    work: "Work",
+    recovery: "Recovery",
+    cooldown: "Cool-down",
+    main: "Run",
+    unknown: "Unknown",
+    stage: "Stage {{stage}}",
   },
   download: {
     eyebrow: "Portable history",

@@ -42,6 +42,16 @@ export const italian = {
     lapStructure: "Struttura dei giri",
     moving: "in movimento",
     noLaps: "Strava non ha fornito i dati dei giri per questa corsa.",
+    progressiveLegend: "Più lento → più veloce",
+  },
+  lapRole: {
+    warmup: "Riscaldamento",
+    work: "Lavoro",
+    recovery: "Recupero",
+    cooldown: "Defaticamento",
+    main: "Corsa",
+    unknown: "Non definito",
+    stage: "Fase {{stage}}",
   },
   download: {
     eyebrow: "Storico portabile",
