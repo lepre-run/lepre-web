@@ -6,7 +6,7 @@ describe("mock workout fixtures", () => {
     const classifications = mockWorkouts.map((fixture) => {
       const result = createWorkout(fixture);
       expect(result.kind).toBe("created");
-      return result.kind === "created" ? result.workout.classification.kind : "invalid";
+      return result.kind === "created" ? result.workout.structure.kind : "invalid";
     });
 
     expect(classifications).toEqual(["intervals", "progressive", "tempo", "unknown", "free-run"]);

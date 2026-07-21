@@ -9,6 +9,7 @@ export const english = {
     sync: "Sync",
     syncing: "Syncing…",
     paused: "Paused",
+    download: "Download",
     disconnect: "Disconnect",
   },
   notices: {
@@ -37,6 +38,17 @@ export const english = {
     lapStructure: "Lap structure",
     moving: "moving",
     noLaps: "Strava did not provide lap data for this run.",
+  },
+  download: {
+    eyebrow: "Portable history",
+    title: "Download workout history",
+    description: "Choose a date range and download an LLM-ready JSON file.",
+    from: "From",
+    to: "To",
+    workoutCount_one: "{{count}} workout will be included",
+    workoutCount_other: "{{count}} workouts will be included",
+    downloadJson: "Download JSON",
+    cancel: "Cancel",
   },
   classification: {
     intervals: "{{repetitions}} × {{work}} intervals with {{recovery}} recovery",

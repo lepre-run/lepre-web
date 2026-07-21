@@ -11,6 +11,7 @@ export const italian = {
     sync: "Sincronizza",
     syncing: "Sincronizzazione…",
     paused: "In pausa",
+    download: "Scarica",
     disconnect: "Disconnetti",
   },
   notices: {
@@ -41,6 +42,17 @@ export const italian = {
     lapStructure: "Struttura dei giri",
     moving: "in movimento",
     noLaps: "Strava non ha fornito i dati dei giri per questa corsa.",
+  },
+  download: {
+    eyebrow: "Storico portabile",
+    title: "Scarica lo storico degli allenamenti",
+    description: "Scegli un intervallo di date e scarica un file JSON pronto per un LLM.",
+    from: "Dal",
+    to: "Al",
+    workoutCount_one: "Sarà incluso {{count}} allenamento",
+    workoutCount_other: "Saranno inclusi {{count}} allenamenti",
+    downloadJson: "Scarica JSON",
+    cancel: "Annulla",
   },
   classification: {
     intervals: "Ripetute: {{repetitions}} × {{work}}, recupero {{recovery}}",

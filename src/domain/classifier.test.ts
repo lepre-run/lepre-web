@@ -29,11 +29,23 @@ describe("workout classifier", () => {
     ];
 
     expect(classifyWorkout(laps)).toMatchObject({
+      schemaVersion: 1,
+      classifierVersion: 1,
+      source: "inferred_from_strava_laps",
+      confidence: 0.98,
       kind: "intervals",
       repetitions: 4,
       work: { kind: "distance", meters: 1_000 },
       recovery: { kind: "distance", meters: 400 },
       coreLapIndexes: [2, 3, 4, 5, 6, 7, 8],
+      lapRoles: {
+        warmup: [1],
+        work: [2, 4, 6, 8],
+        recovery: [3, 5, 7],
+        cooldown: [9],
+        main: [],
+        unknown: [],
+      },
     });
   });
 
@@ -86,7 +98,15 @@ describe("workout classifier", () => {
         lap(3, 1_000, 298),
         lap(4, 1_000, 301),
       ]),
-    ).toEqual({ kind: "free-run", coreLapIndexes: [] });
+    ).toMatchObject({
+      schemaVersion: 1,
+      classifierVersion: 1,
+      source: "inferred_from_strava_laps",
+      confidence: 0.9,
+      kind: "free-run",
+      coreLapIndexes: [],
+      lapRoles: { main: [1, 2, 3, 4] },
+    });
   });
 
   it("prefers unknown for irregular unsupported lap data", () => {

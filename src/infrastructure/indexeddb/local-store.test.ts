@@ -66,6 +66,70 @@ describe("IndexedDB local store", () => {
     });
   });
 
+  it("reclassifies a legacy cached workout once and persists the current structure", async () => {
+    const created = createWorkout({
+      id: "strava:legacy",
+      performedAt: "2026-07-15T06:00:00Z",
+      name: "Legacy Run",
+      description: "",
+      sport: "Run",
+      durationSeconds: 1_200,
+      elapsedDurationSeconds: 1_200,
+      distanceMeters: 4_000,
+      laps: [
+        {
+          index: 1,
+          name: "Run",
+          movingDurationSeconds: 1_200,
+          elapsedDurationSeconds: 1_200,
+          distanceMeters: 4_000,
+        },
+      ],
+    });
+    if (created.kind !== "created") throw new Error("expected workout");
+    await indexedDbLocalStore.applySynchronizationBatch({
+      upserted: [created.workout],
+      removed: [],
+      continuation: { kind: "complete", checkpoint: "complete" as SynchronizationCheckpoint },
+    });
+
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("lepre");
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const downgrade = database.transaction("workouts", "readwrite");
+    const store = downgrade.objectStore("workouts");
+    const record = await new Promise<Record<string, unknown>>((resolve, reject) => {
+      const request = store.get("strava:legacy");
+      request.onsuccess = () => resolve(request.result as Record<string, unknown>);
+      request.onerror = () => reject(request.error);
+    });
+    store.put({ ...record, structure: { classifierVersion: 0 } });
+    await new Promise<void>((resolve, reject) => {
+      downgrade.oncomplete = () => resolve();
+      downgrade.onerror = () => reject(downgrade.error);
+    });
+    database.close();
+
+    const loaded = await indexedDbLocalStore.listWorkouts();
+    expect(loaded[0].structure).toEqual(created.workout.structure);
+
+    const verificationDatabase = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("lepre");
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const verification = verificationDatabase.transaction("workouts", "readonly");
+    const migrated = await new Promise<Record<string, unknown>>((resolve, reject) => {
+      const request = verification.objectStore("workouts").get("strava:legacy");
+      request.onsuccess = () => resolve(request.result as Record<string, unknown>);
+      request.onerror = () => reject(request.error);
+    });
+    expect(migrated.structure).toEqual(created.workout.structure);
+    verificationDatabase.close();
+  });
+
   it("clears workouts when the singleton user changes", async () => {
     const workout = createWorkout({
       id: "strava:7",

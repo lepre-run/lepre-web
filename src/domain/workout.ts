@@ -1,4 +1,8 @@
-import { classifyWorkout, type WorkoutClassification } from "./classifier";
+import {
+  type ActualWorkoutStructure,
+  isCurrentActualWorkoutStructure,
+} from "./actual-workout-structure";
+import { classifyWorkout } from "./classifier";
 import type { DistanceMeters, DurationSeconds, Instant, WorkoutId, WorkoutName } from "./identity";
 
 export type RunSport = "Run" | "TrailRun" | "VirtualRun";
@@ -21,7 +25,7 @@ export type Workout = Readonly<{
   elapsedDurationSeconds: DurationSeconds;
   distanceMeters: DistanceMeters;
   laps: ReadonlyArray<Lap>;
-  classification: WorkoutClassification;
+  structure: ActualWorkoutStructure;
 }>;
 
 export type CreateWorkoutResult =
@@ -44,6 +48,7 @@ export function createWorkout(input: {
     elapsedDurationSeconds: number;
     distanceMeters: number;
   }>;
+  structure?: unknown;
 }): CreateWorkoutResult {
   const id = input.id.trim();
   const name = input.name;
@@ -91,7 +96,9 @@ export function createWorkout(input: {
         elapsedDurationSeconds: input.elapsedDurationSeconds as DurationSeconds,
         distanceMeters: input.distanceMeters as DistanceMeters,
         laps,
-        classification: classifyWorkout(laps),
+        structure: isCurrentActualWorkoutStructure(input.structure)
+          ? input.structure
+          : classifyWorkout(laps),
       };
     })(),
   };

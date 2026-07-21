@@ -1,4 +1,13 @@
+import {
+  ACTUAL_WORKOUT_STRUCTURE_SCHEMA_VERSION,
+  type ActualWorkoutStructure,
+  type LapRoles,
+  type StageMeasure,
+  WORKOUT_CLASSIFIER_VERSION,
+} from "./actual-workout-structure";
 import type { Lap } from "./workout";
+
+export type { ActualWorkoutStructure, StageMeasure } from "./actual-workout-structure";
 
 export type WorkoutType =
   | "progressive"
@@ -11,11 +20,7 @@ export type WorkoutType =
 
 type ClassificationBase = Readonly<{ coreLapIndexes: ReadonlyArray<number> }>;
 
-export type StageMeasure =
-  | Readonly<{ kind: "distance"; meters: number }>
-  | Readonly<{ kind: "duration"; seconds: number }>;
-
-export type WorkoutClassification =
+type Classification =
   | (ClassificationBase & Readonly<{ kind: "progressive"; stageCount: number }>)
   | (ClassificationBase &
       Readonly<{
@@ -30,8 +35,12 @@ export type WorkoutClassification =
   | (ClassificationBase & Readonly<{ kind: "free-run" }>)
   | (ClassificationBase & Readonly<{ kind: "unknown" }>);
 
-type Candidate = Exclude<WorkoutClassification, { kind: "free-run" | "unknown" }> &
-  Readonly<{ score: number }>;
+type Candidate = Exclude<Classification, { kind: "free-run" | "unknown" }> &
+  Readonly<{
+    score: number;
+    workLapIndexes: ReadonlyArray<number>;
+    recoveryLapIndexes: ReadonlyArray<number>;
+  }>;
 
 const STRUCTURED_THRESHOLD = 0.72;
 
@@ -103,6 +112,8 @@ function alternatingCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<Candidat
             work: repeatedStage(work),
             recovery: repeatedStage(recovery),
             coreLapIndexes: indexes.map((index) => laps[index].index),
+            workLapIndexes: work.map((lap) => lap.index),
+            recoveryLapIndexes: recovery.map((lap) => lap.index),
             score,
           });
         } else {
@@ -113,6 +124,8 @@ function alternatingCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<Candidat
             kind: "repeated-hills",
             repetitions: work.length,
             coreLapIndexes: indexes.map((index) => laps[index].index),
+            workLapIndexes: work.map((lap) => lap.index),
+            recoveryLapIndexes: recovery.map((lap) => lap.index),
             score: score - 0.04,
           });
         }
@@ -140,6 +153,8 @@ function progressiveCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<Candidat
         kind: "progressive",
         stageCount: stages.length,
         coreLapIndexes: stages.map((lap) => lap.index),
+        workLapIndexes: stages.map((lap) => lap.index),
+        recoveryLapIndexes: [],
         score: Math.min(0.94, 0.7 + improvement + stages.length * 0.01),
       });
     }
@@ -165,6 +180,8 @@ function tempoCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<Candidate> {
         kind: "tempo",
         distanceMeters: coreDistance,
         coreLapIndexes: core.map((lap) => lap.index),
+        workLapIndexes: core.map((lap) => lap.index),
+        recoveryLapIndexes: [],
         score: Math.min(0.91, 0.68 + separation + Math.min(core.length, 4) * 0.01),
       });
     }
@@ -180,17 +197,84 @@ function steadyStructuredCandidate(laps: ReadonlyArray<Lap>): Candidate | undefi
   return {
     kind: "steady-structured-run",
     coreLapIndexes: laps.map((lap) => lap.index),
+    workLapIndexes: laps.map((lap) => lap.index),
+    recoveryLapIndexes: [],
     score: 0.74 + Math.min(0.08, distanceVariation / 5),
   };
 }
 
-export function classifyWorkout(laps: ReadonlyArray<Lap>): WorkoutClassification {
-  if (laps.length <= 1) return { kind: "free-run", coreLapIndexes: [] };
+function roundConfidence(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+function emptyLapRoles(): LapRoles {
+  return { warmup: [], work: [], recovery: [], cooldown: [], main: [], unknown: [] };
+}
+
+function unstructuredWorkout(
+  laps: ReadonlyArray<Lap>,
+  kind: "free-run" | "unknown",
+  confidence: number,
+): ActualWorkoutStructure {
+  const roles = emptyLapRoles();
+  return {
+    schemaVersion: ACTUAL_WORKOUT_STRUCTURE_SCHEMA_VERSION,
+    classifierVersion: WORKOUT_CLASSIFIER_VERSION,
+    source: "inferred_from_strava_laps",
+    confidence,
+    kind,
+    coreLapIndexes: [],
+    lapRoles: {
+      ...roles,
+      [kind === "free-run" ? "main" : "unknown"]: laps.map((lap) => lap.index),
+    },
+  };
+}
+
+function rolesForCandidate(laps: ReadonlyArray<Lap>, candidate: Candidate): LapRoles {
+  const core = new Set(candidate.coreLapIndexes);
+  const firstCorePosition = laps.findIndex((lap) => core.has(lap.index));
+  let lastCorePosition = -1;
+  for (let index = laps.length - 1; index >= 0; index -= 1) {
+    if (core.has(laps[index].index)) {
+      lastCorePosition = index;
+      break;
+    }
+  }
+  return {
+    warmup: laps.slice(0, Math.max(0, firstCorePosition)).map((lap) => lap.index),
+    work: candidate.workLapIndexes,
+    recovery: candidate.recoveryLapIndexes,
+    cooldown: laps.slice(lastCorePosition + 1).map((lap) => lap.index),
+    main: [],
+    unknown: [],
+  };
+}
+
+function structuredWorkout(laps: ReadonlyArray<Lap>, candidate: Candidate): ActualWorkoutStructure {
+  const {
+    score,
+    workLapIndexes: _work,
+    recoveryLapIndexes: _recovery,
+    ...classification
+  } = candidate;
+  return {
+    schemaVersion: ACTUAL_WORKOUT_STRUCTURE_SCHEMA_VERSION,
+    classifierVersion: WORKOUT_CLASSIFIER_VERSION,
+    source: "inferred_from_strava_laps",
+    confidence: roundConfidence(score),
+    ...classification,
+    lapRoles: rolesForCandidate(laps, candidate),
+  };
+}
+
+export function classifyWorkout(laps: ReadonlyArray<Lap>): ActualWorkoutStructure {
+  if (laps.length <= 1) return unstructuredWorkout(laps, "free-run", 1);
   const validLaps = laps.filter(
     (lap) => lap.distanceMeters > 0 && lap.movingDurationSeconds > 0 && Number.isFinite(pace(lap)),
   );
   if (validLaps.length !== laps.length) {
-    return { kind: "unknown", coreLapIndexes: [] };
+    return unstructuredWorkout(laps, "unknown", 0);
   }
   const candidates = [
     ...alternatingCandidates(laps),
@@ -204,11 +288,10 @@ export function classifyWorkout(laps: ReadonlyArray<Lap>): WorkoutClassification
       right.score - left.score || right.coreLapIndexes.length - left.coreLapIndexes.length,
   )[0];
   if (best && best.score >= STRUCTURED_THRESHOLD) {
-    const { score: _score, ...classification } = best;
-    return classification;
+    return structuredWorkout(laps, best);
   }
   if (coefficientOfVariation(laps.map(pace)) <= 0.1) {
-    return { kind: "free-run", coreLapIndexes: [] };
+    return unstructuredWorkout(laps, "free-run", 0.9);
   }
-  return { kind: "unknown", coreLapIndexes: [] };
+  return unstructuredWorkout(laps, "unknown", 0);
 }

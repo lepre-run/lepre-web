@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Connected } from "./Connected";
 
 const synchronizeWorkouts = vi.hoisted(() => vi.fn());
@@ -22,7 +22,22 @@ const workout = vi.hoisted(() => ({
       distanceMeters: 8_000,
     },
   ],
-  classification: { kind: "free-run", coreLapIndexes: [] },
+  structure: {
+    schemaVersion: 1,
+    classifierVersion: 1,
+    source: "inferred_from_strava_laps",
+    confidence: 1,
+    kind: "free-run",
+    coreLapIndexes: [],
+    lapRoles: {
+      warmup: [],
+      work: [],
+      recovery: [],
+      cooldown: [],
+      main: [1],
+      unknown: [],
+    },
+  },
 }));
 
 vi.mock("../composition/application", () => ({
@@ -50,6 +65,8 @@ describe("Connected", () => {
     });
   });
 
+  afterEach(() => vi.restoreAllMocks());
+
   it("renders the complete local workout entity", async () => {
     render(<Connected />);
     const cardHeading = await screen.findByRole("heading", { name: "Morning Run" });
@@ -70,5 +87,27 @@ describe("Connected", () => {
       "Import paused and will resume automatically in about 15 minutes",
     );
     expect(screen.getByRole("button", { name: "Paused" })).toBeDisabled();
+  });
+
+  it("offers an LLM-ready JSON download for the stored date range", async () => {
+    const createObjectUrl = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:workouts");
+    const revokeObjectUrl = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => undefined);
+    render(<Connected />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Download" }));
+
+    expect(screen.getByRole("dialog", { name: "Download workout history" })).toBeInTheDocument();
+    expect(screen.getByLabelText("From")).toHaveValue("2026-07-15");
+    expect(screen.getByLabelText("To")).toHaveValue("2026-07-15");
+    expect(screen.getByText("1 workout will be included")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Download JSON" }));
+
+    expect(createObjectUrl).toHaveBeenCalledWith(expect.any(Blob));
+    expect(click).toHaveBeenCalledOnce();
+    expect(revokeObjectUrl).toHaveBeenCalledWith("blob:workouts");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

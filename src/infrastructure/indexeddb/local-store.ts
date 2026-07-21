@@ -4,6 +4,7 @@ import type {
   SynchronizationState,
 } from "../../application/model";
 import type { LocalStore } from "../../application/ports";
+import { isCurrentActualWorkoutStructure } from "../../domain/actual-workout-structure";
 import type { ContinuationToken, SynchronizationCheckpoint } from "../../domain/identity";
 import { createProviderConnection } from "../../domain/provider-connection";
 import { createUser, type User } from "../../domain/user";
@@ -46,6 +47,7 @@ type StoredWorkoutRecord = Readonly<{
     elapsedDurationSeconds: number;
     distanceMeters: number;
   }>;
+  structure?: unknown;
 }>;
 
 type StoredSynchronizationRecord =
@@ -129,6 +131,7 @@ function workoutRecord(workout: Workout): StoredWorkoutRecord {
     elapsedDurationSeconds: workout.elapsedDurationSeconds,
     distanceMeters: workout.distanceMeters,
     laps: workout.laps,
+    structure: workout.structure,
   };
 }
 
@@ -154,10 +157,23 @@ async function listWorkouts(): Promise<ReadonlyArray<Workout>> {
     transaction.objectStore(WORKOUT_STORE).getAll() as IDBRequest<StoredWorkoutRecord[]>,
   );
   await done;
+  const workouts = records.map(workoutFromRecord);
+  const staleStructureIds = new Set(
+    records
+      .filter((record) => !isCurrentActualWorkoutStructure(record.structure))
+      .map(({ id }) => id),
+  );
+  if (staleStructureIds.size > 0) {
+    const updateTransaction = database.transaction(WORKOUT_STORE, "readwrite");
+    const updatesDone = transactionDone(updateTransaction);
+    const store = updateTransaction.objectStore(WORKOUT_STORE);
+    for (const workout of workouts) {
+      if (staleStructureIds.has(workout.id)) store.put(workoutRecord(workout));
+    }
+    await updatesDone;
+  }
   database.close();
-  return records
-    .map(workoutFromRecord)
-    .sort((left, right) => right.performedAt.localeCompare(left.performedAt));
+  return workouts.sort((left, right) => right.performedAt.localeCompare(left.performedAt));
 }
 
 async function synchronizationState(): Promise<SynchronizationState> {

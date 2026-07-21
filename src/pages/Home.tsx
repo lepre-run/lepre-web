@@ -1,8 +1,14 @@
-import { type JSX, useCallback, useEffect, useState } from "react";
+import { type FormEvent, type JSX, useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { application } from "../composition/application";
 import type { User } from "../domain/user";
 import type { Workout } from "../domain/workout";
+import {
+  createWorkoutHistoryExport,
+  localWorkoutDate,
+  workoutHistoryFilename,
+  workoutsInRange,
+} from "../domain/workout-history-export";
 import {
   formatClassification,
   formatDistance,
@@ -11,6 +17,7 @@ import {
   formatWorkoutDate,
 } from "../i18n/formatters";
 import { STRAVA_START_URL } from "../infrastructure/api/lepre-backend";
+import { downloadJson } from "../infrastructure/browser/download-json";
 
 export { STRAVA_START_URL };
 
@@ -36,6 +43,22 @@ export function Home(): JSX.Element {
   const [syncing, setSyncing] = useState(false);
   const [notice, setNotice] = useState<Notice>({ kind: "none" });
   const [retryAt, setRetryAt] = useState<number | null>(null);
+  const [downloadOpen, setDownloadOpen] = useState(false);
+  const [downloadFrom, setDownloadFrom] = useState("");
+  const [downloadTo, setDownloadTo] = useState("");
+
+  const storedDateBounds = useMemo(() => {
+    const dates = workouts.map((workout) => localWorkoutDate(workout.performedAt)).sort();
+    return { earliest: dates[0] ?? "", latest: dates[dates.length - 1] ?? "" };
+  }, [workouts]);
+  const downloadRange = { from: downloadFrom, to: downloadTo };
+  const selectedWorkouts = useMemo(
+    () =>
+      downloadFrom.length > 0 && downloadTo.length > 0 && downloadFrom <= downloadTo
+        ? workoutsInRange(workouts, { from: downloadFrom, to: downloadTo })
+        : [],
+    [downloadFrom, downloadTo, workouts],
+  );
 
   const refreshWorkouts = useCallback(async (): Promise<void> => {
     const result = await application.listWorkouts();
@@ -114,6 +137,20 @@ export function Home(): JSX.Element {
     }
   }
 
+  function openDownload(): void {
+    setDownloadFrom(storedDateBounds.earliest);
+    setDownloadTo(storedDateBounds.latest);
+    setDownloadOpen(true);
+  }
+
+  function handleDownload(event: FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    if (selectedWorkouts.length === 0) return;
+    const exportDocument = createWorkoutHistoryExport(workouts, downloadRange);
+    downloadJson(workoutHistoryFilename(downloadRange), exportDocument);
+    setDownloadOpen(false);
+  }
+
   if (screen.kind === "checking") {
     return (
       <main className="shell shell--centered">
@@ -182,8 +219,64 @@ export function Home(): JSX.Element {
           <p className="eyebrow">{t("feed.eyebrow")}</p>
           <h1>{t("feed.title")}</h1>
         </div>
-        <p className="workout-count">{t("feed.storedCount", { count: workouts.length })}</p>
+        <div className="feed-actions">
+          <p className="workout-count">{t("feed.storedCount", { count: workouts.length })}</p>
+          <button
+            className="quiet-action"
+            type="button"
+            onClick={openDownload}
+            disabled={workouts.length === 0}
+          >
+            {t("actions.download")}
+          </button>
+        </div>
       </div>
+      {downloadOpen && (
+        <section className="download-panel" role="dialog" aria-labelledby="download-title">
+          <div className="download-panel__heading">
+            <div>
+              <p className="eyebrow">{t("download.eyebrow")}</p>
+              <h2 id="download-title">{t("download.title")}</h2>
+            </div>
+            <p>{t("download.description")}</p>
+          </div>
+          <form onSubmit={handleDownload}>
+            <div className="download-fields">
+              <label>
+                <span>{t("download.from")}</span>
+                <input
+                  type="date"
+                  value={downloadFrom}
+                  min={storedDateBounds.earliest}
+                  max={downloadTo || storedDateBounds.latest}
+                  onChange={(event) => setDownloadFrom(event.target.value)}
+                />
+              </label>
+              <label>
+                <span>{t("download.to")}</span>
+                <input
+                  type="date"
+                  value={downloadTo}
+                  min={downloadFrom || storedDateBounds.earliest}
+                  max={storedDateBounds.latest}
+                  onChange={(event) => setDownloadTo(event.target.value)}
+                />
+              </label>
+            </div>
+            <output className="download-count">
+              {t("download.workoutCount", { count: selectedWorkouts.length })}
+            </output>
+            <div className="download-actions">
+              <button type="submit" disabled={selectedWorkouts.length === 0}>
+                {t("download.downloadJson")}
+              </button>
+              <button className="quiet-action" type="button" onClick={() => setDownloadOpen(false)}>
+                {t("download.cancel")}
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
       {workouts.length === 0 ? (
         <div className="empty-state">
           <h2>{syncing ? t("feed.importing") : t("feed.emptyTitle")}</h2>
@@ -196,8 +289,8 @@ export function Home(): JSX.Element {
               <article className="workout-card">
                 <header className="workout-card__header">
                   <div>
-                    <p className={`workout-type workout-type--${workout.classification.kind}`}>
-                      {formatClassification(workout.classification, t, language)}
+                    <p className={`workout-type workout-type--${workout.structure.kind}`}>
+                      {formatClassification(workout.structure, t, language)}
                     </p>
                     <h2>{workout.name}</h2>
                   </div>
@@ -231,7 +324,7 @@ export function Home(): JSX.Element {
                   ) : (
                     <ol className="lap-list">
                       {workout.laps.map((lap) => {
-                        const isCore = workout.classification.coreLapIndexes.includes(lap.index);
+                        const isCore = workout.structure.coreLapIndexes.includes(lap.index);
                         return (
                           <li className={isCore ? "lap lap--core" : "lap"} key={lap.index}>
                             <span className="lap__index">{lap.index}</span>

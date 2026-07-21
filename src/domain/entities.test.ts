@@ -62,7 +62,22 @@ describe("domain entities", () => {
             distanceMeters: 10_050.5,
           },
         ],
-        classification: { kind: "free-run", coreLapIndexes: [] },
+        structure: {
+          schemaVersion: 1,
+          classifierVersion: 1,
+          source: "inferred_from_strava_laps",
+          confidence: 1,
+          kind: "free-run",
+          coreLapIndexes: [],
+          lapRoles: {
+            warmup: [],
+            work: [],
+            recovery: [],
+            cooldown: [],
+            main: [1],
+            unknown: [],
+          },
+        },
       },
     });
   });

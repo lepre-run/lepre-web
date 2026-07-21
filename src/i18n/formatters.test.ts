@@ -3,11 +3,23 @@ import { formatClassification, formatDistance, formatWorkoutDate } from "./forma
 import { i18n } from "./i18n";
 
 const intervalWorkout = {
+  schemaVersion: 1,
+  classifierVersion: 1,
+  source: "inferred_from_strava_laps",
+  confidence: 0.94,
   kind: "intervals",
   repetitions: 4,
   work: { kind: "distance", meters: 1_000 },
   recovery: { kind: "distance", meters: 400 },
   coreLapIndexes: [1, 2, 3, 4, 5, 6, 7],
+  lapRoles: {
+    warmup: [],
+    work: [1, 3, 5, 7],
+    recovery: [2, 4, 6],
+    cooldown: [],
+    main: [],
+    unknown: [],
+  },
 } as const;
 
 describe("presentation formatters", () => {

@@ -1,5 +1,5 @@
 import type { TFunction } from "i18next";
-import type { StageMeasure, WorkoutClassification } from "../domain/classifier";
+import type { ActualWorkoutStructure, StageMeasure } from "../domain/actual-workout-structure";
 import { DEFAULT_LANGUAGE, localeFor } from "./i18n";
 
 function decimal(
@@ -67,7 +67,7 @@ function formatStage(stage: StageMeasure, language: string): string {
 }
 
 export function formatClassification(
-  classification: WorkoutClassification,
+  classification: ActualWorkoutStructure,
   t: TFunction,
   language = DEFAULT_LANGUAGE,
 ): string {
