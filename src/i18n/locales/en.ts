@@ -6,14 +6,33 @@ export const english = {
     connectStrava: "Connect with Strava",
   },
   actions: {
-    sync: "Sync",
-    syncing: "Syncing…",
-    paused: "Paused",
+    account: "Account",
     download: "Download",
-    disconnect: "Disconnect",
+    disconnectStrava: "Disconnect Strava",
+    disconnecting: "Disconnecting…",
+    confirmDisconnect: "Disconnect and remove data",
+    reconnectStrava: "Reconnect Strava",
+    tryAgain: "Try again",
+    cancel: "Cancel",
+  },
+  syncStatus: {
+    checking: "Checking for updates…",
+    updating: "Updating workouts…",
+    current: "Up to date",
+    paused: "Updates paused",
+    failed: "Update failed",
+    offline: "Offline",
+    attention: "Connection needs attention",
+  },
+  account: {
+    eyebrow: "Connection",
+    title: "Strava account",
+    description: "New runs are imported automatically while Strava is connected.",
+    disconnectTitle: "Disconnect Strava?",
+    disconnectWarning:
+      "This will disconnect Strava and remove every workout downloaded to this device. You can reconnect later.",
   },
   notices: {
-    reconnectError: "Reconnect Strava to synchronize workouts.",
     synchronizationError: "Could not synchronize workouts right now.",
     queued: "Waiting for a fair synchronization turn…",
     rateLimited_one:

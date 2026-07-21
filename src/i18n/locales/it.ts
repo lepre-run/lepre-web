@@ -8,14 +8,33 @@ export const italian = {
     connectStrava: "Connetti Strava",
   },
   actions: {
-    sync: "Sincronizza",
-    syncing: "Sincronizzazione…",
-    paused: "In pausa",
+    account: "Account",
     download: "Scarica",
-    disconnect: "Disconnetti",
+    disconnectStrava: "Disconnetti Strava",
+    disconnecting: "Disconnessione…",
+    confirmDisconnect: "Disconnetti e rimuovi i dati",
+    reconnectStrava: "Riconnetti Strava",
+    tryAgain: "Riprova",
+    cancel: "Annulla",
+  },
+  syncStatus: {
+    checking: "Controllo aggiornamenti…",
+    updating: "Aggiornamento allenamenti…",
+    current: "Tutto aggiornato",
+    paused: "Aggiornamenti in pausa",
+    failed: "Aggiornamento non riuscito",
+    offline: "Offline",
+    attention: "La connessione richiede attenzione",
+  },
+  account: {
+    eyebrow: "Connessione",
+    title: "Account Strava",
+    description: "Le nuove corse vengono importate automaticamente mentre Strava è connesso.",
+    disconnectTitle: "Disconnettere Strava?",
+    disconnectWarning:
+      "Strava verrà disconnesso e tutti gli allenamenti scaricati su questo dispositivo saranno rimossi. Potrai riconnetterti in seguito.",
   },
   notices: {
-    reconnectError: "Riconnetti Strava per sincronizzare gli allenamenti.",
     synchronizationError: "Al momento non è possibile sincronizzare gli allenamenti.",
     queued: "In attesa del turno di sincronizzazione…",
     rateLimited_one:

@@ -98,7 +98,8 @@ describe("Connected", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(
       "Import paused and will resume automatically in about 15 minutes",
     );
-    expect(screen.getByRole("button", { name: "Paused" })).toBeDisabled();
+    expect(screen.getByText("Updates paused")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Sync" })).not.toBeInTheDocument();
   });
 
   it("shows that synchronization is waiting for its fair turn", async () => {
@@ -109,7 +110,8 @@ describe("Connected", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(
       "Waiting for a fair synchronization turn",
     );
-    expect(screen.getByRole("button", { name: "Paused" })).toBeDisabled();
+    expect(screen.getByText("Updates paused")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Sync" })).not.toBeInTheDocument();
   });
 
   it("offers an LLM-ready JSON download for the stored date range", async () => {

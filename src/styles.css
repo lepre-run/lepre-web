@@ -179,8 +179,116 @@ button:disabled {
   font-size: 0.82rem;
 }
 
-.header-actions {
+.header-controls {
   display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0.35rem 0 0;
+  color: var(--color-instrument);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.72rem;
+}
+
+.sync-status span {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 50%;
+  background: var(--color-kinetic);
+  box-shadow: 0 0 0 3px var(--color-kinetic-glow);
+}
+
+.sync-status[data-state="checking"] span,
+.sync-status[data-state="syncing"] span {
+  background: var(--color-instrument);
+  animation: sync-pulse 1.2s ease-in-out infinite alternate;
+}
+
+.sync-status[data-state="paused"] span {
+  background: var(--color-threshold);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-threshold) 16%, transparent);
+}
+
+.sync-status[data-state="failed"] span {
+  background: var(--color-danger);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-danger) 16%, transparent);
+}
+
+.sync-status[data-state="offline"] span {
+  background: var(--color-instrument);
+  box-shadow: none;
+}
+
+@keyframes sync-pulse {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sync-status span {
+    animation: none;
+  }
+}
+
+.account-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin: -2.5rem 0 1.5rem;
+  border: 1px solid var(--color-line);
+  border-radius: 18px;
+  background: var(--color-surface);
+  padding: 1.25rem;
+  box-shadow: 0 10px 40px var(--color-shadow);
+}
+
+.account-panel h2,
+.disconnect-confirmation h3 {
+  margin: 0.25rem 0 0;
+}
+
+.account-panel p,
+.disconnect-confirmation p {
+  max-width: 38rem;
+  margin: 0.45rem 0 0;
+  color: var(--color-instrument);
+  line-height: 1.5;
+}
+
+.danger-action {
+  flex: none;
+  border-color: var(--color-danger);
+  background: transparent;
+  color: var(--color-danger);
+}
+
+.danger-action--solid {
+  background: var(--color-danger);
+  color: var(--color-surface);
+}
+
+.disconnect-confirmation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1.5rem;
+}
+
+.disconnect-actions {
+  display: flex;
+  flex: none;
   gap: 0.5rem;
 }
 
@@ -285,6 +393,27 @@ button:disabled {
 
 .notice--error {
   border-color: var(--color-danger);
+}
+
+.notice--action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.notice--action p {
+  margin: 0;
+}
+
+.notice-action {
+  flex: none;
+  border-radius: 999px;
+  background: var(--color-carbon);
+  padding: 0.7rem 1rem;
+  color: var(--color-lab-paper);
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .workout-feed {
@@ -543,6 +672,30 @@ button:disabled {
   .feed-actions {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .header-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .account-panel,
+  .disconnect-confirmation,
+  .notice--action {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .account-panel {
+    margin-top: -2.5rem;
+  }
+
+  .disconnect-actions {
+    flex-direction: column;
+  }
+
+  .notice-action {
+    align-self: flex-start;
   }
 
   .download-panel__heading,

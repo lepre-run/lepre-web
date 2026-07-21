@@ -45,7 +45,9 @@ type ScreenState =
 type Notice =
   | Readonly<{ kind: "none" }>
   | Readonly<{ kind: "paused"; message: string }>
-  | Readonly<{ kind: "error"; message: string }>;
+  | Readonly<{ kind: "error"; message: string; retryable: boolean }>;
+
+type SynchronizationStatus = "checking" | "syncing" | "current" | "paused" | "failed";
 
 type LapStyle = CSSProperties & Readonly<{ "--lap-progress"?: string }>;
 
@@ -61,8 +63,13 @@ export function Home(): JSX.Element {
   const [screen, setScreen] = useState<ScreenState>({ kind: "checking" });
   const [workouts, setWorkouts] = useState<ReadonlyArray<Workout>>([]);
   const [syncing, setSyncing] = useState(false);
+  const [synchronizationStatus, setSynchronizationStatus] =
+    useState<SynchronizationStatus>("checking");
   const [notice, setNotice] = useState<Notice>({ kind: "none" });
   const [retryAt, setRetryAt] = useState<number | null>(null);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [disconnectConfirmationOpen, setDisconnectConfirmationOpen] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [downloadFrom, setDownloadFrom] = useState("");
   const [downloadTo, setDownloadTo] = useState("");
@@ -87,26 +94,40 @@ export function Home(): JSX.Element {
 
   const sync = useCallback(async (): Promise<void> => {
     setSyncing(true);
+    setSynchronizationStatus("syncing");
     setNotice({ kind: "none" });
     const result = await application.synchronizeWorkouts(refreshWorkouts);
     if (result.kind === "reauthorization-required") {
-      setNotice({ kind: "error", message: t("notices.reconnectError") });
+      setScreen((current) =>
+        current.kind === "ready"
+          ? { ...current, availability: "reauthorization-required" }
+          : current,
+      );
+      setSynchronizationStatus("failed");
     }
     if (result.kind === "provider-unavailable") {
-      setNotice({ kind: "error", message: t("notices.synchronizationError") });
+      setSynchronizationStatus("failed");
+      setNotice({
+        kind: "error",
+        message: t("notices.synchronizationError"),
+        retryable: true,
+      });
     }
     if (result.kind === "queued") {
       setRetryAt(Date.now() + result.retryAfterSeconds * 1_000);
+      setSynchronizationStatus("paused");
       setNotice({ kind: "paused", message: t("notices.queued") });
     }
     if (result.kind === "rate-limited") {
       const minutes = Math.max(1, Math.ceil(result.retryAfterSeconds / 60));
       setRetryAt(Date.now() + result.retryAfterSeconds * 1_000);
+      setSynchronizationStatus("paused");
       setNotice({
         kind: "paused",
         message: t("notices.rateLimited", { count: minutes }),
       });
     }
+    if (result.kind === "synchronized") setSynchronizationStatus("current");
     setSyncing(false);
   }, [refreshWorkouts, t]);
 
@@ -143,7 +164,11 @@ export function Home(): JSX.Element {
               ? "offline"
               : "reauthorization-required",
       });
-      if (user.kind === "connected") await sync();
+      if (user.kind === "connected") {
+        await sync();
+      } else {
+        setSynchronizationStatus("failed");
+      }
     })();
     return () => {
       active = false;
@@ -152,13 +177,42 @@ export function Home(): JSX.Element {
 
   async function handleDisconnect(): Promise<void> {
     setNotice({ kind: "none" });
+    setDisconnecting(true);
     const result = await application.disconnectProvider();
     if (result.kind === "disconnected") {
       setWorkouts([]);
       setScreen({ kind: "disconnected" });
+      setAccountOpen(false);
+      setDisconnectConfirmationOpen(false);
     } else {
-      setNotice({ kind: "error", message: t("notices.disconnectError") });
+      setNotice({
+        kind: "error",
+        message: t("notices.disconnectError"),
+        retryable: false,
+      });
     }
+    setDisconnecting(false);
+  }
+
+  function synchronizationLabel(): string {
+    if (screen.kind === "ready" && screen.availability === "offline") {
+      return t("syncStatus.offline");
+    }
+    if (screen.kind === "ready" && screen.availability === "reauthorization-required") {
+      return t("syncStatus.attention");
+    }
+    if (synchronizationStatus === "syncing") return t("syncStatus.updating");
+    if (synchronizationStatus === "paused") return t("syncStatus.paused");
+    if (synchronizationStatus === "failed") return t("syncStatus.failed");
+    if (synchronizationStatus === "current") return t("syncStatus.current");
+    return t("syncStatus.checking");
+  }
+
+  function synchronizationState(): SynchronizationStatus | ScreenState["kind"] | "offline" {
+    if (screen.kind !== "ready") return screen.kind;
+    if (screen.availability === "offline") return "offline";
+    if (screen.availability === "reauthorization-required") return "failed";
+    return synchronizationStatus;
   }
 
   function openDownload(): void {
@@ -206,36 +260,98 @@ export function Home(): JSX.Element {
             {screen.user.firstName} {screen.user.lastName}
           </p>
         </div>
-        <div className="header-actions">
-          <button
-            type="button"
-            onClick={() => void sync()}
-            disabled={syncing || retryAt !== null || screen.availability !== "online"}
-          >
-            {syncing
-              ? t("actions.syncing")
-              : retryAt !== null
-                ? t("actions.paused")
-                : t("actions.sync")}
-          </button>
+        <div className="header-controls">
+          <p className="sync-status" data-state={synchronizationState()} aria-live="polite">
+            <span aria-hidden="true" />
+            {synchronizationLabel()}
+          </p>
           <button
             className="quiet-action"
             type="button"
-            onClick={() => void handleDisconnect()}
-            disabled={syncing || screen.availability === "offline"}
+            aria-expanded={accountOpen}
+            aria-controls="account-panel"
+            onClick={() => {
+              setAccountOpen((open) => !open);
+              setDisconnectConfirmationOpen(false);
+            }}
           >
-            {t("actions.disconnect")}
+            {t("actions.account")}
           </button>
         </div>
       </header>
+      {accountOpen && (
+        <section
+          className="account-panel"
+          id="account-panel"
+          aria-labelledby={disconnectConfirmationOpen ? "disconnect-title" : "account-title"}
+        >
+          {!disconnectConfirmationOpen ? (
+            <>
+              <div>
+                <p className="eyebrow">{t("account.eyebrow")}</p>
+                <h2 id="account-title">{t("account.title")}</h2>
+                <p>{t("account.description")}</p>
+              </div>
+              <button
+                className="danger-action"
+                type="button"
+                onClick={() => setDisconnectConfirmationOpen(true)}
+                disabled={syncing || screen.availability === "offline"}
+              >
+                {t("actions.disconnectStrava")}
+              </button>
+            </>
+          ) : (
+            <div
+              className="disconnect-confirmation"
+              role="alertdialog"
+              aria-labelledby="disconnect-title"
+            >
+              <div>
+                <p className="eyebrow">{t("account.eyebrow")}</p>
+                <h3 id="disconnect-title">{t("account.disconnectTitle")}</h3>
+                <p>{t("account.disconnectWarning")}</p>
+              </div>
+              <div className="disconnect-actions">
+                <button
+                  className="danger-action danger-action--solid"
+                  type="button"
+                  onClick={() => void handleDisconnect()}
+                  disabled={disconnecting}
+                >
+                  {disconnecting ? t("actions.disconnecting") : t("actions.confirmDisconnect")}
+                </button>
+                <button
+                  className="quiet-action"
+                  type="button"
+                  onClick={() => setDisconnectConfirmationOpen(false)}
+                  disabled={disconnecting}
+                >
+                  {t("actions.cancel")}
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
       {screen.availability === "offline" && <p className="notice">{t("notices.offline")}</p>}
       {screen.availability === "reauthorization-required" && (
-        <p className="notice">{t("notices.reauthorization")}</p>
+        <div className="notice notice--action">
+          <p>{t("notices.reauthorization")}</p>
+          <a className="notice-action" href={STRAVA_START_URL}>
+            {t("actions.reconnectStrava")}
+          </a>
+        </div>
       )}
       {notice.kind === "error" && (
-        <p className="notice notice--error" role="alert">
-          {notice.message}
-        </p>
+        <div className="notice notice--error notice--action" role="alert">
+          <p>{notice.message}</p>
+          {notice.retryable && (
+            <button type="button" onClick={() => void sync()} disabled={syncing}>
+              {t("actions.tryAgain")}
+            </button>
+          )}
+        </div>
       )}
       {notice.kind === "paused" && <output className="notice">{notice.message}</output>}
       <div className="feed-heading">
