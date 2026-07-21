@@ -11,6 +11,7 @@ type MockWorkout = Readonly<{
   performedAt: string;
   name: string;
   description: string;
+  type: "workout" | "race";
   sport: "Run" | "TrailRun" | "VirtualRun";
   durationSeconds: number;
   elapsedDurationSeconds: number;
@@ -39,6 +40,7 @@ function workout(input: {
   performedAt: string;
   name: string;
   description: string;
+  type?: MockWorkout["type"];
   sport?: MockWorkout["sport"];
   laps: ReadonlyArray<MockLap>;
 }): MockWorkout {
@@ -47,6 +49,7 @@ function workout(input: {
     performedAt: input.performedAt,
     name: input.name,
     description: input.description,
+    type: input.type ?? "workout",
     sport: input.sport ?? "Run",
     durationSeconds: input.laps.reduce((total, value) => total + value.movingDurationSeconds, 0),
     elapsedDurationSeconds: input.laps.reduce(
@@ -94,8 +97,9 @@ export const mockWorkouts: ReadonlyArray<MockWorkout> = [
   workout({
     id: "mock-progressive-8k",
     performedAt: "2026-07-13T06:10:00.000Z",
-    name: "Negative split Sunday",
+    name: "City 8K race",
     description: "Four even stages, moving from comfortable to threshold effort.",
+    type: "race",
     laps: [
       lap(1, "Stage 1", 2_000, 650),
       lap(2, "Stage 2", 2_000, 620),

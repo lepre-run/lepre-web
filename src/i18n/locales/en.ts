@@ -33,6 +33,7 @@ export const english = {
     emptyDescription: "Completed workouts will appear here after their laps have been classified.",
   },
   workout: {
+    race: "Race",
     date: "Date",
     distance: "Distance",
     lapStructure: "Lap structure",

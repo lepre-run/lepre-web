@@ -1,7 +1,7 @@
 import type { Workout } from "./workout";
 
 export const WORKOUT_HISTORY_EXPORT_FORMAT = "lepre.workout-history" as const;
-export const WORKOUT_HISTORY_EXPORT_VERSION = 1 as const;
+export const WORKOUT_HISTORY_EXPORT_VERSION = 2 as const;
 
 export type WorkoutHistoryRange = Readonly<{
   from: string;
@@ -54,6 +54,7 @@ export function createWorkoutHistoryExport(
       sourceProvider: "strava" as const,
       performedAt: workout.performedAt,
       sport: workout.sport,
+      type: workout.type,
       name: workout.name,
       description: workout.description,
       actual: {

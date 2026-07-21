@@ -12,6 +12,7 @@ describe("SynchronizeWorkouts", () => {
       performedAt: "2026-07-15T06:00:00Z",
       name: "Morning Run",
       description: "",
+      type: "workout",
       sport: "Run",
       durationSeconds: 2_400,
       elapsedDurationSeconds: 2_450,

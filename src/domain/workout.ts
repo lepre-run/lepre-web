@@ -6,6 +6,7 @@ import { classifyWorkout } from "./classifier";
 import type { DistanceMeters, DurationSeconds, Instant, WorkoutId, WorkoutName } from "./identity";
 
 export type RunSport = "Run" | "TrailRun" | "VirtualRun";
+export type WorkoutCategory = "workout" | "race";
 
 export type Lap = Readonly<{
   index: number;
@@ -20,6 +21,7 @@ export type Workout = Readonly<{
   performedAt: Instant;
   name: WorkoutName;
   description: string;
+  type: WorkoutCategory;
   sport: RunSport;
   durationSeconds: DurationSeconds;
   elapsedDurationSeconds: DurationSeconds;
@@ -37,6 +39,7 @@ export function createWorkout(input: {
   performedAt: string;
   name: string;
   description: string;
+  type: string;
   sport: string;
   durationSeconds: number;
   elapsedDurationSeconds: number;
@@ -57,6 +60,7 @@ export function createWorkout(input: {
   const validElapsedDuration =
     Number.isInteger(input.elapsedDurationSeconds) && input.elapsedDurationSeconds >= 0;
   const validDistance = Number.isFinite(input.distanceMeters) && input.distanceMeters >= 0;
+  const validType = ["workout", "race"].includes(input.type);
   const validSport = ["Run", "TrailRun", "VirtualRun"].includes(input.sport);
   const validLaps = input.laps.every(
     (lap) =>
@@ -77,6 +81,7 @@ export function createWorkout(input: {
     !validDuration ||
     !validElapsedDuration ||
     !validDistance ||
+    !validType ||
     !validSport ||
     !validLaps
   ) {
@@ -91,6 +96,7 @@ export function createWorkout(input: {
         performedAt: input.performedAt as Instant,
         name: name as WorkoutName,
         description: input.description,
+        type: input.type as WorkoutCategory,
         sport: input.sport as RunSport,
         durationSeconds: input.durationSeconds as DurationSeconds,
         elapsedDurationSeconds: input.elapsedDurationSeconds as DurationSeconds,

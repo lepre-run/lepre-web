@@ -9,6 +9,7 @@ const workout = vi.hoisted(() => ({
   performedAt: "2026-07-15T06:00:00.000Z",
   name: "Morning Run",
   description: "Track session",
+  type: "race",
   sport: "Run",
   durationSeconds: 2_400,
   elapsedDurationSeconds: 2_450,
@@ -76,6 +77,9 @@ describe("Connected", () => {
     expect(screen.getByText(/1 stored locally/i)).toBeInTheDocument();
     expect(screen.getByText("Free run")).toBeInTheDocument();
     expect(screen.getByText("Track session")).toBeInTheDocument();
+    expect(screen.getByText("Race")).toBeInTheDocument();
+    expect(card).toHaveClass("workout-card--race");
+    expect(card).toHaveAttribute("data-workout-type", "race");
     expect(screen.getByText("Run").closest("li")).toHaveAttribute("data-lap-role", "main");
   });
 

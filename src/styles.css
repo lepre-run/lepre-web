@@ -20,6 +20,12 @@
   --color-work: color-mix(in oklch, var(--color-work-soft), var(--color-work-strong) 28%);
   --color-work-border: oklch(55% 0.18 34.02);
   --color-role-badge-surface: oklch(98.92% 0.0054 117.92 / 0.76);
+  --color-race-surface: oklch(95% 0.047 34.02);
+  --color-race-section: oklch(92% 0.028 34.02);
+  --color-race-border: oklch(54% 0.18 34.02);
+  --color-race-shadow: oklch(50% 0.16 34.02 / 0.16);
+  --color-race-badge: oklch(48% 0.17 34.02);
+  --color-on-race-badge: oklch(98.92% 0.0054 117.92);
 
   color: var(--color-carbon);
   background: var(--color-lab-paper);
@@ -286,6 +292,12 @@ button:disabled {
   box-shadow: 0 10px 40px var(--color-shadow);
 }
 
+.workout-card--race {
+  border: 2px solid var(--color-race-border);
+  background: var(--color-race-surface);
+  box-shadow: 0 12px 42px var(--color-race-shadow);
+}
+
 .workout-card__header {
   align-items: start;
   padding: 1.5rem 1.5rem 1.25rem;
@@ -298,6 +310,23 @@ button:disabled {
   font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: 0.02em;
+}
+
+.race-badge {
+  display: inline-flex;
+  gap: 0.38rem;
+  align-items: center;
+  margin: 0 0 0.55rem;
+  border-radius: 999px;
+  background: var(--color-race-badge);
+  color: var(--color-on-race-badge);
+  padding: 0.3rem 0.58rem;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .workout-type--unknown {
@@ -341,6 +370,11 @@ button:disabled {
   border-top: 1px solid var(--color-line);
   background: var(--color-surface-muted);
   padding: 1.1rem 1.5rem 1.4rem;
+}
+
+.workout-card--race .lap-section {
+  border-color: color-mix(in oklch, var(--color-race-border) 35%, var(--color-line));
+  background: var(--color-race-section);
 }
 
 .lap-section__heading {

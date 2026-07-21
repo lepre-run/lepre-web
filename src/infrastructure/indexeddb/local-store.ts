@@ -11,7 +11,7 @@ import { createUser, type User } from "../../domain/user";
 import { createWorkout, type Workout } from "../../domain/workout";
 
 const DATABASE_NAME = "lepre";
-const DATABASE_VERSION = 3;
+const DATABASE_VERSION = 4;
 const USER_STORE = "user";
 const WORKOUT_STORE = "workouts";
 const META_STORE = "meta";
@@ -36,6 +36,7 @@ type StoredWorkoutRecord = Readonly<{
   performedAt: string;
   name: string;
   description: string;
+  type: string;
   sport: string;
   durationSeconds: number;
   elapsedDurationSeconds: number;
@@ -126,6 +127,7 @@ function workoutRecord(workout: Workout): StoredWorkoutRecord {
     performedAt: workout.performedAt,
     name: workout.name,
     description: workout.description,
+    type: workout.type,
     sport: workout.sport,
     durationSeconds: workout.durationSeconds,
     elapsedDurationSeconds: workout.elapsedDurationSeconds,

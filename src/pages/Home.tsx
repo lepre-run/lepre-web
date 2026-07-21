@@ -304,9 +304,18 @@ export function Home(): JSX.Element {
         <ol className="workout-feed">
           {workouts.map((workout) => (
             <li className="workout-feed__item" key={workout.id}>
-              <article className="workout-card">
+              <article
+                className={`workout-card workout-card--${workout.type}`}
+                data-workout-type={workout.type}
+              >
                 <header className="workout-card__header">
                   <div>
+                    {workout.type === "race" && (
+                      <p className="race-badge">
+                        <span aria-hidden="true">🏁</span>
+                        {t("workout.race")}
+                      </p>
+                    )}
                     <p className={`workout-type workout-type--${workout.structure.kind}`}>
                       {formatClassification(workout.structure, t, language)}
                     </p>

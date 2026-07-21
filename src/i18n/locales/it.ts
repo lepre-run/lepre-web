@@ -37,6 +37,7 @@ export const italian = {
       "Gli allenamenti completati appariranno qui dopo la classificazione dei giri.",
   },
   workout: {
+    race: "Gara",
     date: "Data",
     distance: "Distanza",
     lapStructure: "Struttura dei giri",

@@ -35,6 +35,7 @@ type WorkoutDto = Readonly<{
   performedAt: string;
   name: string;
   description: string;
+  type: string;
   sport: string;
   durationSeconds: number;
   elapsedDurationSeconds: number;
