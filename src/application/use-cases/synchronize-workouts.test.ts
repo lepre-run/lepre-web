@@ -110,4 +110,23 @@ describe("SynchronizeWorkouts", () => {
     );
     expect(applySynchronizationBatch).not.toHaveBeenCalled();
   });
+
+  it("preserves the local checkpoint while waiting for a fair turn", async () => {
+    const applySynchronizationBatch = vi.fn();
+    const store = {
+      synchronizationState: vi.fn().mockResolvedValue({ kind: "initial" }),
+      applySynchronizationBatch,
+    } as unknown as LocalStore;
+    const backend = {
+      fetchWorkoutBatch: vi.fn().mockResolvedValue({
+        kind: "queued",
+        retryAfterSeconds: 5,
+      }),
+    } as unknown as BackendGateway;
+
+    await expect(createSynchronizeWorkouts(store, backend)(async () => undefined)).resolves.toEqual(
+      { kind: "queued", retryAfterSeconds: 5 },
+    );
+    expect(applySynchronizationBatch).not.toHaveBeenCalled();
+  });
 });

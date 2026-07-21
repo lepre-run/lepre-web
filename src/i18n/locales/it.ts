@@ -17,6 +17,7 @@ export const italian = {
   notices: {
     reconnectError: "Riconnetti Strava per sincronizzare gli allenamenti.",
     synchronizationError: "Al momento non è possibile sincronizzare gli allenamenti.",
+    queued: "In attesa del turno di sincronizzazione…",
     rateLimited_one:
       "Strava ha raggiunto il limite di richieste. L’importazione è in pausa e riprenderà automaticamente tra circa {{count}} minuto.",
     rateLimited_other:

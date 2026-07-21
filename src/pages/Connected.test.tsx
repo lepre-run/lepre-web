@@ -101,6 +101,17 @@ describe("Connected", () => {
     expect(screen.getByRole("button", { name: "Paused" })).toBeDisabled();
   });
 
+  it("shows that synchronization is waiting for its fair turn", async () => {
+    synchronizeWorkouts.mockResolvedValue({ kind: "queued", retryAfterSeconds: 60 });
+
+    render(<Connected />);
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Waiting for a fair synchronization turn",
+    );
+    expect(screen.getByRole("button", { name: "Paused" })).toBeDisabled();
+  });
+
   it("offers an LLM-ready JSON download for the stored date range", async () => {
     const createObjectUrl = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:workouts");
     const revokeObjectUrl = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);

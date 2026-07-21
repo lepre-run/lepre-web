@@ -117,6 +117,21 @@ async function fetchWorkoutBatch(
     return { kind: "unavailable" };
   }
   if (response.status === 401) return { kind: "reauthorization-required" };
+  if (response.status === 202) {
+    const headerSeconds = Number(response.headers.get("Retry-After"));
+    let bodySeconds = Number.NaN;
+    try {
+      bodySeconds = Number(((await response.json()) as RateLimitDto).retryAfterSeconds);
+    } catch {
+      // The Retry-After header remains the fallback for a malformed response body.
+    }
+    const retryAfterSeconds = Number.isFinite(bodySeconds)
+      ? bodySeconds
+      : Number.isFinite(headerSeconds) && headerSeconds > 0
+        ? headerSeconds
+        : 2;
+    return { kind: "queued", retryAfterSeconds: Math.max(1, retryAfterSeconds) };
+  }
   if (response.status === 429) {
     const headerSeconds = Number(response.headers.get("Retry-After"));
     let bodySeconds = Number.NaN;

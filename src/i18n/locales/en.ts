@@ -15,6 +15,7 @@ export const english = {
   notices: {
     reconnectError: "Reconnect Strava to synchronize workouts.",
     synchronizationError: "Could not synchronize workouts right now.",
+    queued: "Waiting for a fair synchronization turn…",
     rateLimited_one:
       "Strava’s request limit was reached. Import paused and will resume automatically in about {{count}} minute.",
     rateLimited_other:

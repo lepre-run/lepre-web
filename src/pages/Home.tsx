@@ -95,6 +95,10 @@ export function Home(): JSX.Element {
     if (result.kind === "provider-unavailable") {
       setNotice({ kind: "error", message: t("notices.synchronizationError") });
     }
+    if (result.kind === "queued") {
+      setRetryAt(Date.now() + result.retryAfterSeconds * 1_000);
+      setNotice({ kind: "paused", message: t("notices.queued") });
+    }
     if (result.kind === "rate-limited") {
       const minutes = Math.max(1, Math.ceil(result.retryAfterSeconds / 60));
       setRetryAt(Date.now() + result.retryAfterSeconds * 1_000);
