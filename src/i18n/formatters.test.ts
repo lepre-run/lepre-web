@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   formatClassification,
   formatDistance,
+  formatHeartRate,
+  formatHeartRateValue,
   formatLapRole,
   formatWorkoutDate,
 } from "./formatters";
@@ -31,11 +33,20 @@ describe("presentation formatters", () => {
   it("uses English by default", () => {
     expect(formatWorkoutDate("2026-07-15T06:00:00.000Z")).toBe("Jul 15, 2026");
     expect(formatDistance(8_000)).toBe("8.00 km");
+    expect(formatHeartRate(148.2)).toBe("148 bpm");
+    expect(formatHeartRate(null)).toBe("—");
+    expect(formatHeartRateValue(148.2)).toBe("148");
+    expect(formatHeartRateValue(null)).toBe("—");
     expect(formatClassification(intervalWorkout, i18n.t)).toBe(
       "4 × 1 km intervals with 400 m recovery",
     );
     expect(i18n.t("feed.storedCount", { count: 1 })).toBe("1 stored locally");
     expect(i18n.t("feed.storedCount", { count: 5 })).toBe("5 stored locally");
+    expect(i18n.t("workout.averageHeartRateShort")).toBe("avg");
+    expect(i18n.t("workout.maxHeartRateShort")).toBe("max");
+    expect(i18n.t("workout.lapHeartRate", { average: "148", maximum: "176" })).toBe(
+      "Heart rate: 148 bpm average, 176 bpm maximum",
+    );
     expect(formatLapRole({ role: "work", progressiveStage: 3 }, i18n.t)).toBe("Stage 3");
   });
 
@@ -48,6 +59,11 @@ describe("presentation formatters", () => {
     );
     expect(t("feed.storedCount", { count: 1 })).toBe("1 allenamento salvato in locale");
     expect(t("feed.storedCount", { count: 5 })).toBe("5 allenamenti salvati in locale");
+    expect(t("workout.averageHeartRateShort")).toBe("media");
+    expect(t("workout.maxHeartRateShort")).toBe("max");
+    expect(t("workout.lapHeartRate", { average: "148", maximum: "176" })).toBe(
+      "Frequenza cardiaca: media 148 bpm, massima 176 bpm",
+    );
     expect(formatLapRole({ role: "recovery" }, t)).toBe("Recupero");
   });
 });

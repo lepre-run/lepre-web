@@ -18,6 +18,8 @@ function workout(id: string, performedAt: string, type: "workout" | "race" = "wo
     durationSeconds: 660,
     elapsedDurationSeconds: 660,
     distanceMeters: 3_400,
+    averageHeartRateBpm: 151.4,
+    maxHeartRateBpm: 178,
     laps: [
       {
         index: 1,
@@ -25,6 +27,8 @@ function workout(id: string, performedAt: string, type: "workout" | "race" = "wo
         movingDurationSeconds: 240,
         elapsedDurationSeconds: 240,
         distanceMeters: 1_000,
+        averageHeartRateBpm: 153.2,
+        maxHeartRateBpm: 172,
       },
       {
         index: 2,
@@ -75,7 +79,7 @@ describe("workout history export", () => {
     expect(workoutsInRange([included, excluded], range)).toEqual([included]);
     expect(document).toMatchObject({
       format: "lepre.workout-history",
-      version: 2,
+      version: 3,
       generatedAt: "2026-08-01T12:00:00.000Z",
       semantics: {
         containsPlannedWorkouts: false,
@@ -85,6 +89,10 @@ describe("workout history export", () => {
     });
     expect(document.workouts[0].actual.structure).toBe(included.structure);
     expect(document.workouts[0].actual.laps).toBe(included.laps);
+    expect(document.workouts[0].actual.summary.averageHeartRateBpm).toBe(151.4);
+    expect(document.workouts[0].actual.summary.maxHeartRateBpm).toBe(178);
+    expect(document.workouts[0].actual.laps[0].averageHeartRateBpm).toBe(153.2);
+    expect(document.workouts[0].actual.laps[0].maxHeartRateBpm).toBe(172);
     expect(document.workouts[0].type).toBe("race");
     expect(workoutHistoryFilename(range)).toBe("lepre-workouts-2026-07-01-to-2026-07-31.json");
   });

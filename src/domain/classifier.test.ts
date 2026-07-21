@@ -11,6 +11,8 @@ function lap(index: number, distanceMeters: number, paceSecondsPerKilometer: num
     movingDurationSeconds,
     elapsedDurationSeconds: movingDurationSeconds,
     distanceMeters,
+    averageHeartRateBpm: null,
+    maxHeartRateBpm: null,
   };
 }
 

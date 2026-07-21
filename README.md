@@ -12,10 +12,13 @@ complete activity before synchronizing its selected source data into IndexedDB:
   performedAt,
   name,
   description,
+  type,
   sport,
   durationSeconds,
   elapsedDurationSeconds,
   distanceMeters,
+  averageHeartRateBpm,
+  maxHeartRateBpm,
   laps
 }
 ```
@@ -39,8 +42,8 @@ Code follows the Clean Architecture dependency rule:
 - `src/composition` wires concrete adapters into use cases.
 - `src/pages` contains React presentation.
 
-IndexedDB schema version 3 deliberately resets the pre-feed development
-schema; there is no production migration because the app has no users yet.
+IndexedDB schema version 5 deliberately resets cached workout history so the
+current source fields can be reimported from Strava.
 
 ## Local verification
 

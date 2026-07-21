@@ -4,6 +4,8 @@ type MockLap = Readonly<{
   movingDurationSeconds: number;
   elapsedDurationSeconds: number;
   distanceMeters: number;
+  averageHeartRateBpm: number | null;
+  maxHeartRateBpm: number | null;
 }>;
 
 type MockWorkout = Readonly<{
@@ -16,6 +18,8 @@ type MockWorkout = Readonly<{
   durationSeconds: number;
   elapsedDurationSeconds: number;
   distanceMeters: number;
+  averageHeartRateBpm: number | null;
+  maxHeartRateBpm: number | null;
   laps: ReadonlyArray<MockLap>;
 }>;
 
@@ -25,6 +29,8 @@ function lap(
   distanceMeters: number,
   movingDurationSeconds: number,
   stoppedDurationSeconds = 0,
+  averageHeartRateBpm: number | null = 134 + index * 3,
+  maxHeartRateBpm: number | null = averageHeartRateBpm === null ? null : averageHeartRateBpm + 12,
 ): MockLap {
   return {
     index,
@@ -32,6 +38,8 @@ function lap(
     movingDurationSeconds,
     elapsedDurationSeconds: movingDurationSeconds + stoppedDurationSeconds,
     distanceMeters,
+    averageHeartRateBpm,
+    maxHeartRateBpm,
   };
 }
 
@@ -44,6 +52,12 @@ function workout(input: {
   sport?: MockWorkout["sport"];
   laps: ReadonlyArray<MockLap>;
 }): MockWorkout {
+  const recordedHeartRates = input.laps.flatMap((value) =>
+    value.averageHeartRateBpm === null ? [] : [value.averageHeartRateBpm],
+  );
+  const recordedMaximums = input.laps.flatMap((value) =>
+    value.maxHeartRateBpm === null ? [] : [value.maxHeartRateBpm],
+  );
   return {
     id: input.id,
     performedAt: input.performedAt,
@@ -57,6 +71,11 @@ function workout(input: {
       0,
     ),
     distanceMeters: input.laps.reduce((total, value) => total + value.distanceMeters, 0),
+    averageHeartRateBpm:
+      recordedHeartRates.length === 0
+        ? null
+        : recordedHeartRates.reduce((total, value) => total + value, 0) / recordedHeartRates.length,
+    maxHeartRateBpm: recordedMaximums.length === 0 ? null : Math.max(...recordedMaximums),
     laps: input.laps,
   };
 }

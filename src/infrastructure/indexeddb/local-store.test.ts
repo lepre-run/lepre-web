@@ -39,6 +39,8 @@ describe("IndexedDB local store", () => {
       durationSeconds: 2_400,
       elapsedDurationSeconds: 2_450,
       distanceMeters: 8_000,
+      averageHeartRateBpm: 148.2,
+      maxHeartRateBpm: 176,
       laps: [
         {
           index: 1,
@@ -46,6 +48,8 @@ describe("IndexedDB local store", () => {
           movingDurationSeconds: 2_400,
           elapsedDurationSeconds: 2_450,
           distanceMeters: 8_000,
+          averageHeartRateBpm: 148.2,
+          maxHeartRateBpm: 176,
         },
       ],
     });

@@ -1,7 +1,7 @@
 import type { Workout } from "./workout";
 
 export const WORKOUT_HISTORY_EXPORT_FORMAT = "lepre.workout-history" as const;
-export const WORKOUT_HISTORY_EXPORT_VERSION = 2 as const;
+export const WORKOUT_HISTORY_EXPORT_VERSION = 3 as const;
 
 export type WorkoutHistoryRange = Readonly<{
   from: string;
@@ -62,6 +62,8 @@ export function createWorkoutHistoryExport(
           distanceMeters: workout.distanceMeters,
           movingDurationSeconds: workout.durationSeconds,
           elapsedDurationSeconds: workout.elapsedDurationSeconds,
+          averageHeartRateBpm: workout.averageHeartRateBpm,
+          maxHeartRateBpm: workout.maxHeartRateBpm,
         },
         structure: workout.structure,
         laps: workout.laps,

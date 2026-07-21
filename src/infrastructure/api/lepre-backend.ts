@@ -40,12 +40,16 @@ type WorkoutDto = Readonly<{
   durationSeconds: number;
   elapsedDurationSeconds: number;
   distanceMeters: number;
+  averageHeartRateBpm: number | null;
+  maxHeartRateBpm: number | null;
   laps: ReadonlyArray<{
     index: number;
     name: string;
     movingDurationSeconds: number;
     elapsedDurationSeconds: number;
     distanceMeters: number;
+    averageHeartRateBpm: number | null;
+    maxHeartRateBpm: number | null;
   }>;
 }>;
 

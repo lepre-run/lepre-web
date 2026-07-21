@@ -26,6 +26,7 @@
   --color-race-shadow: oklch(50% 0.16 34.02 / 0.16);
   --color-race-badge: oklch(48% 0.17 34.02);
   --color-on-race-badge: oklch(98.92% 0.0054 117.92);
+  --color-heart-rate: oklch(48% 0.17 18);
 
   color: var(--color-carbon);
   background: var(--color-lab-paper);
@@ -36,6 +37,16 @@
 
 * {
   box-sizing: border-box;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 body {
@@ -343,7 +354,9 @@ button:disabled {
 .workout-summary {
   display: flex;
   flex: none;
+  flex-wrap: wrap;
   gap: 1.5rem;
+  justify-content: flex-end;
   margin: 0;
 }
 
@@ -405,7 +418,7 @@ button:disabled {
 
 .lap {
   display: grid;
-  grid-template-columns: 2rem minmax(5rem, 1fr) repeat(3, minmax(4.7rem, auto));
+  grid-template-columns: 2rem minmax(5rem, 1fr) repeat(4, minmax(4.7rem, auto));
   gap: 0.8rem;
   align-items: center;
   border: 1px solid transparent;
@@ -507,6 +520,13 @@ button:disabled {
   text-align: right;
 }
 
+.lap__heart-rate {
+  color: var(--color-heart-rate);
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
 @media (max-width: 680px) {
   .app-header,
   .feed-heading,
@@ -517,6 +537,7 @@ button:disabled {
 
   .workout-summary {
     width: 100%;
+    justify-content: flex-start;
   }
 
   .feed-actions {
@@ -537,6 +558,11 @@ button:disabled {
   }
 
   .lap strong {
-    grid-column: 2 / 5;
+    grid-column: 2 / 3;
+    text-align: left;
+  }
+
+  .lap__heart-rate {
+    grid-column: 3 / 5;
   }
 }

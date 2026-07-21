@@ -11,7 +11,7 @@ import { createUser, type User } from "../../domain/user";
 import { createWorkout, type Workout } from "../../domain/workout";
 
 const DATABASE_NAME = "lepre";
-const DATABASE_VERSION = 4;
+const DATABASE_VERSION = 5;
 const USER_STORE = "user";
 const WORKOUT_STORE = "workouts";
 const META_STORE = "meta";
@@ -41,12 +41,16 @@ type StoredWorkoutRecord = Readonly<{
   durationSeconds: number;
   elapsedDurationSeconds: number;
   distanceMeters: number;
+  averageHeartRateBpm: number | null;
+  maxHeartRateBpm: number | null;
   laps: ReadonlyArray<{
     index: number;
     name: string;
     movingDurationSeconds: number;
     elapsedDurationSeconds: number;
     distanceMeters: number;
+    averageHeartRateBpm: number | null;
+    maxHeartRateBpm: number | null;
   }>;
   structure?: unknown;
 }>;
@@ -132,6 +136,8 @@ function workoutRecord(workout: Workout): StoredWorkoutRecord {
     durationSeconds: workout.durationSeconds,
     elapsedDurationSeconds: workout.elapsedDurationSeconds,
     distanceMeters: workout.distanceMeters,
+    averageHeartRateBpm: workout.averageHeartRateBpm,
+    maxHeartRateBpm: workout.maxHeartRateBpm,
     laps: workout.laps,
     structure: workout.structure,
   };

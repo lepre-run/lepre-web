@@ -46,6 +46,14 @@ export function formatPace(seconds: number, meters: number): string {
   return `${minutes}:${remainder.toString().padStart(2, "0")} /km`;
 }
 
+export function formatHeartRate(beatsPerMinute: number | null): string {
+  return beatsPerMinute === null ? "—" : `${Math.round(beatsPerMinute)} bpm`;
+}
+
+export function formatHeartRateValue(beatsPerMinute: number | null): string {
+  return beatsPerMinute === null ? "—" : Math.round(beatsPerMinute).toString();
+}
+
 function formatStageDistance(meters: number, language: string): string {
   if (meters < 950) return `${decimal(Math.round(meters / 10) * 10, 0, 0, language)} m`;
   const kilometers = meters / 1_000;

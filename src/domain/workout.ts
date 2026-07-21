@@ -14,6 +14,8 @@ export type Lap = Readonly<{
   movingDurationSeconds: number;
   elapsedDurationSeconds: number;
   distanceMeters: number;
+  averageHeartRateBpm: number | null;
+  maxHeartRateBpm: number | null;
 }>;
 
 export type Workout = Readonly<{
@@ -26,6 +28,8 @@ export type Workout = Readonly<{
   durationSeconds: DurationSeconds;
   elapsedDurationSeconds: DurationSeconds;
   distanceMeters: DistanceMeters;
+  averageHeartRateBpm: number | null;
+  maxHeartRateBpm: number | null;
   laps: ReadonlyArray<Lap>;
   structure: ActualWorkoutStructure;
 }>;
@@ -44,12 +48,16 @@ export function createWorkout(input: {
   durationSeconds: number;
   elapsedDurationSeconds: number;
   distanceMeters: number;
+  averageHeartRateBpm?: number | null;
+  maxHeartRateBpm?: number | null;
   laps: ReadonlyArray<{
     index: number;
     name: string;
     movingDurationSeconds: number;
     elapsedDurationSeconds: number;
     distanceMeters: number;
+    averageHeartRateBpm?: number | null;
+    maxHeartRateBpm?: number | null;
   }>;
   structure?: unknown;
 }): CreateWorkoutResult {
@@ -60,6 +68,10 @@ export function createWorkout(input: {
   const validElapsedDuration =
     Number.isInteger(input.elapsedDurationSeconds) && input.elapsedDurationSeconds >= 0;
   const validDistance = Number.isFinite(input.distanceMeters) && input.distanceMeters >= 0;
+  const validHeartRate = (value: number | null | undefined) =>
+    value == null || (Number.isFinite(value) && value >= 0);
+  const validWorkoutHeartRate =
+    validHeartRate(input.averageHeartRateBpm) && validHeartRate(input.maxHeartRateBpm);
   const validType = ["workout", "race"].includes(input.type);
   const validSport = ["Run", "TrailRun", "VirtualRun"].includes(input.sport);
   const validLaps = input.laps.every(
@@ -72,7 +84,9 @@ export function createWorkout(input: {
       Number.isInteger(lap.elapsedDurationSeconds) &&
       lap.elapsedDurationSeconds >= 0 &&
       Number.isFinite(lap.distanceMeters) &&
-      lap.distanceMeters >= 0,
+      lap.distanceMeters >= 0 &&
+      validHeartRate(lap.averageHeartRateBpm) &&
+      validHeartRate(lap.maxHeartRateBpm),
   );
   if (
     id.length === 0 ||
@@ -81,6 +95,7 @@ export function createWorkout(input: {
     !validDuration ||
     !validElapsedDuration ||
     !validDistance ||
+    !validWorkoutHeartRate ||
     !validType ||
     !validSport ||
     !validLaps
@@ -90,7 +105,11 @@ export function createWorkout(input: {
   return {
     kind: "created",
     workout: (() => {
-      const laps = input.laps.map((lap) => ({ ...lap }));
+      const laps = input.laps.map((lap) => ({
+        ...lap,
+        averageHeartRateBpm: lap.averageHeartRateBpm ?? null,
+        maxHeartRateBpm: lap.maxHeartRateBpm ?? null,
+      }));
       return {
         id: id as WorkoutId,
         performedAt: input.performedAt as Instant,
@@ -101,6 +120,8 @@ export function createWorkout(input: {
         durationSeconds: input.durationSeconds as DurationSeconds,
         elapsedDurationSeconds: input.elapsedDurationSeconds as DurationSeconds,
         distanceMeters: input.distanceMeters as DistanceMeters,
+        averageHeartRateBpm: input.averageHeartRateBpm ?? null,
+        maxHeartRateBpm: input.maxHeartRateBpm ?? null,
         laps,
         structure: isCurrentActualWorkoutStructure(input.structure)
           ? input.structure

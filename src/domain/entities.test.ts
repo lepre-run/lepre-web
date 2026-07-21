@@ -33,6 +33,8 @@ describe("domain entities", () => {
       durationSeconds: 3_601,
       elapsedDurationSeconds: 3_700,
       distanceMeters: 10_050.5,
+      averageHeartRateBpm: 148.2,
+      maxHeartRateBpm: 176,
       laps: [
         {
           index: 1,
@@ -40,6 +42,8 @@ describe("domain entities", () => {
           movingDurationSeconds: 3_601,
           elapsedDurationSeconds: 3_700,
           distanceMeters: 10_050.5,
+          averageHeartRateBpm: 148.2,
+          maxHeartRateBpm: 176,
         },
       ],
     });
@@ -55,6 +59,8 @@ describe("domain entities", () => {
         durationSeconds: 3_601,
         elapsedDurationSeconds: 3_700,
         distanceMeters: 10_050.5,
+        averageHeartRateBpm: 148.2,
+        maxHeartRateBpm: 176,
         laps: [
           {
             index: 1,
@@ -62,6 +68,8 @@ describe("domain entities", () => {
             movingDurationSeconds: 3_601,
             elapsedDurationSeconds: 3_700,
             distanceMeters: 10_050.5,
+            averageHeartRateBpm: 148.2,
+            maxHeartRateBpm: 176,
           },
         ],
         structure: {

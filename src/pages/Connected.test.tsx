@@ -14,6 +14,8 @@ const workout = vi.hoisted(() => ({
   durationSeconds: 2_400,
   elapsedDurationSeconds: 2_450,
   distanceMeters: 8_000,
+  averageHeartRateBpm: 148.2,
+  maxHeartRateBpm: 176,
   laps: [
     {
       index: 1,
@@ -21,6 +23,8 @@ const workout = vi.hoisted(() => ({
       movingDurationSeconds: 2_400,
       elapsedDurationSeconds: 2_450,
       distanceMeters: 8_000,
+      averageHeartRateBpm: 148.2,
+      maxHeartRateBpm: 176,
     },
   ],
   structure: {
@@ -80,6 +84,9 @@ describe("Connected", () => {
     expect(screen.getByText("Race")).toBeInTheDocument();
     expect(card).toHaveClass("workout-card--race");
     expect(card).toHaveAttribute("data-workout-type", "race");
+    expect(card).toHaveTextContent("148 bpm");
+    expect(card).toHaveTextContent("176 bpm");
+    expect(card).toHaveTextContent("148 avg · 176 max");
     expect(screen.getByText("Run").closest("li")).toHaveAttribute("data-lap-role", "main");
   });
 

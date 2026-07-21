@@ -22,6 +22,8 @@ import {
   formatClassification,
   formatDistance,
   formatDuration,
+  formatHeartRate,
+  formatHeartRateValue,
   formatLapRole,
   formatPace,
   formatWorkoutDate,
@@ -334,6 +336,18 @@ export function Home(): JSX.Element {
                       <dt>{t("workout.distance")}</dt>
                       <dd>{formatDistance(workout.distanceMeters, language)}</dd>
                     </div>
+                    {workout.averageHeartRateBpm !== null && (
+                      <div>
+                        <dt>{t("workout.averageHeartRate")}</dt>
+                        <dd>{formatHeartRate(workout.averageHeartRateBpm)}</dd>
+                      </div>
+                    )}
+                    {workout.maxHeartRateBpm !== null && (
+                      <div>
+                        <dt>{t("workout.maxHeartRate")}</dt>
+                        <dd>{formatHeartRate(workout.maxHeartRateBpm)}</dd>
+                      </div>
+                    )}
                   </dl>
                 </header>
                 {workout.description.trim().length > 0 && (
@@ -356,6 +370,8 @@ export function Home(): JSX.Element {
                       <ol className="lap-list">
                         {workout.laps.map((lap) => {
                           const appearance = appearanceForLap(workout, lap);
+                          const averageHeartRate = formatHeartRateValue(lap.averageHeartRateBpm);
+                          const maxHeartRate = formatHeartRateValue(lap.maxHeartRateBpm);
                           const progressiveClass =
                             appearance.progressiveIntensity === undefined
                               ? ""
@@ -377,6 +393,18 @@ export function Home(): JSX.Element {
                               <strong>
                                 {formatPace(lap.movingDurationSeconds, lap.distanceMeters)}
                               </strong>
+                              <span className="lap__heart-rate">
+                                <span className="visually-hidden">
+                                  {t("workout.lapHeartRate", {
+                                    average: averageHeartRate,
+                                    maximum: maxHeartRate,
+                                  })}
+                                </span>
+                                <span aria-hidden="true">
+                                  ♥ {averageHeartRate} {t("workout.averageHeartRateShort")} ·{" "}
+                                  {maxHeartRate} {t("workout.maxHeartRateShort")}
+                                </span>
+                              </span>
                             </li>
                           );
                         })}
