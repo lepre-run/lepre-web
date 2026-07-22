@@ -101,7 +101,9 @@ export const italian = {
     cooldown: "Defaticamento",
     main: "Corsa",
     unknown: "Non definito",
-    stage: "Fase {{stage}}",
+    stage: "Lap {{stage}}",
+    interval: "Ripetuta {{repetition}}",
+    recoveryNumber: "Recupero {{repetition}}",
   },
   download: {
     eyebrow: "Storico portabile",
@@ -116,7 +118,11 @@ export const italian = {
   },
   classification: {
     intervals: "Ripetute: {{repetitions}} × {{work}}, recupero {{recovery}}",
+    intervalsBadge: "Ripetute",
+    intervalsBadgeWithCount_one: "{{count}} ripetuta",
+    intervalsBadgeWithCount_other: "{{count}} ripetute",
     progressive: "Progressivo in {{stageCount}} fasi",
+    progressiveBadge: "Progressivo",
     tempo: "Corsa a ritmo medio di {{distance}}",
     repeatedHills: "{{repetitions}} ripetute in salita con recupero in corsa lenta",
     steadyStructuredRun: "Corsa strutturata a ritmo costante",

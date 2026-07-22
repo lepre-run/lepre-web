@@ -23,7 +23,7 @@
   --radius-control: 8px;
   --shadow-card: 0 2px 10px var(--color-shadow);
   --font-display: "Avenir Next", "Segoe UI Variable Display", "Helvetica Neue", sans-serif;
-  --font-free-run: "Barlow", "Avenir Next", "Segoe UI", sans-serif;
+  --font-journal: "Barlow", "Avenir Next", "Segoe UI", sans-serif;
   --font-data: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 
   color: var(--color-carbon);
@@ -1394,19 +1394,31 @@ input:focus-visible {
   }
 }
 
-/* Free runs use a journal-like card rather than the structured workout anatomy. */
+/* Journal cards combine hand-drawn outlines with clear, readable workout data. */
 
 .workout-card--free-run {
+  --color-card-accent: oklch(59% 0.15 145);
+}
+
+.workout-card--progressive {
+  --color-card-accent: var(--color-sunrise);
+}
+
+.workout-card--intervals {
+  --color-card-accent: oklch(57% 0.15 250);
+}
+
+.workout-card--journal {
   position: relative;
   overflow: visible;
   margin-top: 1.35rem;
   border: 0;
   border-radius: 16px;
-  font-family: var(--font-free-run);
+  font-family: var(--font-journal);
   box-shadow: 0 3px 12px var(--color-shadow);
 }
 
-.free-run-card__outline {
+.journal-card__outline {
   position: absolute;
   z-index: 1;
   inset: 0;
@@ -1416,15 +1428,15 @@ input:focus-visible {
   pointer-events: none;
 }
 
-.free-run-card__outline path {
+.journal-card__outline path {
   fill: none;
-  stroke: var(--color-free-run, oklch(59% 0.15 145));
+  stroke: var(--color-card-accent);
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2;
 }
 
-.free-run-card__type {
+.journal-card__type {
   position: absolute;
   z-index: 1;
   top: -1.35rem;
@@ -1434,13 +1446,13 @@ input:focus-visible {
   height: 2.7rem;
   place-items: center;
   color: var(--color-carbon);
-  font-family: var(--font-free-run);
+  font-family: var(--font-journal);
   font-size: 1rem;
   font-weight: 400;
   letter-spacing: -0.015em;
 }
 
-.free-run-card__type svg {
+.journal-card__type svg {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -1448,35 +1460,35 @@ input:focus-visible {
   overflow: visible;
 }
 
-.free-run-card__type path {
-  fill: var(--color-free-run, oklch(59% 0.15 145));
+.journal-card__type path {
+  fill: var(--color-card-accent);
 }
 
-.free-run-card__type span {
+.journal-card__type span {
   position: relative;
 }
 
-.workout-card--free-run .workout-card__header {
+.workout-card--journal .workout-card__header {
   grid-template-columns: minmax(15rem, 0.8fr) minmax(28rem, 1.2fr);
   column-gap: clamp(2rem, 5vw, 4.5rem);
   padding: 2.8rem 2rem 1.8rem;
 }
 
-.workout-card--free-run .workout-card__topline {
+.workout-card--journal .workout-card__topline {
   grid-column: 1;
 }
 
-.workout-card--free-run h2 {
+.workout-card--journal h2 {
   grid-column: 1;
   grid-row: 2;
   margin-top: 0.45rem;
-  font-family: var(--font-free-run);
+  font-family: var(--font-journal);
   font-size: clamp(1.65rem, 3vw, 2.25rem);
   font-weight: 700;
   letter-spacing: -0.025em;
 }
 
-.workout-card--free-run .workout-summary--complete {
+.workout-card--journal .workout-summary--complete {
   display: grid;
   grid-column: 2;
   grid-row: 1 / span 5;
@@ -1486,7 +1498,7 @@ input:focus-visible {
   margin: 0;
 }
 
-.workout-card--free-run .workout-metric {
+.workout-card--journal .workout-metric {
   display: grid;
   min-width: 0;
   grid-template-columns: 2.4rem minmax(0, 1fr);
@@ -1496,21 +1508,21 @@ input:focus-visible {
   padding: 0;
 }
 
-.workout-card--free-run .workout-metric dt {
+.workout-card--journal .workout-metric dt {
   display: grid;
   place-items: center;
-  color: var(--color-free-run, oklch(59% 0.15 145));
+  color: var(--color-card-accent);
 }
 
-.workout-card--free-run .workout-metric svg {
+.workout-card--journal .workout-metric svg {
   width: 2rem;
   height: 2rem;
 }
 
-.workout-card--free-run .workout-metric dd {
+.workout-card--journal .workout-metric dd {
   margin: 0;
   color: var(--color-carbon);
-  font-family: var(--font-free-run);
+  font-family: var(--font-journal);
   font-size: clamp(1.7rem, 3.7vw, 2.75rem);
   font-weight: 400;
   letter-spacing: -0.035em;
@@ -1518,30 +1530,219 @@ input:focus-visible {
   white-space: nowrap;
 }
 
-.workout-card--free-run .workout-description {
+.workout-card--journal .workout-description {
   grid-column: 1;
   grid-row: 3;
   margin-top: 0.8rem;
 }
 
-.workout-card--free-run .workout-private-description {
+.workout-card--journal .workout-private-description {
   grid-column: 1;
   grid-row: 4;
 }
 
-.workout-card--free-run .workout-private-description > span {
+.workout-card--journal .workout-private-description > span {
   display: flex;
   align-items: center;
   gap: 0.35rem;
 }
 
+.workout-card--progressive .workout-card__structure,
+.workout-card--intervals .workout-card__structure {
+  border-top-color: color-mix(in oklch, var(--color-card-accent) 34%, var(--color-line));
+  background: transparent;
+  padding-inline: 2rem;
+}
+
+.workout-card--progressive .execution-section__heading h3,
+.workout-card--progressive .stage-row__identity span,
+.workout-card--intervals .stage-row__identity span {
+  font-family: var(--font-journal);
+}
+
+.workout-card--progressive .stage-row__bar,
+.workout-card--intervals .stage-row__bar {
+  background: var(--color-card-accent);
+}
+
+.workout-card--intervals .interval-repetition-matrix {
+  border-block: 0;
+  background: transparent;
+}
+
+.workout-card--intervals .repetition-row {
+  grid-template-columns: 5rem minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 2.6rem);
+  border-bottom-color: color-mix(in oklch, var(--color-card-accent) 22%, var(--color-line));
+  padding: 1rem 0.5rem;
+}
+
+.workout-card--intervals .repetition-cell--work,
+.workout-card--intervals .repetition-cell--recovery {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.35rem 0;
+}
+
+.workout-card--intervals .repetition-cell--work::before {
+  display: none;
+}
+
+.workout-card--intervals .repetition-row__identity {
+  justify-items: start;
+  padding: 0;
+}
+
+.workout-card--intervals .repetition-row__identity strong {
+  display: grid;
+  width: 2.4rem;
+  height: 2.15rem;
+  place-items: center;
+  border: 2px solid var(--color-card-accent);
+  border-radius: 48% 54% 46% 52%;
+  line-height: 1;
+  transform: rotate(-1.5deg);
+}
+
+.workout-card--intervals .repetition-row:nth-child(even) .repetition-row__identity strong {
+  border-radius: 55% 45% 52% 48%;
+  transform: rotate(1deg);
+}
+
+.workout-card--intervals .repetition-cell strong {
+  grid-row: 2;
+}
+
+.workout-card--intervals .interval-cell__stroke {
+  width: 72%;
+  height: 0.55rem;
+  grid-column: 1;
+  grid-row: 3;
+  transform: rotate(-0.6deg);
+}
+
+.workout-card--intervals .interval-cell__stroke path {
+  fill: none;
+  stroke: var(--color-card-accent);
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.workout-card--intervals .repetition-cell--recovery .interval-cell__stroke {
+  width: 46%;
+  color: color-mix(in oklch, var(--color-card-accent) 44%, var(--color-line-strong));
+  transform: rotate(0.7deg);
+}
+
+.workout-card--intervals .repetition-cell--recovery .interval-cell__stroke path {
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+.workout-card--intervals .interval-cell__details {
+  grid-column: 1;
+  grid-row: 4;
+}
+
+.workout-card--intervals .repetition-cell__heart-rate {
+  grid-row: 2 / 5;
+}
+
+.workout-card--intervals .interval-boundary-laps + .interval-repetition-matrix,
+.workout-card--intervals .interval-repetition-matrix + .interval-boundary-laps {
+  margin-top: 1rem;
+}
+
+.workout-card--intervals .repetition-matrix__labels,
+.workout-card--intervals .repetition-row__identity span,
+.workout-card--intervals .repetition-cell__label,
+.workout-card--intervals .repetition-cell__heart-rate,
+.workout-card--intervals .stage-row__identity small,
+.workout-card--intervals .stage-row__heart-rate {
+  font-family: var(--font-journal);
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
+.workout-card--intervals .repetition-matrix__labels {
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.workout-card--intervals .repetition-row__identity strong {
+  font-family: var(--font-journal);
+  font-size: 1.3rem;
+}
+
+.workout-card--intervals .repetition-row__identity span {
+  font-size: 0.72rem;
+}
+
+.workout-card--intervals .repetition-cell__label {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+
+.workout-card--intervals .repetition-cell__label small {
+  font: inherit;
+  opacity: 0.72;
+}
+
+.workout-card--intervals .interval-cell__role-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: none;
+  color: var(--color-card-accent);
+}
+
+.workout-card--intervals .interval-cell__role-icon path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.workout-card--intervals .repetition-cell--recovery .interval-cell__role-icon,
+.workout-card--intervals .repetition-cell--recovery .repetition-cell__label {
+  color: color-mix(in oklch, var(--color-card-accent) 42%, var(--color-instrument));
+}
+
+.workout-card--intervals .repetition-cell--recovery strong {
+  color: color-mix(in oklch, var(--color-carbon) 78%, var(--color-instrument));
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.workout-card--intervals .repetition-cell--recovery .interval-cell__details,
+.workout-card--intervals .repetition-cell--recovery .repetition-cell__heart-rate {
+  color: var(--color-instrument);
+  opacity: 0.82;
+}
+
+.workout-card--intervals .repetition-cell strong {
+  font-family: var(--font-journal);
+  font-size: 1.15rem;
+}
+
+.workout-card--intervals .repetition-cell > span:not(.repetition-cell__label),
+.workout-card--intervals .stage-row__identity small,
+.workout-card--intervals .stage-row__heart-rate {
+  font-size: 0.74rem;
+}
+
 @media (max-width: 760px) {
-  .workout-card--free-run {
+  .workout-card--journal {
     margin-top: 1.15rem;
     border-radius: 14px;
   }
 
-  .free-run-card__type {
+  .journal-card__type {
     top: -1.15rem;
     left: 1.1rem;
     width: 8.75rem;
@@ -1549,37 +1750,58 @@ input:focus-visible {
     font-size: 0.9rem;
   }
 
-  .workout-card--free-run .workout-card__header {
+  .workout-card--journal .workout-card__header {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     padding: 2.35rem 1.1rem 1.25rem;
   }
 
-  .workout-card--free-run .workout-card__topline,
-  .workout-card--free-run h2,
-  .workout-card--free-run .workout-description,
-  .workout-card--free-run .workout-private-description,
-  .workout-card--free-run .workout-summary--complete {
+  .workout-card--journal .workout-card__topline,
+  .workout-card--journal h2,
+  .workout-card--journal .workout-description,
+  .workout-card--journal .workout-private-description,
+  .workout-card--journal .workout-summary--complete {
     grid-column: 1;
   }
 
-  .workout-card--free-run .workout-summary--complete {
+  .workout-card--journal .workout-summary--complete {
     grid-row: 5;
     gap: 1rem 0.8rem;
     margin-top: 1.25rem;
   }
 
-  .workout-card--free-run .workout-metric {
+  .workout-card--journal .workout-metric {
     grid-template-columns: 1.8rem minmax(0, 1fr);
     gap: 0.45rem;
   }
 
-  .workout-card--free-run .workout-metric svg {
+  .workout-card--journal .workout-metric svg {
     width: 1.5rem;
     height: 1.5rem;
   }
 
-  .workout-card--free-run .workout-metric dd {
+  .workout-card--journal .workout-metric dd {
     font-size: clamp(1.25rem, 7vw, 1.75rem);
+  }
+
+  .workout-card--progressive .workout-card__structure,
+  .workout-card--intervals .workout-card__structure {
+    padding-inline: 1.1rem;
+  }
+
+  .workout-card--intervals .repetition-row {
+    grid-template-columns: 2.7rem minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.45rem;
+    padding: 0.8rem 0;
+  }
+
+  .workout-card--intervals .repetition-row__identity strong {
+    width: 2.1rem;
+    height: 1.9rem;
+    font-size: 1.05rem;
+  }
+
+  .workout-card--intervals .repetition-cell__label {
+    font-size: 0.7rem;
   }
 }

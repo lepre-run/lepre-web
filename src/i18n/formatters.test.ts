@@ -47,7 +47,7 @@ describe("presentation formatters", () => {
     expect(i18n.t("workout.lapHeartRate", { average: "148", maximum: "176" })).toBe(
       "Heart rate: 148 bpm average, 176 bpm maximum",
     );
-    expect(formatLapRole({ role: "work", progressiveStage: 3 }, i18n.t)).toBe("Stage 3");
+    expect(formatLapRole({ role: "work", progressiveStage: 3 }, i18n.t)).toBe("Lap 3");
   });
 
   it("can render the same presentation in Italian", () => {
@@ -68,6 +68,7 @@ describe("presentation formatters", () => {
     expect(t("workout.lapCount", { count: 1 })).toBe("1 lap");
     expect(t("workout.lapCount", { count: 4 })).toBe("4 lap");
     expect(t("workout.lapNumber", { number: 2 })).toBe("Lap 2");
+    expect(formatLapRole({ role: "work", progressiveStage: 3 }, t)).toBe("Lap 3");
     expect(formatLapRole({ role: "recovery" }, t)).toBe("Recupero");
   });
 });

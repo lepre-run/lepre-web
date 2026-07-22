@@ -13,13 +13,16 @@ import {
   formatWorkoutDate,
 } from "../i18n/formatters";
 import { FreeRunCard, freeRunCardPropsFromWorkout } from "./workout-cards/FreeRunCard";
+import { IntervalRunCard, intervalRunCardPropsFromWorkout } from "./workout-cards/IntervalRunCard";
+import {
+  ProgressiveRunCard,
+  progressiveRunCardPropsFromWorkout,
+} from "./workout-cards/ProgressiveRunCard";
 
 type Repetition = Readonly<{ work: Lap; recovery?: Lap }>;
 type StageStyle = CSSProperties & Readonly<{ "--stage-progress"?: string }>;
 
 const STRUCTURED_KINDS = new Set<Workout["structure"]["kind"]>([
-  "intervals",
-  "progressive",
   "tempo",
   "repeated-hills",
   "steady-structured-run",
@@ -293,8 +296,7 @@ function StructuredContent({
   workout,
   language,
 }: Readonly<{ workout: Workout; language: string }>): JSX.Element {
-  const paired =
-    workout.structure.kind === "intervals" || workout.structure.kind === "repeated-hills";
+  const paired = workout.structure.kind === "repeated-hills";
   return (
     <div className="workout-card__structure">
       {paired ? (
@@ -312,6 +314,14 @@ export function WorkoutCard({ workout }: Readonly<{ workout: Workout }>): JSX.El
 
   if (workout.structure.kind === "free-run") {
     return <FreeRunCard {...freeRunCardPropsFromWorkout(workout)} />;
+  }
+
+  if (workout.structure.kind === "progressive") {
+    return <ProgressiveRunCard {...progressiveRunCardPropsFromWorkout(workout)} />;
+  }
+
+  if (workout.structure.kind === "intervals") {
+    return <IntervalRunCard {...intervalRunCardPropsFromWorkout(workout)} />;
   }
 
   const language = i18n.resolvedLanguage ?? i18n.language;

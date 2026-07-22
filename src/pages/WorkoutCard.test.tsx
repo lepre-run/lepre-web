@@ -42,7 +42,7 @@ function workout(laps: ReadonlyArray<Lap>, name = "Original activity"): Workout 
 }
 
 describe("WorkoutCard", () => {
-  it("pairs each interval with its following recovery", () => {
+  it("shows each interval beside its recovery", () => {
     const value = workout([
       lap(1, "Warm up", 2_000, 660),
       lap(2, "Rep 1", 1_000, 240),
@@ -56,12 +56,19 @@ describe("WorkoutCard", () => {
     render(<WorkoutCard workout={value} />);
 
     expect(screen.getByRole("heading", { name: "Original activity" })).toBeInTheDocument();
-    expect(screen.getByText("3 × 1 km intervals with 400 m recovery")).toBeInTheDocument();
-    const repetitions = screen.getAllByTestId("repetition-row");
+    expect(screen.getByText("Intervals")).toBeInTheDocument();
+    const boundaries = screen.getAllByTestId("interval-boundary-lap-row");
+    expect(boundaries).toHaveLength(2);
+    expect(within(boundaries[0]).getByText("Warm-up")).toBeInTheDocument();
+    expect(within(boundaries[1]).getByText("Cool-down")).toBeInTheDocument();
+
+    const repetitions = screen.getAllByTestId("interval-repetition-row");
     expect(repetitions).toHaveLength(3);
-    expect(within(repetitions[0]).getByText("Laps 2 + 3")).toBeInTheDocument();
-    expect(within(repetitions[1]).getByText("Laps 4 + 5")).toBeInTheDocument();
-    expect(within(repetitions[2]).getByText("Lap 6")).toBeInTheDocument();
+    expect(within(repetitions[0]).getByText(/Interval 1/)).toBeInTheDocument();
+    expect(within(repetitions[0]).getByText(/Recovery 1/)).toBeInTheDocument();
+    expect(within(repetitions[1]).getByText(/Interval 2/)).toBeInTheDocument();
+    expect(within(repetitions[1]).getByText(/Recovery 2/)).toBeInTheDocument();
+    expect(within(repetitions[2]).getByText(/Interval 3/)).toBeInTheDocument();
     expect(within(repetitions[2]).getByText("No recovery lap")).toBeInTheDocument();
     expect(screen.queryByText("Session structure")).not.toBeInTheDocument();
   });
@@ -119,8 +126,9 @@ describe("WorkoutCard", () => {
     render(<WorkoutCard workout={value} />);
 
     expect(screen.getByRole("heading", { name: "Original activity" })).toBeInTheDocument();
-    expect(screen.getByText("4-stage progressive run")).toBeInTheDocument();
-    expect(screen.getAllByTestId("stage-row")).toHaveLength(4);
-    expect(screen.getByText("Slower → faster")).toBeInTheDocument();
+    expect(screen.getByText("Progressive")).toBeInTheDocument();
+    expect(screen.getAllByTestId("progressive-lap-row")).toHaveLength(4);
+    expect(screen.queryByText("Stage execution")).not.toBeInTheDocument();
+    expect(screen.queryByText("Slower → faster")).not.toBeInTheDocument();
   });
 });

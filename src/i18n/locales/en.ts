@@ -98,7 +98,9 @@ export const english = {
     cooldown: "Cool-down",
     main: "Run",
     unknown: "Unknown",
-    stage: "Stage {{stage}}",
+    stage: "Lap {{stage}}",
+    interval: "Interval {{repetition}}",
+    recoveryNumber: "Recovery {{repetition}}",
   },
   download: {
     eyebrow: "Portable history",
@@ -113,7 +115,11 @@ export const english = {
   },
   classification: {
     intervals: "{{repetitions}} × {{work}} intervals with {{recovery}} recovery",
+    intervalsBadge: "Intervals",
+    intervalsBadgeWithCount_one: "{{count}} interval",
+    intervalsBadgeWithCount_other: "{{count}} intervals",
     progressive: "{{stageCount}}-stage progressive run",
+    progressiveBadge: "Progressive",
     tempo: "{{distance}} tempo",
     repeatedHills: "{{repetitions}} repeated hills with jog recovery",
     steadyStructuredRun: "Steady structured run",

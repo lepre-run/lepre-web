@@ -5,22 +5,19 @@ import { MapIcon } from "react-doodle-icons/icons/MapIcon";
 import { StopwatchIcon } from "react-doodle-icons/icons/StopwatchIcon";
 import { TrendUpIcon } from "react-doodle-icons/icons/TrendUpIcon";
 import { useTranslation } from "react-i18next";
-import type { DistanceMeters, DurationSeconds } from "../../domain/identity";
 import { formatDistance, formatDuration, formatHeartRate } from "../../i18n/formatters";
+import type { CommonWorkoutCardProps, Measurement } from "./workoutCardData";
 
-export type Measurement<Value> =
-  | Readonly<{ kind: "recorded"; value: Value }>
-  | Readonly<{ kind: "unavailable" }>;
-
-export type CommonWorkoutCardProps = Readonly<{
-  title: string;
-  description: string | null;
-  privateDescription: string | null;
-  distance: DistanceMeters;
-  time: DurationSeconds;
-  elevation: Measurement<number>;
-  averageHeartRate: Measurement<number>;
-}>;
+export type WorkoutCardSummaryProps = Pick<
+  CommonWorkoutCardProps,
+  | "title"
+  | "description"
+  | "privateDescription"
+  | "distance"
+  | "time"
+  | "elevation"
+  | "averageHeartRate"
+>;
 
 function formattedMeasurement<Value>(
   measurement: Measurement<Value>,
@@ -57,7 +54,7 @@ export function WorkoutCardSummary({
   time,
   elevation,
   averageHeartRate,
-}: CommonWorkoutCardProps): JSX.Element {
+}: WorkoutCardSummaryProps): JSX.Element {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage ?? i18n.language;
 

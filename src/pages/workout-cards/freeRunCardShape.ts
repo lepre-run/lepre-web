@@ -43,17 +43,17 @@ export function freeRunCardShape(seed: number): FreeRunCardShape {
   const badgeRandom = seededRandom(seed ^ 0x9e3779b9);
 
   const outlinePath = [
-    `M ${vary(outlineRandom, 29, 3)} ${vary(outlineRandom, 7, 2)}`,
-    `C ${vary(outlineRandom, 176, 5)} ${vary(outlineRandom, 4, 2.5)}, ${vary(outlineRandom, 338, 5)} ${vary(outlineRandom, 10, 2.5)}, ${vary(outlineRandom, 505, 5)} ${vary(outlineRandom, 6, 2.5)}`,
-    `C ${vary(outlineRandom, 676, 5)} ${vary(outlineRandom, 2, 2)}, ${vary(outlineRandom, 837, 5)} ${vary(outlineRandom, 10, 2.5)}, ${vary(outlineRandom, 970, 3)} ${vary(outlineRandom, 7, 2)}`,
-    `Q ${vary(outlineRandom, 993, 2)} ${vary(outlineRandom, 8, 2)}, ${vary(outlineRandom, 994, 2)} ${vary(outlineRandom, 31, 3)}`,
-    `C ${vary(outlineRandom, 998, 2)} ${vary(outlineRandom, 73, 4)}, ${vary(outlineRandom, 991, 2)} ${vary(outlineRandom, 119, 4)}, ${vary(outlineRandom, 995, 2)} ${vary(outlineRandom, 168, 3)}`,
-    `Q ${vary(outlineRandom, 994, 2)} ${vary(outlineRandom, 194, 2)}, ${vary(outlineRandom, 965, 3)} ${vary(outlineRandom, 194, 2)}`,
-    `C ${vary(outlineRandom, 786, 5)} ${vary(outlineRandom, 198, 2)}, ${vary(outlineRandom, 611, 5)} ${vary(outlineRandom, 190, 2.5)}, ${vary(outlineRandom, 431, 5)} ${vary(outlineRandom, 195, 2.5)}`,
-    `C ${vary(outlineRandom, 256, 5)} ${vary(outlineRandom, 199, 2)}, ${vary(outlineRandom, 118, 5)} ${vary(outlineRandom, 191, 2.5)}, ${vary(outlineRandom, 32, 3)} ${vary(outlineRandom, 195, 2)}`,
-    `Q ${vary(outlineRandom, 6, 2)} ${vary(outlineRandom, 194, 2)}, ${vary(outlineRandom, 7, 2)} ${vary(outlineRandom, 168, 3)}`,
-    `C ${vary(outlineRandom, 3, 2)} ${vary(outlineRandom, 121, 4)}, ${vary(outlineRandom, 10, 2)} ${vary(outlineRandom, 72, 4)}, ${vary(outlineRandom, 7, 2)} ${vary(outlineRandom, 32, 3)}`,
-    `Q ${vary(outlineRandom, 7, 2)} ${vary(outlineRandom, 9, 2)}, ${vary(outlineRandom, 29, 3)} ${vary(outlineRandom, 7, 2)} Z`,
+    `M ${vary(outlineRandom, 29, 3)} ${vary(outlineRandom, 14, 3)}`,
+    `C ${vary(outlineRandom, 176, 5)} ${vary(outlineRandom, 8, 4)}, ${vary(outlineRandom, 338, 5)} ${vary(outlineRandom, 20, 4)}, ${vary(outlineRandom, 505, 5)} ${vary(outlineRandom, 12, 4)}`,
+    `C ${vary(outlineRandom, 676, 5)} ${vary(outlineRandom, 5, 3)}, ${vary(outlineRandom, 837, 5)} ${vary(outlineRandom, 20, 4)}, ${vary(outlineRandom, 970, 3)} ${vary(outlineRandom, 14, 3)}`,
+    `Q ${vary(outlineRandom, 993, 2)} ${vary(outlineRandom, 16, 3)}, ${vary(outlineRandom, 994, 2)} ${vary(outlineRandom, 55, 5)}`,
+    `C ${vary(outlineRandom, 998, 2)} ${vary(outlineRandom, 280, 15)}, ${vary(outlineRandom, 991, 2)} ${vary(outlineRandom, 650, 15)}, ${vary(outlineRandom, 995, 2)} ${vary(outlineRandom, 945, 8)}`,
+    `Q ${vary(outlineRandom, 994, 2)} ${vary(outlineRandom, 986, 4)}, ${vary(outlineRandom, 965, 3)} ${vary(outlineRandom, 986, 4)}`,
+    `C ${vary(outlineRandom, 786, 5)} ${vary(outlineRandom, 996, 3)}, ${vary(outlineRandom, 611, 5)} ${vary(outlineRandom, 975, 4)}, ${vary(outlineRandom, 431, 5)} ${vary(outlineRandom, 990, 4)}`,
+    `C ${vary(outlineRandom, 256, 5)} ${vary(outlineRandom, 998, 3)}, ${vary(outlineRandom, 118, 5)} ${vary(outlineRandom, 978, 4)}, ${vary(outlineRandom, 32, 3)} ${vary(outlineRandom, 990, 4)}`,
+    `Q ${vary(outlineRandom, 6, 2)} ${vary(outlineRandom, 986, 4)}, ${vary(outlineRandom, 7, 2)} ${vary(outlineRandom, 945, 8)}`,
+    `C ${vary(outlineRandom, 3, 2)} ${vary(outlineRandom, 700, 15)}, ${vary(outlineRandom, 10, 2)} ${vary(outlineRandom, 300, 15)}, ${vary(outlineRandom, 7, 2)} ${vary(outlineRandom, 55, 5)}`,
+    `Q ${vary(outlineRandom, 7, 2)} ${vary(outlineRandom, 18, 3)}, ${vary(outlineRandom, 29, 3)} ${vary(outlineRandom, 14, 3)} Z`,
   ].join(" ");
 
   const badgePath = [
