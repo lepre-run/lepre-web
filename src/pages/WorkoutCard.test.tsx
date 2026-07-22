@@ -55,16 +55,15 @@ describe("WorkoutCard", () => {
 
     render(<WorkoutCard workout={value} />);
 
-    expect(
-      screen.getByRole("heading", { name: "3 × 1 km intervals with 400 m recovery" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Original activity" })).toBeInTheDocument();
+    expect(screen.getByText("3 × 1 km intervals with 400 m recovery")).toBeInTheDocument();
     const repetitions = screen.getAllByTestId("repetition-row");
     expect(repetitions).toHaveLength(3);
     expect(within(repetitions[0]).getByText("Laps 2 + 3")).toBeInTheDocument();
     expect(within(repetitions[1]).getByText("Laps 4 + 5")).toBeInTheDocument();
     expect(within(repetitions[2]).getByText("Lap 6")).toBeInTheDocument();
     expect(within(repetitions[2]).getByText("No recovery lap")).toBeInTheDocument();
-    expect(screen.getByText("Session structure")).toBeInTheDocument();
+    expect(screen.queryByText("Session structure")).not.toBeInTheDocument();
   });
 
   it("keeps the dominant one-lap free run compact", () => {
@@ -93,6 +92,7 @@ describe("WorkoutCard", () => {
 
     const summary = screen.getByText("Expand").closest("summary");
     if (!summary) throw new Error("expected source-evidence summary");
+    expect(summary.closest("details")).not.toHaveAttribute("open");
     expect(within(summary).getByText("Expand")).toBeInTheDocument();
 
     fireEvent.click(summary);
@@ -118,7 +118,8 @@ describe("WorkoutCard", () => {
 
     render(<WorkoutCard workout={value} />);
 
-    expect(screen.getByRole("heading", { name: "4-stage progressive run" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Original activity" })).toBeInTheDocument();
+    expect(screen.getByText("4-stage progressive run")).toBeInTheDocument();
     expect(screen.getAllByTestId("stage-row")).toHaveLength(4);
     expect(screen.getByText("Slower → faster")).toBeInTheDocument();
   });

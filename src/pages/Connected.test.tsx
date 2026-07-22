@@ -82,6 +82,7 @@ describe("Connected", () => {
     expect(screen.getByText("Free run")).toBeInTheDocument();
     expect(screen.getByText("Track session")).toBeInTheDocument();
     expect(screen.getByText("Race")).toBeInTheDocument();
+    expect(screen.queryByTestId("training-rhythm")).not.toBeInTheDocument();
     expect(card).toHaveAttribute("data-workout-type", "race");
     expect(card).toHaveTextContent("148 bpm");
     expect(card).not.toHaveTextContent("176 bpm");

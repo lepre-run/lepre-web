@@ -9,6 +9,19 @@ describe("mock workout fixtures", () => {
       return result.kind === "created" ? result.workout.structure.kind : "invalid";
     });
 
-    expect(classifications).toEqual(["intervals", "progressive", "tempo", "unknown", "free-run"]);
+    expect(classifications).toEqual([
+      "intervals",
+      "free-run",
+      "repeated-hills",
+      "intervals",
+      "progressive",
+      "tempo",
+      "unknown",
+      "free-run",
+      "steady-structured-run",
+      "free-run",
+      "progressive",
+      "free-run",
+    ]);
   });
 });

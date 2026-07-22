@@ -12,6 +12,7 @@ import {
   formatPace,
   formatWorkoutDate,
 } from "../i18n/formatters";
+import { FreeRunCard, freeRunCardPropsFromWorkout } from "./workout-cards/FreeRunCard";
 
 type Repetition = Readonly<{ work: Lap; recovery?: Lap }>;
 type StageStyle = CSSProperties & Readonly<{ "--stage-progress"?: string }>;
@@ -34,14 +35,6 @@ function lapsForRole(
   role: keyof Workout["structure"]["lapRoles"],
 ): ReadonlyArray<Lap> {
   return lapsForIndexes(workout, workout.structure.lapRoles[role]);
-}
-
-function distanceOf(laps: ReadonlyArray<Lap>): number {
-  return laps.reduce((total, lap) => total + lap.distanceMeters, 0);
-}
-
-function durationOf(laps: ReadonlyArray<Lap>): number {
-  return laps.reduce((total, lap) => total + lap.movingDurationSeconds, 0);
 }
 
 function pairedRepetitions(workout: Workout): ReadonlyArray<Repetition> {
@@ -75,91 +68,6 @@ function paceSecondsPerKilometer(lap: Lap): number {
 
 function lapCountLabel(count: number, t: ReturnType<typeof useTranslation>["t"]): string {
   return t("workout.lapCount", { count });
-}
-
-function GroupMarks({
-  laps,
-  workout,
-}: Readonly<{ laps: ReadonlyArray<Lap>; workout: Workout }>): JSX.Element {
-  return (
-    <span className="structure-block__marks" aria-hidden="true">
-      {laps.map((lap) => (
-        <span
-          className="structure-block__mark"
-          data-role={appearanceForLap(workout, lap).role}
-          key={lap.index}
-        />
-      ))}
-    </span>
-  );
-}
-
-function StructureBlock({
-  label,
-  laps,
-  workout,
-  language,
-  kind,
-}: Readonly<{
-  label: string;
-  laps: ReadonlyArray<Lap>;
-  workout: Workout;
-  language: string;
-  kind: "context" | "core";
-}>): JSX.Element | null {
-  const { t } = useTranslation();
-  if (laps.length === 0) return null;
-  return (
-    <div
-      className={`structure-block structure-block--${kind}`}
-      style={{ flexGrow: Math.max(1, Math.sqrt(laps.length)) }}
-    >
-      <span className="structure-block__label">{label}</span>
-      <strong>
-        {formatDistance(distanceOf(laps), language)} · {formatDuration(durationOf(laps))}
-      </strong>
-      <span className="structure-block__count">{lapCountLabel(laps.length, t)}</span>
-      <GroupMarks laps={laps} workout={workout} />
-    </div>
-  );
-}
-
-function SessionMap({ workout, language }: Readonly<{ workout: Workout; language: string }>) {
-  const { t } = useTranslation();
-  const preparation = lapsForRole(workout, "warmup");
-  const core = lapsForIndexes(workout, workout.structure.coreLapIndexes);
-  const afterCore = lapsForRole(workout, "cooldown");
-  return (
-    <div className="structure-overview">
-      <div className="structure-overview__heading">
-        <h3>{t("workout.sessionStructure")}</h3>
-        <span>{lapCountLabel(workout.laps.length, t)}</span>
-      </div>
-      <div className="structure-overview__map">
-        <StructureBlock
-          label={t("workout.preparation")}
-          laps={preparation}
-          workout={workout}
-          language={language}
-          kind="context"
-        />
-        <StructureBlock
-          label={t("workout.mainSet")}
-          laps={core}
-          workout={workout}
-          language={language}
-          kind="core"
-        />
-        <StructureBlock
-          label={t("workout.afterCore")}
-          laps={afterCore}
-          workout={workout}
-          language={language}
-          kind="context"
-        />
-      </div>
-    </div>
-  );
 }
 
 function StageCell({
@@ -356,23 +264,11 @@ function EvidenceTable({
 function SourceEvidence({
   workout,
   language,
-  alwaysVisible = false,
-}: Readonly<{ workout: Workout; language: string; alwaysVisible?: boolean }>): JSX.Element {
+}: Readonly<{ workout: Workout; language: string }>): JSX.Element {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const title = t("workout.sourceLapEvidence");
   const lapCount = lapCountLabel(workout.laps.length, t);
-  if (alwaysVisible) {
-    return (
-      <section className="source-evidence source-evidence--visible">
-        <div className="source-evidence__heading">
-          <span>{title}</span>
-          <span>{lapCount}</span>
-        </div>
-        <EvidenceTable workout={workout} language={language} />
-      </section>
-    );
-  }
   return (
     <details
       className="source-evidence"
@@ -401,7 +297,6 @@ function StructuredContent({
     workout.structure.kind === "intervals" || workout.structure.kind === "repeated-hills";
   return (
     <div className="workout-card__structure">
-      <SessionMap workout={workout} language={language} />
       {paired ? (
         <RepetitionMatrix workout={workout} language={language} />
       ) : (
@@ -414,15 +309,19 @@ function StructuredContent({
 
 export function WorkoutCard({ workout }: Readonly<{ workout: Workout }>): JSX.Element {
   const { t, i18n } = useTranslation();
+
+  if (workout.structure.kind === "free-run") {
+    return <FreeRunCard {...freeRunCardPropsFromWorkout(workout)} />;
+  }
+
   const language = i18n.resolvedLanguage ?? i18n.language;
   const structured = STRUCTURED_KINDS.has(workout.structure.kind);
-  const freeRun = workout.structure.kind === "free-run";
   const hasLaps = workout.laps.length > 0;
   const classification = formatClassification(workout.structure, t, language);
 
   return (
     <article
-      className={`workout-card workout-card--${workout.structure.kind}${freeRun ? " workout-card--compact" : ""}`}
+      className={`workout-card workout-card--${workout.structure.kind}`}
       data-workout-type={workout.type}
     >
       <header className="workout-card__header">
@@ -438,20 +337,8 @@ export function WorkoutCard({ workout }: Readonly<{ workout: Workout }>): JSX.El
           )}
         </div>
 
-        {freeRun ? (
-          <>
-            <p className="workout-kind">{classification}</p>
-            <h2>{workout.name}</h2>
-          </>
-        ) : (
-          <>
-            <h2>{classification}</h2>
-            <p className="source-activity">
-              <span>{t("workout.sourceActivity")}</span>
-              {workout.name}
-            </p>
-          </>
-        )}
+        <h2>{workout.name}</h2>
+        <p className="workout-classification">{classification}</p>
 
         <dl className="workout-summary">
           <div>
@@ -478,7 +365,9 @@ export function WorkoutCard({ workout }: Readonly<{ workout: Workout }>): JSX.El
       {!hasLaps && <p className="no-laps">{t("workout.noLaps")}</p>}
       {structured && hasLaps && <StructuredContent workout={workout} language={language} />}
       {workout.structure.kind === "unknown" && hasLaps && (
-        <SourceEvidence workout={workout} language={language} alwaysVisible />
+        <div className="workout-card__structure">
+          <SourceEvidence workout={workout} language={language} />
+        </div>
       )}
     </article>
   );
