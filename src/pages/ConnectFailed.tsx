@@ -1,6 +1,7 @@
 import type { JSX } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
+import { LanguageSelector } from "../i18n/LanguageSelector";
 
 /**
  * `GET /connect-failed?reason=<slug>&id=<correlation_id>` — the Lambda's
@@ -34,7 +35,11 @@ export function ConnectFailed(): JSX.Element {
   const id = params.get("id");
 
   return (
-    <main>
+    <main className="shell shell--centered">
+      <div className="public-settings">
+        <p className="wordmark">lepre</p>
+        <LanguageSelector />
+      </div>
       <h1>{t("connectFailed.title")}</h1>
       <p>{t(messageKey(reason))}</p>
       <p>

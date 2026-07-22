@@ -1,7 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { application } from "../composition/application";
 import type { User } from "../domain/user";
+import { i18n, LANGUAGE_STORAGE_KEY } from "../i18n/i18n";
 import { mockUser } from "../mocks/fixtures";
 import { Home, STRAVA_START_URL } from "./Home";
 
@@ -16,7 +17,9 @@ vi.mock("../composition/application", () => ({
 
 const user = mockUser as unknown as User;
 
-beforeEach(() => {
+beforeEach(async () => {
+  window.localStorage.removeItem(LANGUAGE_STORAGE_KEY);
+  await i18n.changeLanguage("en");
   vi.mocked(application.disconnectProvider).mockReset().mockResolvedValue({ kind: "disconnected" });
   vi.mocked(application.loadUser).mockReset().mockResolvedValue({ kind: "disconnected" });
   vi.mocked(application.listWorkouts)
@@ -25,6 +28,11 @@ beforeEach(() => {
   vi.mocked(application.synchronizeWorkouts)
     .mockReset()
     .mockResolvedValue({ kind: "synchronized" });
+});
+
+afterEach(async () => {
+  window.localStorage.removeItem(LANGUAGE_STORAGE_KEY);
+  await i18n.changeLanguage("en");
 });
 
 describe("Home", () => {
@@ -89,5 +97,27 @@ describe("Home", () => {
 
     expect(await screen.findByRole("link", { name: "Connect with Strava" })).toBeInTheDocument();
     expect(application.disconnectProvider).toHaveBeenCalledOnce();
+  });
+
+  it("lets the runner override and persist the interface language", async () => {
+    vi.mocked(application.loadUser).mockResolvedValue({ kind: "connected", user });
+
+    render(<Home />);
+    await screen.findByText("Up to date");
+    const synchronizationCalls = vi.mocked(application.synchronizeWorkouts).mock.calls.length;
+
+    fireEvent.click(screen.getByRole("button", { name: "Account" }));
+    expect(screen.getByRole("button", { name: "English" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Italiano" }));
+
+    expect(await screen.findByText("Tutto aggiornato")).toBeInTheDocument();
+    expect(screen.getByText("Lingua")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Italiano" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(window.localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe("it");
+    expect(document.documentElement).toHaveAttribute("lang", "it");
+    expect(application.synchronizeWorkouts).toHaveBeenCalledTimes(synchronizationCalls);
   });
 });

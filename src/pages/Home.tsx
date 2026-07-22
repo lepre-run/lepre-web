@@ -1,15 +1,6 @@
-import {
-  type CSSProperties,
-  type FormEvent,
-  type JSX,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { type FormEvent, type JSX, useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { application } from "../composition/application";
-import { appearanceForLap, type LapAppearance } from "../domain/lap-appearance";
 import type { User } from "../domain/user";
 import type { Workout } from "../domain/workout";
 import {
@@ -18,18 +9,10 @@ import {
   workoutHistoryFilename,
   workoutsInRange,
 } from "../domain/workout-history-export";
-import {
-  formatClassification,
-  formatDistance,
-  formatDuration,
-  formatHeartRate,
-  formatHeartRateValue,
-  formatLapRole,
-  formatPace,
-  formatWorkoutDate,
-} from "../i18n/formatters";
+import { LanguageSelector } from "../i18n/LanguageSelector";
 import { STRAVA_START_URL } from "../infrastructure/api/lepre-backend";
 import { downloadJson } from "../infrastructure/browser/download-json";
+import { WorkoutCard } from "./WorkoutCard";
 
 export { STRAVA_START_URL };
 
@@ -44,22 +27,18 @@ type ScreenState =
 
 type Notice =
   | Readonly<{ kind: "none" }>
-  | Readonly<{ kind: "paused"; message: string }>
-  | Readonly<{ kind: "error"; message: string; retryable: boolean }>;
+  | Readonly<{ kind: "paused"; reason: "queued" }>
+  | Readonly<{ kind: "paused"; reason: "rate-limited"; minutes: number }>
+  | Readonly<{
+      kind: "error";
+      reason: "synchronization" | "disconnect";
+      retryable: boolean;
+    }>;
 
 type SynchronizationStatus = "checking" | "syncing" | "current" | "paused" | "failed";
 
-type LapStyle = CSSProperties & Readonly<{ "--lap-progress"?: string }>;
-
-function styleForLap(appearance: LapAppearance): LapStyle | undefined {
-  return appearance.progressiveIntensity === undefined
-    ? undefined
-    : { "--lap-progress": `${appearance.progressiveIntensity * 100}%` };
-}
-
 export function Home(): JSX.Element {
-  const { t, i18n } = useTranslation();
-  const language = i18n.resolvedLanguage ?? i18n.language;
+  const { t } = useTranslation();
   const [screen, setScreen] = useState<ScreenState>({ kind: "checking" });
   const [workouts, setWorkouts] = useState<ReadonlyArray<Workout>>([]);
   const [syncing, setSyncing] = useState(false);
@@ -109,14 +88,14 @@ export function Home(): JSX.Element {
       setSynchronizationStatus("failed");
       setNotice({
         kind: "error",
-        message: t("notices.synchronizationError"),
+        reason: "synchronization",
         retryable: true,
       });
     }
     if (result.kind === "queued") {
       setRetryAt(Date.now() + result.retryAfterSeconds * 1_000);
       setSynchronizationStatus("paused");
-      setNotice({ kind: "paused", message: t("notices.queued") });
+      setNotice({ kind: "paused", reason: "queued" });
     }
     if (result.kind === "rate-limited") {
       const minutes = Math.max(1, Math.ceil(result.retryAfterSeconds / 60));
@@ -124,12 +103,13 @@ export function Home(): JSX.Element {
       setSynchronizationStatus("paused");
       setNotice({
         kind: "paused",
-        message: t("notices.rateLimited", { count: minutes }),
+        reason: "rate-limited",
+        minutes,
       });
     }
     if (result.kind === "synchronized") setSynchronizationStatus("current");
     setSyncing(false);
-  }, [refreshWorkouts, t]);
+  }, [refreshWorkouts]);
 
   useEffect(() => {
     if (retryAt === null) return;
@@ -187,7 +167,7 @@ export function Home(): JSX.Element {
     } else {
       setNotice({
         kind: "error",
-        message: t("notices.disconnectError"),
+        reason: "disconnect",
         retryable: false,
       });
     }
@@ -213,6 +193,17 @@ export function Home(): JSX.Element {
     if (screen.availability === "offline") return "offline";
     if (screen.availability === "reauthorization-required") return "failed";
     return synchronizationStatus;
+  }
+
+  function noticeMessage(): string {
+    if (notice.kind === "none") return "";
+    if (notice.kind === "paused" && notice.reason === "queued") return t("notices.queued");
+    if (notice.kind === "paused") {
+      return t("notices.rateLimited", { count: notice.minutes });
+    }
+    return notice.reason === "disconnect"
+      ? t("notices.disconnectError")
+      : t("notices.synchronizationError");
   }
 
   function openDownload(): void {
@@ -241,7 +232,10 @@ export function Home(): JSX.Element {
   if (screen.kind === "disconnected") {
     return (
       <main className="shell shell--centered">
-        <p className="wordmark">lepre</p>
+        <div className="public-settings">
+          <p className="wordmark">lepre</p>
+          <LanguageSelector />
+        </div>
         <h1>{t("home.heroTitle")}</h1>
         <p className="lede">{t("home.heroDescription")}</p>
         <a className="primary-action" href={STRAVA_START_URL}>
@@ -292,14 +286,17 @@ export function Home(): JSX.Element {
                 <h2 id="account-title">{t("account.title")}</h2>
                 <p>{t("account.description")}</p>
               </div>
-              <button
-                className="danger-action"
-                type="button"
-                onClick={() => setDisconnectConfirmationOpen(true)}
-                disabled={syncing || screen.availability === "offline"}
-              >
-                {t("actions.disconnectStrava")}
-              </button>
+              <div className="account-panel__controls">
+                <LanguageSelector />
+                <button
+                  className="danger-action"
+                  type="button"
+                  onClick={() => setDisconnectConfirmationOpen(true)}
+                  disabled={syncing || screen.availability === "offline"}
+                >
+                  {t("actions.disconnectStrava")}
+                </button>
+              </div>
             </>
           ) : (
             <div
@@ -345,7 +342,7 @@ export function Home(): JSX.Element {
       )}
       {notice.kind === "error" && (
         <div className="notice notice--error notice--action" role="alert">
-          <p>{notice.message}</p>
+          <p>{noticeMessage()}</p>
           {notice.retryable && (
             <button type="button" onClick={() => void sync()} disabled={syncing}>
               {t("actions.tryAgain")}
@@ -353,7 +350,7 @@ export function Home(): JSX.Element {
           )}
         </div>
       )}
-      {notice.kind === "paused" && <output className="notice">{notice.message}</output>}
+      {notice.kind === "paused" && <output className="notice">{noticeMessage()}</output>}
       <div className="feed-heading">
         <div>
           <p className="eyebrow">{t("feed.eyebrow")}</p>
@@ -426,113 +423,7 @@ export function Home(): JSX.Element {
         <ol className="workout-feed">
           {workouts.map((workout) => (
             <li className="workout-feed__item" key={workout.id}>
-              <article
-                className={`workout-card workout-card--${workout.type}`}
-                data-workout-type={workout.type}
-              >
-                <header className="workout-card__header">
-                  <div>
-                    {workout.type === "race" && (
-                      <p className="race-badge">
-                        <span aria-hidden="true">🏁</span>
-                        {t("workout.race")}
-                      </p>
-                    )}
-                    <p className={`workout-type workout-type--${workout.structure.kind}`}>
-                      {formatClassification(workout.structure, t, language)}
-                    </p>
-                    <h2>{workout.name}</h2>
-                  </div>
-                  <dl className="workout-summary">
-                    <div>
-                      <dt>{t("workout.date")}</dt>
-                      <dd>
-                        <time dateTime={workout.performedAt}>
-                          {formatWorkoutDate(workout.performedAt, language)}
-                        </time>
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>{t("workout.distance")}</dt>
-                      <dd>{formatDistance(workout.distanceMeters, language)}</dd>
-                    </div>
-                    {workout.averageHeartRateBpm !== null && (
-                      <div>
-                        <dt>{t("workout.averageHeartRate")}</dt>
-                        <dd>{formatHeartRate(workout.averageHeartRateBpm)}</dd>
-                      </div>
-                    )}
-                    {workout.maxHeartRateBpm !== null && (
-                      <div>
-                        <dt>{t("workout.maxHeartRate")}</dt>
-                        <dd>{formatHeartRate(workout.maxHeartRateBpm)}</dd>
-                      </div>
-                    )}
-                  </dl>
-                </header>
-                {workout.description.trim().length > 0 && (
-                  <p className="workout-description">{workout.description}</p>
-                )}
-                <div className="lap-section">
-                  <div className="lap-section__heading">
-                    <h3>{t("workout.lapStructure")}</h3>
-                    <span>
-                      {formatDuration(workout.durationSeconds)} {t("workout.moving")}
-                    </span>
-                  </div>
-                  {workout.laps.length === 0 ? (
-                    <p className="no-laps">{t("workout.noLaps")}</p>
-                  ) : (
-                    <>
-                      {workout.structure.kind === "progressive" && (
-                        <p className="progressive-legend">{t("workout.progressiveLegend")}</p>
-                      )}
-                      <ol className="lap-list">
-                        {workout.laps.map((lap) => {
-                          const appearance = appearanceForLap(workout, lap);
-                          const averageHeartRate = formatHeartRateValue(lap.averageHeartRateBpm);
-                          const maxHeartRate = formatHeartRateValue(lap.maxHeartRateBpm);
-                          const progressiveClass =
-                            appearance.progressiveIntensity === undefined
-                              ? ""
-                              : " lap--progressive";
-                          return (
-                            <li
-                              className={`lap lap--${appearance.role}${progressiveClass}`}
-                              data-lap-role={appearance.role}
-                              key={lap.index}
-                              style={styleForLap(appearance)}
-                            >
-                              <span className="lap__index">{lap.index}</span>
-                              <span className="lap__identity">
-                                <span className="lap__name">{lap.name}</span>
-                                <span className="lap__role">{formatLapRole(appearance, t)}</span>
-                              </span>
-                              <span>{formatDistance(lap.distanceMeters, language)}</span>
-                              <span>{formatDuration(lap.movingDurationSeconds)}</span>
-                              <strong>
-                                {formatPace(lap.movingDurationSeconds, lap.distanceMeters)}
-                              </strong>
-                              <span className="lap__heart-rate">
-                                <span className="visually-hidden">
-                                  {t("workout.lapHeartRate", {
-                                    average: averageHeartRate,
-                                    maximum: maxHeartRate,
-                                  })}
-                                </span>
-                                <span aria-hidden="true">
-                                  ♥ {averageHeartRate} {t("workout.averageHeartRateShort")} ·{" "}
-                                  {maxHeartRate} {t("workout.maxHeartRateShort")}
-                                </span>
-                              </span>
-                            </li>
-                          );
-                        })}
-                      </ol>
-                    </>
-                  )}
-                </div>
-              </article>
+              <WorkoutCard workout={workout} />
             </li>
           ))}
         </ol>

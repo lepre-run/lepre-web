@@ -42,4 +42,11 @@ describe("ConnectFailed", () => {
     const link = screen.getByRole("link", { name: /try again/i });
     expect(link).toHaveAttribute("href", "/");
   });
+
+  it("keeps the language override available after a failed connection", () => {
+    renderAt("/connect-failed?reason=user_denied");
+
+    expect(screen.getByRole("button", { name: "English" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Italiano" })).toBeInTheDocument();
+  });
 });

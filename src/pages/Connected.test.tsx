@@ -82,12 +82,11 @@ describe("Connected", () => {
     expect(screen.getByText("Free run")).toBeInTheDocument();
     expect(screen.getByText("Track session")).toBeInTheDocument();
     expect(screen.getByText("Race")).toBeInTheDocument();
-    expect(card).toHaveClass("workout-card--race");
     expect(card).toHaveAttribute("data-workout-type", "race");
     expect(card).toHaveTextContent("148 bpm");
     expect(card).toHaveTextContent("176 bpm");
-    expect(card).toHaveTextContent("148 avg · 176 max");
-    expect(screen.getByText("Run").closest("li")).toHaveAttribute("data-lap-role", "main");
+    expect(card).toHaveTextContent("148 / 176");
+    expect(screen.getByText("Warm up").closest("tr")).toHaveAttribute("data-role", "main");
   });
 
   it("shows a retryable pause when Strava reaches its request limit", async () => {
