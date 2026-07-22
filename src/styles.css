@@ -916,6 +916,12 @@ button:disabled {
   padding-top: 0.9rem;
 }
 
+.workout-card--compact > .source-evidence {
+  margin-top: 0;
+  background: var(--color-surface-muted);
+  padding: 0.9rem 1.65rem 1rem;
+}
+
 .source-evidence--visible {
   margin-top: 0;
   padding-top: 1.3rem;
@@ -1114,6 +1120,10 @@ button:disabled {
   .workout-card__structure,
   .source-evidence--visible {
     padding: 1rem;
+  }
+
+  .workout-card--compact > .source-evidence {
+    padding: 0.85rem 1rem 1rem;
   }
 
   .structure-overview__map {
