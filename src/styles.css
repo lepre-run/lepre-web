@@ -232,6 +232,10 @@ button:disabled {
   .sync-status span {
     animation: none;
   }
+
+  .source-evidence__chevron {
+    transition: none;
+  }
 }
 
 .account-panel {
@@ -916,12 +920,6 @@ button:disabled {
   padding-top: 0.9rem;
 }
 
-.workout-card--compact > .source-evidence {
-  margin-top: 0;
-  background: var(--color-surface-muted);
-  padding: 0.9rem 1.65rem 1rem;
-}
-
 .source-evidence--visible {
   margin-top: 0;
   padding-top: 1.3rem;
@@ -939,6 +937,49 @@ button:disabled {
 
 .source-evidence summary {
   cursor: pointer;
+  list-style: none;
+}
+
+.source-evidence summary::-webkit-details-marker {
+  display: none;
+}
+
+.source-evidence__summary-meta,
+.source-evidence__action {
+  display: inline-flex;
+  align-items: center;
+}
+
+.source-evidence__summary-meta {
+  flex: none;
+  gap: 0.8rem;
+}
+
+.source-evidence__action {
+  gap: 0.4rem;
+  justify-content: flex-end;
+  inline-size: 5.5rem;
+  color: var(--color-carbon);
+  font-weight: 700;
+}
+
+.source-evidence__chevron {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-0.1rem) rotate(45deg);
+  transition: transform 140ms ease;
+}
+
+.source-evidence[open] .source-evidence__chevron {
+  transform: translateY(0.1rem) rotate(225deg);
+}
+
+.source-evidence summary:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--color-kinetic);
+  outline-offset: 4px;
 }
 
 .source-evidence[open] summary {
@@ -1120,10 +1161,6 @@ button:disabled {
   .workout-card__structure,
   .source-evidence--visible {
     padding: 1rem;
-  }
-
-  .workout-card--compact > .source-evidence {
-    padding: 0.85rem 1rem 1rem;
   }
 
   .structure-overview__map {
@@ -1349,6 +1386,10 @@ button:disabled {
 
   .structure-overview__heading span,
   .execution-section__heading span {
+    display: none;
+  }
+
+  .source-evidence__lap-count {
     display: none;
   }
 

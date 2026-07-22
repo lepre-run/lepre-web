@@ -64,6 +64,10 @@ describe("presentation formatters", () => {
     expect(t("workout.lapHeartRate", { average: "148", maximum: "176" })).toBe(
       "Frequenza cardiaca: media 148 bpm, massima 176 bpm",
     );
+    expect(t("workout.sourceLapEvidence")).toBe("Dettaglio dei lap originali");
+    expect(t("workout.lapCount", { count: 1 })).toBe("1 lap");
+    expect(t("workout.lapCount", { count: 4 })).toBe("4 lap");
+    expect(t("workout.lapNumber", { number: 2 })).toBe("Lap 2");
     expect(formatLapRole({ role: "recovery" }, t)).toBe("Recupero");
   });
 });

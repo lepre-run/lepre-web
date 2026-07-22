@@ -72,7 +72,7 @@ describe("Connected", () => {
 
   afterEach(() => vi.restoreAllMocks());
 
-  it("renders the complete local workout entity", async () => {
+  it("renders the local free-run summary without source-lap evidence", async () => {
     render(<Connected />);
     const cardHeading = await screen.findByRole("heading", { name: "Morning Run" });
     const card = cardHeading.closest("article");
@@ -84,9 +84,9 @@ describe("Connected", () => {
     expect(screen.getByText("Race")).toBeInTheDocument();
     expect(card).toHaveAttribute("data-workout-type", "race");
     expect(card).toHaveTextContent("148 bpm");
-    expect(card).toHaveTextContent("176 bpm");
-    expect(card).toHaveTextContent("148 / 176");
-    expect(screen.getByText("Warm up").closest("tr")).toHaveAttribute("data-role", "main");
+    expect(card).not.toHaveTextContent("176 bpm");
+    expect(card).not.toHaveTextContent("148 / 176");
+    expect(screen.queryByText("Warm up")).not.toBeInTheDocument();
   });
 
   it("shows a retryable pause when Strava reaches its request limit", async () => {

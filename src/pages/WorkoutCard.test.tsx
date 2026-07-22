@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { createWorkout, type Lap, type Workout } from "../domain/workout";
 import { WorkoutCard } from "./WorkoutCard";
@@ -76,7 +76,29 @@ describe("WorkoutCard", () => {
     expect(heading.closest("article")).toHaveClass("workout-card--compact");
     expect(screen.getByText("Free run")).toBeInTheDocument();
     expect(screen.queryByText("Session structure")).not.toBeInTheDocument();
-    expect(screen.getAllByText("Source-lap evidence")).not.toHaveLength(0);
+    expect(screen.queryByText("Source-lap evidence")).not.toBeInTheDocument();
+  });
+
+  it("makes structured source evidence visibly expandable", () => {
+    const value = workout([
+      lap(1, "Warm up", 2_000, 660),
+      lap(2, "Rep 1", 1_000, 240),
+      lap(3, "Recovery 1", 400, 150),
+      lap(4, "Rep 2", 1_000, 238),
+      lap(5, "Recovery 2", 400, 150),
+      lap(6, "Rep 3", 1_000, 235),
+    ]);
+
+    render(<WorkoutCard workout={value} />);
+
+    const summary = screen.getByText("Expand").closest("summary");
+    if (!summary) throw new Error("expected source-evidence summary");
+    expect(within(summary).getByText("Expand")).toBeInTheDocument();
+
+    fireEvent.click(summary);
+
+    expect(within(summary).getByText("Collapse")).toBeInTheDocument();
+    expect(summary.closest("details")).toHaveAttribute("open");
   });
 
   it("explains when the source activity has no lap data", () => {

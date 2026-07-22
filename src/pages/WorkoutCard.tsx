@@ -1,4 +1,4 @@
-import type { CSSProperties, JSX } from "react";
+import { type CSSProperties, type JSX, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { appearanceForLap, type LapAppearance } from "../domain/lap-appearance";
 import type { Lap, Workout } from "../domain/workout";
@@ -359,23 +359,35 @@ function SourceEvidence({
   alwaysVisible = false,
 }: Readonly<{ workout: Workout; language: string; alwaysVisible?: boolean }>): JSX.Element {
   const { t } = useTranslation();
-  const heading = (
-    <>
-      <span>{t("workout.sourceLapEvidence")}</span>
-      <span>{lapCountLabel(workout.laps.length, t)}</span>
-    </>
-  );
+  const [expanded, setExpanded] = useState(false);
+  const title = t("workout.sourceLapEvidence");
+  const lapCount = lapCountLabel(workout.laps.length, t);
   if (alwaysVisible) {
     return (
       <section className="source-evidence source-evidence--visible">
-        <div className="source-evidence__heading">{heading}</div>
+        <div className="source-evidence__heading">
+          <span>{title}</span>
+          <span>{lapCount}</span>
+        </div>
         <EvidenceTable workout={workout} language={language} />
       </section>
     );
   }
   return (
-    <details className="source-evidence">
-      <summary>{heading}</summary>
+    <details
+      className="source-evidence"
+      onToggle={(event) => setExpanded(event.currentTarget.open)}
+    >
+      <summary>
+        <span>{title}</span>
+        <span className="source-evidence__summary-meta">
+          <span className="source-evidence__lap-count">{lapCount}</span>
+          <span className="source-evidence__action">
+            {t(expanded ? "workout.collapseEvidence" : "workout.expandEvidence")}
+            <span className="source-evidence__chevron" aria-hidden="true" />
+          </span>
+        </span>
+      </summary>
       <EvidenceTable workout={workout} language={language} />
     </details>
   );
@@ -468,7 +480,6 @@ export function WorkoutCard({ workout }: Readonly<{ workout: Workout }>): JSX.El
       {workout.structure.kind === "unknown" && hasLaps && (
         <SourceEvidence workout={workout} language={language} alwaysVisible />
       )}
-      {freeRun && hasLaps && <SourceEvidence workout={workout} language={language} />}
     </article>
   );
 }

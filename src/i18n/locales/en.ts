@@ -78,6 +78,8 @@ export const english = {
     fastest: "Fastest",
     noRecoveryLap: "No recovery lap",
     sourceLapEvidence: "Source-lap evidence",
+    expandEvidence: "Expand",
+    collapseEvidence: "Collapse",
     lap: "Lap",
     role: "Role",
     time: "Time",
