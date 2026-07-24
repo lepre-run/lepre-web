@@ -517,12 +517,6 @@ export function IntervalRunCard(props: IntervalRunCardProps): JSX.Element {
       <header className="workout-card__header">
         <div className="workout-card__topline">
           <time dateTime={performedAt}>{formatWorkoutDate(performedAt, language)}</time>
-          {category === "race" && (
-            <span className="race-badge">
-              <span aria-hidden="true">🏁</span>
-              {t("workout.race")}
-            </span>
-          )}
         </div>
 
         <WorkoutCardSummary {...summary} />

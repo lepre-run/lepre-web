@@ -20,7 +20,11 @@ function lap(
   };
 }
 
-function workout(laps: ReadonlyArray<Lap>, name = "Original activity"): Workout {
+function workout(
+  laps: ReadonlyArray<Lap>,
+  name = "Original activity",
+  type: "workout" | "race" = "workout",
+): Workout {
   const durationSeconds = laps.reduce((total, value) => total + value.movingDurationSeconds, 0);
   const distanceMeters = laps.reduce((total, value) => total + value.distanceMeters, 0);
   const result = createWorkout({
@@ -28,7 +32,7 @@ function workout(laps: ReadonlyArray<Lap>, name = "Original activity"): Workout 
     performedAt: "2026-07-15T06:00:00Z",
     name,
     description: "",
-    type: "workout",
+    type,
     sport: "Run",
     durationSeconds,
     elapsedDurationSeconds: durationSeconds,
@@ -83,6 +87,26 @@ describe("WorkoutCard", () => {
     expect(screen.getByText("Free run")).toBeInTheDocument();
     expect(screen.queryByText("Session structure")).not.toBeInTheDocument();
     expect(screen.queryByText("Source-lap evidence")).not.toBeInTheDocument();
+  });
+
+  it("routes races to their own card instead of an inferred workout card", () => {
+    const value = workout(
+      [
+        lap(1, "First split", 2_000, 620),
+        lap(2, "Second split", 2_000, 590),
+        lap(3, "Final split", 2_000, 560),
+      ],
+      "City race",
+      "race",
+    );
+
+    render(<WorkoutCard workout={value} />);
+
+    const article = screen.getByRole("heading", { name: "City race" }).closest("article");
+    expect(article).toHaveClass("workout-card--race");
+    expect(screen.getByText("Race")).toBeInTheDocument();
+    expect(screen.queryByText("Progressive")).not.toBeInTheDocument();
+    expect(screen.getAllByTestId("race-split-row")).toHaveLength(3);
   });
 
   it("makes structured source evidence visibly expandable", () => {

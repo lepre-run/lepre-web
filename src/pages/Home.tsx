@@ -12,7 +12,7 @@ import {
 import { LanguageSelector } from "../i18n/LanguageSelector";
 import { STRAVA_START_URL } from "../infrastructure/api/lepre-backend";
 import { downloadJson } from "../infrastructure/browser/download-json";
-import { WorkoutCard } from "./WorkoutCard";
+import { WeeklyOverview } from "./weekly-overview/WeeklyOverview";
 
 export { STRAVA_START_URL };
 
@@ -420,13 +420,7 @@ export function Home(): JSX.Element {
           <p>{t("feed.emptyDescription")}</p>
         </div>
       ) : (
-        <ol className="workout-feed">
-          {workouts.map((workout) => (
-            <li className="workout-feed__item" key={workout.id}>
-              <WorkoutCard workout={workout} />
-            </li>
-          ))}
-        </ol>
+        <WeeklyOverview workouts={workouts} />
       )}
     </main>
   );

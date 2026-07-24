@@ -72,22 +72,39 @@ describe("Connected", () => {
 
   afterEach(() => vi.restoreAllMocks());
 
-  it("renders the local free-run summary without source-lap evidence", async () => {
+  it("renders a race with its own card and visible splits", async () => {
     render(<Connected />);
-    const cardHeading = await screen.findByRole("heading", { name: "Morning Run" });
+    const workoutButton = await screen.findByRole("button", {
+      name: /Open Morning Run, Race/,
+    });
+    const overview = screen.getByRole("region", { name: "Weekly training overview" });
+    expect(overview).toHaveTextContent("1 run");
+    expect(overview).toHaveTextContent("8.00 km");
+    expect(overview).toHaveTextContent("40m");
+    expect(workoutButton).toHaveTextContent("5:00 /km");
+    expect(screen.queryByRole("heading", { name: "Morning Run" })).not.toBeInTheDocument();
+    const selectedWeek = workoutButton.closest(".weekly-grid__week");
+
+    fireEvent.click(workoutButton);
+
+    const detail = screen.getByRole("region", { name: "Workout details" });
+    expect(selectedWeek).toContainElement(detail);
+    const cardHeading = screen.getByRole("heading", { name: "Morning Run" });
     const card = cardHeading.closest("article");
     expect(card).toHaveTextContent("8.00 km");
     expect(card).toHaveTextContent("40:00");
     expect(screen.getByText(/1 stored locally/i)).toBeInTheDocument();
-    expect(screen.getByText("Free run")).toBeInTheDocument();
+    expect(card).toHaveClass("workout-card--race");
     expect(screen.getByText("Track session")).toBeInTheDocument();
-    expect(screen.getByText("Race")).toBeInTheDocument();
+    expect(screen.getAllByText("Race")).toHaveLength(2);
+    expect(screen.queryByText("Free run")).not.toBeInTheDocument();
     expect(screen.queryByTestId("training-rhythm")).not.toBeInTheDocument();
     expect(card).toHaveAttribute("data-workout-type", "race");
     expect(card).toHaveTextContent("148 bpm");
-    expect(card).not.toHaveTextContent("176 bpm");
-    expect(card).not.toHaveTextContent("148 / 176");
-    expect(screen.queryByText("Warm up")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Warm up")).toHaveLength(2);
+    expect(screen.getAllByTestId("race-split-row")).toHaveLength(1);
+    expect(screen.getAllByText("Source-lap evidence")).toHaveLength(2);
+    expect(card?.querySelector(".race-badge")).toBeNull();
   });
 
   it("shows a retryable pause when Strava reaches its request limit", async () => {

@@ -18,6 +18,7 @@ import {
   ProgressiveRunCard,
   progressiveRunCardPropsFromWorkout,
 } from "./workout-cards/ProgressiveRunCard";
+import { RaceCard, raceCardPropsFromWorkout } from "./workout-cards/RaceCard";
 
 type Repetition = Readonly<{ work: Lap; recovery?: Lap }>;
 type StageStyle = CSSProperties & Readonly<{ "--stage-progress"?: string }>;
@@ -312,6 +313,10 @@ function StructuredContent({
 export function WorkoutCard({ workout }: Readonly<{ workout: Workout }>): JSX.Element {
   const { t, i18n } = useTranslation();
 
+  if (workout.type === "race") {
+    return <RaceCard {...raceCardPropsFromWorkout(workout)} />;
+  }
+
   if (workout.structure.kind === "free-run") {
     return <FreeRunCard {...freeRunCardPropsFromWorkout(workout)} />;
   }
@@ -339,12 +344,6 @@ export function WorkoutCard({ workout }: Readonly<{ workout: Workout }>): JSX.El
           <time dateTime={workout.performedAt}>
             {formatWorkoutDate(workout.performedAt, language)}
           </time>
-          {workout.type === "race" && (
-            <span className="race-badge">
-              <span aria-hidden="true">🏁</span>
-              {t("workout.race")}
-            </span>
-          )}
         </div>
 
         <h2>{workout.name}</h2>
