@@ -85,6 +85,9 @@ describe("Connected", () => {
     expect(overview).toHaveTextContent("1 run");
     expect(overview).toHaveTextContent("8.00 km");
     expect(overview).toHaveTextContent("40m");
+    expect(overview.querySelectorAll(".weekly-cadence > li")).toHaveLength(7);
+    expect(overview.querySelectorAll('.weekly-cadence > li[data-active="true"]')).toHaveLength(1);
+    expect(overview.querySelector(".weekly-day__heading")).toHaveTextContent("Wed");
     expect(workoutButton).toHaveTextContent("5:00 /km");
     expect(screen.queryByRole("heading", { name: "Morning Run" })).not.toBeInTheDocument();
     const selectedWeek = workoutButton.closest(".weekly-grid__week");

@@ -135,6 +135,7 @@ export const italian = {
     runCount_other: "{{count}} corse",
     zeroDistance: "0 km",
     restDay: "Giorno di riposo",
+    restWeek: "Settimana di riposo",
     openWorkout: "Apri {{name}}, {{type}}, {{date}}",
     pagination: "Pagine degli allenamenti settimanali",
     newer: "Settimane recenti",

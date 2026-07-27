@@ -651,6 +651,12 @@ input:focus-visible {
   font-weight: 700;
 }
 
+.weekly-cadence,
+.weekly-summary__rest,
+.weekly-day__heading {
+  display: none;
+}
+
 .weekly-day {
   display: grid;
   align-content: start;
@@ -3143,16 +3149,280 @@ button:disabled {
   }
 
   .weekly-overview__scroll {
+    overflow: visible;
     box-shadow: 5px 5px 0 var(--color-carbon);
   }
 
+  .weekly-grid {
+    min-width: 0;
+  }
+
+  .weekly-grid__header {
+    display: none;
+  }
+
+  .weekly-grid__weeks {
+    display: grid;
+    gap: 0;
+  }
+
+  .weekly-grid__week {
+    display: block;
+    min-height: 0;
+  }
+
+  .weekly-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.28rem 1rem;
+    padding: 1rem;
+  }
+
+  .weekly-summary > time {
+    align-self: end;
+    font-size: 0.65rem;
+  }
+
+  .weekly-summary > strong {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0;
+    font-family: var(--font-data);
+    font-size: 0.72rem;
+    letter-spacing: 0.035em;
+    text-align: end;
+    text-transform: uppercase;
+  }
+
+  .weekly-summary dl {
+    display: flex;
+    grid-column: 1 / -1;
+    gap: 1.25rem;
+    margin: 0.55rem 0 0;
+  }
+
+  .weekly-summary__metric {
+    display: grid;
+    gap: 0.08rem;
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .weekly-summary dt {
+    font-size: 0.56rem;
+  }
+
+  .weekly-summary dd {
+    font-size: 1.08rem;
+  }
+
+  .weekly-cadence {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.25rem;
+    margin: 0.7rem 0 0;
+    padding: 0.65rem 0 0;
+    border-top: 2px solid var(--color-carbon);
+    list-style: none;
+  }
+
+  .weekly-cadence li {
+    --cadence-accent: var(--color-carbon);
+
+    display: grid;
+    justify-items: center;
+    gap: 0.1rem;
+    min-width: 0;
+    color: color-mix(in oklch, var(--color-carbon) 55%, var(--color-violet));
+    font-family: var(--font-data);
+  }
+
+  .weekly-cadence li[data-kind="free-run"] {
+    --cadence-accent: oklch(58% 0.145 150);
+  }
+
+  .weekly-cadence li[data-kind="progressive"],
+  .weekly-cadence li[data-kind="tempo"] {
+    --cadence-accent: var(--color-sunrise);
+  }
+
+  .weekly-cadence li[data-kind="intervals"],
+  .weekly-cadence li[data-kind="repeated-hills"] {
+    --cadence-accent: oklch(57% 0.15 250);
+  }
+
+  .weekly-cadence li[data-kind="race"] {
+    --cadence-accent: oklch(61% 0.18 28);
+  }
+
+  .weekly-cadence span {
+    overflow: hidden;
+    max-width: 100%;
+    font-size: 0.53rem;
+    font-weight: 800;
+    letter-spacing: 0.035em;
+    text-overflow: clip;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .weekly-cadence b {
+    font-size: 0.78rem;
+  }
+
+  .weekly-cadence i {
+    color: color-mix(in oklch, var(--color-carbon) 42%, var(--color-violet));
+    font-size: 0.72rem;
+    font-style: normal;
+    line-height: 0.8;
+  }
+
+  .weekly-cadence li[data-active="true"] {
+    color: var(--color-carbon);
+  }
+
+  .weekly-cadence li[data-active="true"] i {
+    color: var(--cadence-accent);
+    text-shadow:
+      -0.5px -0.5px 0 var(--color-carbon),
+      0.5px 0.5px 0 var(--color-carbon);
+  }
+
+  .weekly-summary__rest {
+    display: block;
+    grid-column: 1 / -1;
+    margin: 0.6rem 0 0;
+    border: 2px solid var(--color-carbon);
+    background: var(--color-surface);
+    padding: 0.48rem 0.65rem;
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .weekly-day {
+    display: block;
+    border-block-start: 2px solid var(--color-carbon);
+    border-inline-start: 0;
+    padding: 0;
+  }
+
+  .weekly-day[data-empty="true"] {
+    display: none;
+  }
+
+  .weekly-day__heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.58rem 0.9rem 0.3rem;
+    font-family: var(--font-data);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .weekly-day__heading time {
+    color: var(--color-instrument);
+    font-weight: 700;
+  }
+
+  .weekly-workout {
+    position: relative;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.25rem 0.8rem;
+    border: 0;
+    border-top: 1px solid var(--color-line);
+    border-radius: 0;
+    background: var(--color-surface);
+    padding: 0.7rem 2.25rem 0.8rem 0.9rem;
+    box-shadow: inset 5px 0 0 var(--weekly-accent);
+    transform: none;
+  }
+
+  .weekly-workout::after {
+    position: absolute;
+    top: 50%;
+    right: 0.85rem;
+    content: "›";
+    font-family: var(--font-display);
+    font-size: 1.65rem;
+    font-weight: 700;
+    line-height: 1;
+    transform: translateY(-50%);
+  }
+
+  .weekly-workout + .weekly-workout {
+    border-top: 2px dashed var(--color-line-strong);
+  }
+
+  .weekly-workout__type {
+    grid-column: 1;
+  }
+
+  .weekly-workout > strong {
+    grid-column: 1;
+    font-size: 0.93rem;
+    line-height: 1.2;
+    white-space: normal;
+  }
+
+  .weekly-workout__metrics {
+    display: grid;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-content: center;
+    justify-items: end;
+    gap: 0.12rem;
+    margin: 0;
+  }
+
+  .weekly-workout__metrics b {
+    font-size: 0.78rem;
+  }
+
+  .weekly-workout small {
+    grid-column: 1 / -1;
+    font-size: 0.66rem;
+  }
+
+  .weekly-workout[aria-expanded="true"] {
+    border-color: var(--color-carbon);
+    background: color-mix(in oklch, var(--weekly-accent) 18%, var(--color-surface));
+    box-shadow: inset 5px 0 0 var(--weekly-accent);
+    transform: none;
+  }
+
   .weekly-detail {
-    position: sticky;
-    left: 0;
-    width: calc(100vw - 1.4rem);
-    max-width: calc(100vw - 1.4rem);
-    justify-self: start;
+    position: fixed;
+    z-index: 20;
+    inset: 0;
+    width: auto;
+    max-width: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-top: 0;
+    background: var(--color-cyan);
     padding: 1.25rem 1rem 1.6rem;
+  }
+
+  .weekly-detail > header {
+    position: sticky;
+    z-index: 2;
+    top: -1.25rem;
+    align-items: center;
+    margin: -1.25rem -1rem 1rem;
+    border-bottom: var(--border-heavy);
+    background: var(--color-cyan);
+    padding: 1rem;
+  }
+
+  .weekly-detail > header h2 {
+    font-size: 1.45rem;
   }
 
   .workout-card--journal {

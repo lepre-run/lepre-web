@@ -126,6 +126,10 @@ export function WeeklyOverview({
   const visibleWeeks = weeksOnPage(weeks, Math.min(page, totalPages - 1));
   const selectedWorkout = workouts.find((workout) => workout.id === selectedWorkoutId) ?? null;
   const weekdayFormatter = new Intl.DateTimeFormat(localeFor(language), { weekday: "short" });
+  const mobileDateFormatter = new Intl.DateTimeFormat(localeFor(language), {
+    day: "numeric",
+    month: "short",
+  });
 
   function changePage(nextPage: number): void {
     setPage(nextPage);
@@ -144,7 +148,11 @@ export function WeeklyOverview({
           </div>
           <ol className="weekly-grid__weeks">
             {visibleWeeks.map((week) => (
-              <li className="weekly-grid__week" key={week.dateKey}>
+              <li
+                className="weekly-grid__week"
+                data-resting={week.workouts.length === 0}
+                key={week.dateKey}
+              >
                 <header className="weekly-summary">
                   <time dateTime={week.dateKey}>{weekRange(week, language)}</time>
                   <strong>{t("weekly.runCount", { count: week.workouts.length })}</strong>
@@ -162,6 +170,24 @@ export function WeeklyOverview({
                       <dd>{compactDuration(week.durationSeconds)}</dd>
                     </div>
                   </dl>
+                  <ol className="weekly-cadence" aria-hidden="true">
+                    {week.days.map((day) => (
+                      <li
+                        data-active={day.workouts.length > 0}
+                        data-kind={
+                          day.workouts.length > 0 ? workoutKind(day.workouts[0]) : undefined
+                        }
+                        key={day.dateKey}
+                      >
+                        <span>{weekdayFormatter.format(day.date)}</span>
+                        <b>{day.date.getDate()}</b>
+                        <i>{day.workouts.length > 0 ? "●" : "·"}</i>
+                      </li>
+                    ))}
+                  </ol>
+                  {week.workouts.length === 0 && (
+                    <p className="weekly-summary__rest">{t("weekly.restWeek")}</p>
+                  )}
                 </header>
                 {week.days.map((day) => (
                   <div
@@ -174,6 +200,12 @@ export function WeeklyOverview({
                         day.date,
                       )}
                     </time>
+                    {day.workouts.length > 0 && (
+                      <div className="weekly-day__heading" aria-hidden="true">
+                        <span>{weekdayFormatter.format(day.date)}</span>
+                        <time>{mobileDateFormatter.format(day.date)}</time>
+                      </div>
+                    )}
                     {day.workouts.length === 0 ? (
                       <span className="weekly-day__empty">
                         <span aria-hidden="true">—</span>

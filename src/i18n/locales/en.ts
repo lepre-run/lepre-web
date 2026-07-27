@@ -131,6 +131,7 @@ export const english = {
     runCount_other: "{{count}} runs",
     zeroDistance: "0 km",
     restDay: "Rest day",
+    restWeek: "Rest week",
     openWorkout: "Open {{name}}, {{type}}, {{date}}",
     pagination: "Weekly training pages",
     newer: "Newer weeks",
