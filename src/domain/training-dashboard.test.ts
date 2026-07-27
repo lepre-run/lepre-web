@@ -65,17 +65,41 @@ function easy(id: string, performedAt: string, secondsPerKilometer: number): Wor
   });
 }
 
-function sixByOneKilometer(id: string, performedAt: string, repetitionSeconds: number): Workout {
+function distanceIntervals(input: {
+  id: string;
+  performedAt: string;
+  repetitions: number;
+  workMeters: number;
+  recoveryMeters: number;
+  repetitionSeconds: number;
+}): Workout {
   const laps = [
     { distanceMeters: 2_000, movingDurationSeconds: 720 },
-    ...Array.from({ length: 5 }, () => [
-      { distanceMeters: 1_000, movingDurationSeconds: repetitionSeconds },
-      { distanceMeters: 400, movingDurationSeconds: 150 },
+    ...Array.from({ length: input.repetitions - 1 }, () => [
+      {
+        distanceMeters: input.workMeters,
+        movingDurationSeconds: input.repetitionSeconds,
+      },
+      { distanceMeters: input.recoveryMeters, movingDurationSeconds: 150 },
     ]).flat(),
-    { distanceMeters: 1_000, movingDurationSeconds: repetitionSeconds },
+    {
+      distanceMeters: input.workMeters,
+      movingDurationSeconds: input.repetitionSeconds,
+    },
     { distanceMeters: 1_500, movingDurationSeconds: 570 },
   ];
-  return workout({ id, performedAt, laps });
+  return workout({ id: input.id, performedAt: input.performedAt, laps });
+}
+
+function sixByOneKilometer(id: string, performedAt: string, repetitionSeconds: number): Workout {
+  return distanceIntervals({
+    id,
+    performedAt,
+    repetitions: 6,
+    workMeters: 1_000,
+    recoveryMeters: 400,
+    repetitionSeconds,
+  });
 }
 
 describe("training dashboard", () => {
@@ -100,16 +124,60 @@ describe("training dashboard", () => {
     });
     expect(dashboard?.easyPace?.trend?.direction).toBe("up");
     expect(dashboard?.easyPace?.trend?.percent).toBeCloseTo(5.4, 1);
-    expect(dashboard?.kilometerIntervals).toMatchObject({
-      secondsPerKilometer: 222,
+    expect(dashboard?.referenceIntervals?.primary).toMatchObject({
+      work: { kind: "distance", meters: 1_000 },
+      secondsPerKilometer: 224,
       repetitions: 6,
-      sessionCount: 2,
+      sessionCount: 4,
     });
-    expect(dashboard?.kilometerIntervals?.trend?.direction).toBe("up");
+    expect(dashboard?.referenceIntervals?.primary.trend?.direction).toBe("up");
     expect(dashboard?.trainingMix).toMatchObject({ low: 2, moderate: 0, high: 2, unknown: 0 });
     expect(dashboard?.trainingMix.lowSharePercent).toBe(50);
     expect(dashboard?.weeklyVolume.workoutCount).toBe(4);
     expect(dashboard?.weeklyVolume.averageWeeklyDistanceMeters).toBeGreaterThan(7_000);
+  });
+
+  it("selects the most repeated recent interval family and keeps alternatives concise", () => {
+    const interval = (
+      id: string,
+      performedAt: string,
+      workMeters: number,
+      repetitions: number,
+      repetitionSeconds: number,
+    ) =>
+      distanceIntervals({
+        id,
+        performedAt,
+        workMeters,
+        repetitions,
+        recoveryMeters: workMeters === 400 ? 200 : 400,
+        repetitionSeconds,
+      });
+    const dashboard = createTrainingDashboard([
+      interval("400-now-1", "2026-07-20T06:00:00.000Z", 400, 10, 84),
+      interval("400-now-2", "2026-07-05T06:00:00.000Z", 400, 12, 86),
+      interval("400-now-3", "2026-06-15T06:00:00.000Z", 400, 10, 88),
+      interval("400-before-1", "2026-05-20T06:00:00.000Z", 400, 12, 90),
+      interval("400-before-2", "2026-04-20T06:00:00.000Z", 400, 10, 92),
+      interval("1k-now", "2026-07-18T06:00:00.000Z", 1_000, 6, 220),
+      interval("1k-before", "2026-05-18T06:00:00.000Z", 1_000, 5, 230),
+      interval("800-now", "2026-07-12T06:00:00.000Z", 800, 8, 176),
+      interval("800-before", "2026-04-12T06:00:00.000Z", 800, 8, 184),
+      interval("2k-once", "2026-07-10T06:00:00.000Z", 2_000, 3, 460),
+    ]);
+
+    expect(dashboard?.referenceIntervals?.primary).toMatchObject({
+      work: { kind: "distance", meters: 400 },
+      recovery: { kind: "distance", meters: 200 },
+      repetitions: 10,
+      sessionCount: 5,
+      recentSessionCount: 4,
+    });
+    expect(dashboard?.referenceIntervals?.primary.trend?.direction).toBe("up");
+    expect(dashboard?.referenceIntervals?.alternatives.map((format) => format.work)).toEqual([
+      { kind: "distance", meters: 1_000 },
+      { kind: "distance", meters: 800 },
+    ]);
   });
 
   it("does not describe trail, race, or short activities as easy-pace evidence", () => {

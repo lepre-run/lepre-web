@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
   createTrainingDashboard,
   type EvidenceStrength,
+  type IntervalFormatInsight,
   type RelativeTrend,
 } from "../../domain/training-dashboard";
 import type { Workout } from "../../domain/workout";
@@ -67,6 +68,38 @@ function VolumeTrend({
           })}
     </span>
   );
+}
+
+function IntervalTrend({
+  trend,
+  language,
+}: Readonly<{ trend: RelativeTrend | null; language: string }>): JSX.Element {
+  const { t } = useTranslation();
+  if (trend === null) {
+    return <span className="condition-card__trend">{t("dashboard.intervals.noComparison")}</span>;
+  }
+  return (
+    <span className="condition-card__trend" data-direction={trend.direction}>
+      {trend.direction === "steady"
+        ? t("dashboard.intervals.steady")
+        : t(`dashboard.intervals.${trend.direction}`, {
+            value: decimal(Math.abs(trend.percent), language),
+          })}
+    </span>
+  );
+}
+
+function intervalProtocol(
+  format: IntervalFormatInsight,
+  language: string,
+  t: ReturnType<typeof useTranslation>["t"],
+): string {
+  return t("dashboard.intervals.protocol", {
+    repetitions: format.repetitions,
+    work: formatStageMeasure(format.work, language),
+    recovery: formatStageMeasure(format.recovery, language),
+    variation: decimal(format.repetitionVariationPercent, language),
+  });
 }
 
 export function ConditionDashboard({
@@ -146,33 +179,60 @@ export function ConditionDashboard({
         <article className="condition-card condition-card--intervals">
           <header>
             <h2>{t("dashboard.intervals.title")}</h2>
-            {dashboard.kilometerIntervals && (
-              <EvidenceBadge strength={dashboard.kilometerIntervals.evidence} />
+            {dashboard.referenceIntervals && (
+              <EvidenceBadge strength={dashboard.referenceIntervals.primary.evidence} />
             )}
           </header>
-          {dashboard.kilometerIntervals ? (
+          {dashboard.referenceIntervals ? (
             <>
               <p className="condition-card__metric">
-                {paceValue(dashboard.kilometerIntervals.secondsPerKilometer)}
+                {paceValue(dashboard.referenceIntervals.primary.secondsPerKilometer)}
                 <small>/km</small>
               </p>
-              <p className="condition-card__context">
-                {t("dashboard.intervals.protocol", {
-                  repetitions: dashboard.kilometerIntervals.repetitions,
-                  recovery: formatStageMeasure(dashboard.kilometerIntervals.recovery, language),
-                  variation: decimal(
-                    dashboard.kilometerIntervals.repetitionVariationPercent,
-                    language,
-                  ),
-                })}
+              <p className="condition-card__context condition-card__context--intervals">
+                <strong>
+                  {intervalProtocol(dashboard.referenceIntervals.primary, language, t)}
+                </strong>
+                <span>
+                  {t("dashboard.intervals.selectedReason", {
+                    count: dashboard.referenceIntervals.primary.sessionCount,
+                  })}
+                </span>
               </p>
+              {dashboard.referenceIntervals.alternatives.length > 0 && (
+                <details className="interval-alternatives">
+                  <summary>
+                    {t("dashboard.intervals.alternatives", {
+                      count: dashboard.referenceIntervals.alternatives.length,
+                    })}
+                  </summary>
+                  <ul>
+                    {dashboard.referenceIntervals.alternatives.map((format) => (
+                      <li
+                        key={`${format.work.kind}-${formatStageMeasure(format.work, language)}-${format.recovery.kind}-${formatStageMeasure(format.recovery, language)}`}
+                      >
+                        <strong>{intervalProtocol(format, language, t)}</strong>
+                        <span>
+                          {paceValue(format.secondsPerKilometer)} /km ·{" "}
+                          {t("dashboard.intervals.sessions", {
+                            count: format.sessionCount,
+                          })}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
               <footer>
                 <span>
                   {t("dashboard.intervals.sessions", {
-                    count: dashboard.kilometerIntervals.sessionCount,
+                    count: dashboard.referenceIntervals.primary.sessionCount,
                   })}
                 </span>
-                <PaceTrend trend={dashboard.kilometerIntervals.trend} language={language} />
+                <IntervalTrend
+                  trend={dashboard.referenceIntervals.primary.trend}
+                  language={language}
+                />
               </footer>
             </>
           ) : (

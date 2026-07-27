@@ -8,7 +8,7 @@ import { initializeI18n } from "./i18n/i18n";
 import "./styles.css";
 
 const MOCK_DATA_VERSION_KEY = "lepre:mock-data-version";
-const MOCK_DATA_VERSION = "condition-dashboard-fixtures-2026-07-27";
+const MOCK_DATA_VERSION = "adaptive-interval-dashboard-training-year-2026-07-27";
 
 async function resetStaleMockData(): Promise<void> {
   if (

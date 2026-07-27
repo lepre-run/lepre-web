@@ -90,12 +90,21 @@ export const english = {
       empty: "A road or treadmill free run over 20 minutes will start this baseline.",
     },
     intervals: {
-      title: "1 km intervals",
-      protocol:
-        "{{repetitions}} reps · {{recovery}} recovery · {{variation}}% repetition variation",
+      title: "Reference intervals",
+      protocol: "{{repetitions}} × {{work}} · {{recovery}} recovery · {{variation}}% variation",
+      selectedReason_one:
+        "Your most repeated recent format · {{count}} comparable session in the last year",
+      selectedReason_other:
+        "Your most repeated recent format · {{count}} comparable sessions in the last year",
       sessions_one: "{{count}} matched session",
       sessions_other: "{{count}} matched sessions",
-      empty: "Complete a session with repeated 1 km work laps to establish this pace.",
+      alternatives_one: "{{count}} other matched format",
+      alternatives_other: "{{count}} other matched formats",
+      up: "{{value}}% faster across recent matched sessions",
+      down: "{{value}}% slower across recent matched sessions",
+      steady: "Stable across recent matched sessions",
+      noComparison: "More matched sessions needed for a trend",
+      empty: "Complete a session with repeated work laps to establish an interval benchmark.",
     },
     volume: {
       title: "Running volume",

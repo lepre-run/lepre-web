@@ -80,17 +80,28 @@ function workout(input: {
   };
 }
 
-function kilometerIntervals(input: {
+function distanceIntervals(input: {
   id: string;
   performedAt: string;
   name: string;
+  workMeters: number;
+  recoveryMeters: number;
   repetitionSeconds: ReadonlyArray<number>;
+  recoverySeconds?: number;
+  description?: string;
 }): MockWorkout {
   const laps: MockLap[] = [lap(1, "Warm up", 2_500, 840, 0, 136, 151)];
   input.repetitionSeconds.forEach((seconds, offset) => {
-    laps.push(lap(2 + offset * 2, `Rep ${offset + 1}`, 1_000, seconds));
+    laps.push(lap(2 + offset * 2, `Rep ${offset + 1}`, input.workMeters, seconds));
     if (offset < input.repetitionSeconds.length - 1) {
-      laps.push(lap(3 + offset * 2, `Recovery ${offset + 1}`, 400, 150));
+      laps.push(
+        lap(
+          3 + offset * 2,
+          `Recovery ${offset + 1}`,
+          input.recoveryMeters,
+          input.recoverySeconds ?? 150,
+        ),
+      );
     }
   });
   laps.push(lap(1 + input.repetitionSeconds.length * 2, "Cool down", 1_800, 630, 0, 139, 153));
@@ -98,8 +109,22 @@ function kilometerIntervals(input: {
     id: input.id,
     performedAt: input.performedAt,
     name: input.name,
-    description: "A repeatable six-by-one-kilometre session for longitudinal comparison.",
+    description: input.description ?? "A repeatable interval session for longitudinal comparison.",
     laps,
+  });
+}
+
+function kilometerIntervals(input: {
+  id: string;
+  performedAt: string;
+  name: string;
+  repetitionSeconds: ReadonlyArray<number>;
+}): MockWorkout {
+  return distanceIntervals({
+    ...input,
+    workMeters: 1_000,
+    recoveryMeters: 400,
+    description: "A repeatable six-by-one-kilometre session for longitudinal comparison.",
   });
 }
 
@@ -114,7 +139,7 @@ export const mockUser = {
   },
 } as const;
 
-export const mockWorkouts: ReadonlyArray<MockWorkout> = [
+const curatedWorkouts: ReadonlyArray<MockWorkout> = [
   workout({
     id: "mock-intervals-8x400",
     performedAt: "2026-07-21T05:50:00.000Z",
@@ -310,3 +335,119 @@ export const mockWorkouts: ReadonlyArray<MockWorkout> = [
     repetitionSeconds: [240, 239, 238, 237, 236, 235],
   }),
 ];
+
+const DAY_MILLISECONDS = 24 * 60 * 60 * 1_000;
+const TRAINING_YEAR_START = Date.UTC(2025, 6, 28);
+const TRAINING_WEEK_COUNT = 52;
+
+function generatedInstant(dayTimestamp: number, weekIndex: number): string {
+  const hour = 5 + (weekIndex % 3);
+  const minute = 10 + ((weekIndex * 7) % 35);
+  return new Date(dayTimestamp + (hour * 60 + minute) * 60 * 1_000).toISOString();
+}
+
+function repetitionSeries(count: number, baseSeconds: number): ReadonlyArray<number> {
+  return Array.from({ length: count }, (_, index) => baseSeconds + Math.max(0, 3 - index));
+}
+
+function generatedIntervals(weekIndex: number, performedAt: string): MockWorkout {
+  const progress = weekIndex / (TRAINING_WEEK_COUNT - 1);
+  const pattern = weekIndex % 4;
+  if (pattern === 0 || pattern === 2) {
+    const repetitions = pattern === 0 ? 10 : 12;
+    return distanceIntervals({
+      id: `mock-year-${weekIndex}-400m`,
+      performedAt,
+      name: `${repetitions} × 400 m`,
+      workMeters: 400,
+      recoveryMeters: 200,
+      recoverySeconds: 82,
+      repetitionSeconds: repetitionSeries(repetitions, Math.round(92 - progress * 8)),
+      description: "Short track repetitions with controlled float recoveries.",
+    });
+  }
+  if (pattern === 1) {
+    return distanceIntervals({
+      id: `mock-year-${weekIndex}-800m`,
+      performedAt,
+      name: "8 × 800 m",
+      workMeters: 800,
+      recoveryMeters: 400,
+      recoverySeconds: 148,
+      repetitionSeconds: repetitionSeries(8, Math.round(190 - progress * 14)),
+      description: "Eight steady 800 metre repetitions at a repeatable rhythm.",
+    });
+  }
+  return distanceIntervals({
+    id: `mock-year-${weekIndex}-1k`,
+    performedAt,
+    name: "6 × 1 km",
+    workMeters: 1_000,
+    recoveryMeters: 400,
+    recoverySeconds: 150,
+    repetitionSeconds: repetitionSeries(6, Math.round(240 - progress * 18)),
+    description: "Six controlled kilometre repetitions with relaxed recoveries.",
+  });
+}
+
+function generatedEasyRun(weekIndex: number, dayOffset: number, performedAt: string): MockWorkout {
+  const progress = weekIndex / (TRAINING_WEEK_COUNT - 1);
+  const isLongRun = dayOffset === 6;
+  const distanceMeters = isLongRun
+    ? 16_000 + (weekIndex % 7) * 1_000
+    : 6_500 + ((weekIndex + dayOffset * 2) % 6) * 900;
+  const paceSecondsPerKilometer = 370 - progress * 22 + (isLongRun ? 5 : (dayOffset % 3) * 3);
+  const durationSeconds = Math.round((distanceMeters / 1_000) * paceSecondsPerKilometer);
+  const averageHeartRate = Math.round(136 - progress * 3 + (isLongRun ? 2 : dayOffset % 2));
+  return workout({
+    id: `mock-year-${weekIndex}-easy-${dayOffset}`,
+    performedAt,
+    name: isLongRun ? "Sunday aerobic long run" : "Easy aerobic run",
+    description: isLongRun
+      ? "Comfortable weekly long run, kept conversational from start to finish."
+      : "Low-intensity aerobic mileage at a conversational effort.",
+    laps: [
+      lap(
+        1,
+        isLongRun ? "Long run" : "Easy run",
+        distanceMeters,
+        durationSeconds,
+        0,
+        averageHeartRate,
+        averageHeartRate + 13,
+      ),
+    ],
+  });
+}
+
+function trainingYearWorkouts(curated: ReadonlyArray<MockWorkout>): ReadonlyArray<MockWorkout> {
+  const curatedByDate = new Map(curated.map((entry) => [entry.performedAt.slice(0, 10), entry]));
+  const generated: MockWorkout[] = [];
+  for (let weekIndex = 0; weekIndex < TRAINING_WEEK_COUNT; weekIndex += 1) {
+    const weekStart = TRAINING_YEAR_START + weekIndex * 7 * DAY_MILLISECONDS;
+    const targetRunCount = weekIndex % 3 === 0 ? 5 : 6;
+    const occupiedDays = new Set<number>();
+    for (let dayOffset = 0; dayOffset < 7; dayOffset += 1) {
+      const date = new Date(weekStart + dayOffset * DAY_MILLISECONDS).toISOString().slice(0, 10);
+      if (curatedByDate.has(date)) occupiedDays.add(dayOffset);
+    }
+    const preferredDays = [1, 3, 5, 6, 0, 2, 4];
+    for (const dayOffset of preferredDays) {
+      if (occupiedDays.size >= targetRunCount) break;
+      if (occupiedDays.has(dayOffset)) continue;
+      const dayTimestamp = weekStart + dayOffset * DAY_MILLISECONDS;
+      const performedAt = generatedInstant(dayTimestamp, weekIndex);
+      generated.push(
+        dayOffset === 1
+          ? generatedIntervals(weekIndex, performedAt)
+          : generatedEasyRun(weekIndex, dayOffset, performedAt),
+      );
+      occupiedDays.add(dayOffset);
+    }
+  }
+  return [...curated, ...generated].sort((left, right) =>
+    right.performedAt.localeCompare(left.performedAt),
+  );
+}
+
+export const mockWorkouts = trainingYearWorkouts(curatedWorkouts);

@@ -2,7 +2,7 @@ import { delay, HttpResponse, http } from "msw";
 import { API_BASE_URL } from "../infrastructure/api/lepre-backend";
 import { mockUser, mockWorkouts } from "./fixtures";
 
-const CHECKPOINT = "mock-checkpoint-2026-07-27-condition-dashboard";
+const CHECKPOINT = "mock-checkpoint-2026-07-27-adaptive-interval-training-year";
 let connected = true;
 
 export const handlers = [

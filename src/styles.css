@@ -1758,6 +1758,52 @@ input:focus-visible {
   line-height: 1.5;
 }
 
+.condition-card__context--intervals {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.condition-card__context--intervals strong {
+  font-size: 0.72rem;
+}
+
+.condition-card__context--intervals span {
+  color: var(--color-instrument);
+}
+
+.interval-alternatives {
+  margin: -0.25rem 0 0.8rem;
+  border-block: 1px solid var(--color-carbon);
+  font-family: var(--font-data);
+  font-size: 0.61rem;
+}
+
+.interval-alternatives summary {
+  padding: 0.55rem 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.interval-alternatives ul {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0 0 0.5rem;
+  list-style: none;
+}
+
+.interval-alternatives li {
+  display: grid;
+  gap: 0.25rem;
+  border-top: 1px dashed var(--color-carbon);
+  padding: 0.55rem 0;
+}
+
+.interval-alternatives li span {
+  color: var(--color-instrument);
+}
+
 .condition-card__context--legend {
   display: flex;
   flex-wrap: wrap;

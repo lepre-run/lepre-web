@@ -94,11 +94,21 @@ export const italian = {
       empty: "Una corsa libera su strada o tapis roulant di oltre 20 minuti creerà la base.",
     },
     intervals: {
-      title: "Ripetute da 1 km",
-      protocol: "{{repetitions}} ripetute · recupero {{recovery}} · variabilità {{variation}}%",
+      title: "Ripetute di riferimento",
+      protocol: "{{repetitions}} × {{work}} · recupero {{recovery}} · variabilità {{variation}}%",
+      selectedReason_one:
+        "Il formato recente più ripetuto · {{count}} seduta confrontabile nell’ultimo anno",
+      selectedReason_other:
+        "Il formato recente più ripetuto · {{count}} sedute confrontabili nell’ultimo anno",
       sessions_one: "{{count}} seduta confrontabile",
       sessions_other: "{{count}} sedute confrontabili",
-      empty: "Completa una seduta con ripetute da 1 km per stabilire questo passo.",
+      alternatives_one: "{{count}} altro formato confrontabile",
+      alternatives_other: "{{count}} altri formati confrontabili",
+      up: "{{value}}% più veloce nelle sedute recenti confrontabili",
+      down: "{{value}}% più lento nelle sedute recenti confrontabili",
+      steady: "Stabile nelle sedute recenti confrontabili",
+      noComparison: "Servono altre sedute confrontabili per una tendenza",
+      empty: "Completa una seduta con ripetute per creare un riferimento sugli intervalli.",
     },
     volume: {
       title: "Volume di corsa",

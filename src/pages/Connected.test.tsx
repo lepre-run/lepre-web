@@ -80,7 +80,7 @@ describe("Connected", () => {
     const overview = screen.getByRole("region", { name: "Weekly training overview" });
     const dashboard = screen.getByRole("region", { name: "Your running condition" });
     expect(dashboard).toHaveTextContent("Easy pace");
-    expect(dashboard).toHaveTextContent("1 km intervals");
+    expect(dashboard).toHaveTextContent("Reference intervals");
     expect(dashboard).toHaveTextContent("Training mix");
     expect(overview).toHaveTextContent("1 run");
     expect(overview).toHaveTextContent("8.00 km");

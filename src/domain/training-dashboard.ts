@@ -3,6 +3,8 @@ import type { Workout } from "./workout";
 
 const DAY_MILLISECONDS = 24 * 60 * 60 * 1_000;
 export const CONDITION_WINDOW_DAYS = 42;
+export const INTERVAL_LOOKBACK_DAYS = 365;
+const INTERVAL_RECENCY_DAYS = 84;
 
 export type EvidenceStrength = "early" | "growing" | "strong";
 export type TrendDirection = "up" | "steady" | "down";
@@ -22,14 +24,21 @@ export type EasyPaceInsight = Readonly<{
   trend: RelativeTrend | null;
 }>;
 
-export type KilometerIntervalInsight = Readonly<{
+export type IntervalFormatInsight = Readonly<{
+  work: StageMeasure;
+  recovery: StageMeasure;
   secondsPerKilometer: number;
   repetitions: number;
-  recovery: StageMeasure;
   sessionCount: number;
+  recentSessionCount: number;
   repetitionVariationPercent: number;
   evidence: EvidenceStrength;
   trend: RelativeTrend | null;
+}>;
+
+export type IntervalBenchmarkInsight = Readonly<{
+  primary: IntervalFormatInsight;
+  alternatives: ReadonlyArray<IntervalFormatInsight>;
 }>;
 
 export type WeeklyVolumeInsight = Readonly<{
@@ -54,7 +63,7 @@ export type TrainingDashboard = Readonly<{
   through: string;
   workoutCount: number;
   easyPace: EasyPaceInsight | null;
-  kilometerIntervals: KilometerIntervalInsight | null;
+  referenceIntervals: IntervalBenchmarkInsight | null;
   weeklyVolume: WeeklyVolumeInsight;
   trainingMix: TrainingMixInsight;
 }>;
@@ -64,12 +73,19 @@ type WorkoutWindow = Readonly<{
   previous: ReadonlyArray<Workout>;
 }>;
 
-type KilometerIntervalObservation = Readonly<{
+type IntervalObservation = Readonly<{
   workout: Workout;
+  work: StageMeasure;
+  recovery: StageMeasure;
   secondsPerKilometer: number;
   repetitions: number;
-  recovery: StageMeasure;
   repetitionVariationPercent: number;
+}>;
+
+type IntervalFamily = Readonly<{
+  observations: ReadonlyArray<IntervalObservation>;
+  insight: IntervalFormatInsight;
+  score: number;
 }>;
 
 function median(values: ReadonlyArray<number>): number {
@@ -152,31 +168,22 @@ function coefficientOfVariation(values: ReadonlyArray<number>): number {
   return average === 0 ? 0 : Math.sqrt(variance) / average;
 }
 
-function kilometerIntervalObservation(workout: Workout): KilometerIntervalObservation | null {
-  if (
-    workout.type !== "workout" ||
-    workout.structure.kind !== "intervals" ||
-    workout.structure.work.kind !== "distance" ||
-    workout.structure.work.meters < 900 ||
-    workout.structure.work.meters > 1_100
-  ) {
+function intervalObservation(workout: Workout): IntervalObservation | null {
+  if (workout.type !== "workout" || workout.structure.kind !== "intervals") {
     return null;
   }
   const workIndexes = new Set(workout.structure.lapRoles.work);
   const workLaps = workout.laps.filter(
-    (lap) =>
-      workIndexes.has(lap.index) &&
-      lap.distanceMeters >= 900 &&
-      lap.distanceMeters <= 1_100 &&
-      lap.movingDurationSeconds > 0,
+    (lap) => workIndexes.has(lap.index) && lap.distanceMeters > 0 && lap.movingDurationSeconds > 0,
   );
   if (workLaps.length === 0) return null;
   const paces = workLaps.map((lap) => (lap.movingDurationSeconds / lap.distanceMeters) * 1_000);
   return {
     workout,
+    work: workout.structure.work,
+    recovery: workout.structure.recovery,
     secondsPerKilometer: median(paces),
     repetitions: workLaps.length,
-    recovery: workout.structure.recovery,
     repetitionVariationPercent: coefficientOfVariation(paces) * 100,
   };
 }
@@ -185,55 +192,94 @@ function stageValue(stage: StageMeasure): number {
   return stage.kind === "distance" ? stage.meters : stage.seconds;
 }
 
-function sameIntervalFingerprint(
-  candidate: KilometerIntervalObservation,
-  reference: KilometerIntervalObservation,
-): boolean {
-  if (
-    candidate.recovery.kind !== reference.recovery.kind ||
-    Math.abs(candidate.repetitions - reference.repetitions) > 1
-  ) {
-    return false;
+function normalizedStage(stage: StageMeasure): StageMeasure {
+  if (stage.kind === "duration") {
+    return { kind: "duration", seconds: Math.max(30, Math.round(stage.seconds / 30) * 30) };
   }
-  const referenceRecovery = stageValue(reference.recovery);
-  return (
-    referenceRecovery === 0 ||
-    Math.abs(stageValue(candidate.recovery) - referenceRecovery) / referenceRecovery <= 0.2
+  const step = stage.meters < 1_500 ? 100 : 250;
+  return { kind: "distance", meters: Math.max(step, Math.round(stage.meters / step) * step) };
+}
+
+function intervalFingerprint(observation: IntervalObservation): string {
+  const work = normalizedStage(observation.work);
+  const recovery = normalizedStage(observation.recovery);
+  return `${work.kind}:${stageValue(work)}|${recovery.kind}:${stageValue(recovery)}`;
+}
+
+function intervalTrend(observations: ReadonlyArray<IntervalObservation>): RelativeTrend | null {
+  if (observations.length < 4) return null;
+  const sorted = [...observations].sort((left, right) =>
+    right.workout.performedAt.localeCompare(left.workout.performedAt),
+  );
+  const sampleSize = Math.min(3, Math.floor(sorted.length / 2));
+  return trendFromPaces(
+    sorted.slice(0, sampleSize).map((observation) => observation.secondsPerKilometer),
+    sorted.slice(sampleSize, sampleSize * 2).map((observation) => observation.secondsPerKilometer),
   );
 }
 
-function kilometerIntervalInsight(
-  currentWorkouts: ReadonlyArray<Workout>,
-  previousWorkouts: ReadonlyArray<Workout>,
-): KilometerIntervalInsight | null {
-  const currentObservations = currentWorkouts
-    .flatMap((workout) => {
-      const observation = kilometerIntervalObservation(workout);
-      return observation === null ? [] : [observation];
-    })
-    .sort((left, right) => right.workout.performedAt.localeCompare(left.workout.performedAt));
-  const reference = currentObservations[0];
-  if (!reference) return null;
-  const current = currentObservations.filter((observation) =>
-    sameIntervalFingerprint(observation, reference),
+function intervalFamily(
+  observations: ReadonlyArray<IntervalObservation>,
+  latestTimestamp: number,
+): IntervalFamily {
+  const sorted = [...observations].sort((left, right) =>
+    right.workout.performedAt.localeCompare(left.workout.performedAt),
   );
-  const previous = previousWorkouts.flatMap((workout) => {
-    const observation = kilometerIntervalObservation(workout);
-    return observation !== null && sameIntervalFingerprint(observation, reference)
-      ? [observation]
-      : [];
-  });
+  const recent = sorted.slice(0, Math.min(3, sorted.length));
+  const recencyStart = latestTimestamp - INTERVAL_RECENCY_DAYS * DAY_MILLISECONDS;
+  const recentSessionCount = sorted.filter(
+    (observation) => Date.parse(observation.workout.performedAt) > recencyStart,
+  ).length;
+  const daysSinceLast =
+    (latestTimestamp - Date.parse(sorted[0].workout.performedAt)) / DAY_MILLISECONDS;
+  const repetitions = Math.round(median(recent.map((observation) => observation.repetitions)));
   return {
-    secondsPerKilometer: median(current.map((observation) => observation.secondsPerKilometer)),
-    repetitions: reference.repetitions,
-    recovery: reference.recovery,
-    sessionCount: current.length,
-    repetitionVariationPercent: reference.repetitionVariationPercent,
-    evidence: evidenceStrength(current.length),
-    trend: trendFromPaces(
-      current.map((observation) => observation.secondsPerKilometer),
-      previous.map((observation) => observation.secondsPerKilometer),
-    ),
+    observations: sorted,
+    insight: {
+      work: normalizedStage(sorted[0].work),
+      recovery: normalizedStage(sorted[0].recovery),
+      secondsPerKilometer: median(recent.map((observation) => observation.secondsPerKilometer)),
+      repetitions,
+      sessionCount: sorted.length,
+      recentSessionCount,
+      repetitionVariationPercent: median(
+        recent.map((observation) => observation.repetitionVariationPercent),
+      ),
+      evidence: evidenceStrength(sorted.length),
+      trend: intervalTrend(sorted),
+    },
+    score: recentSessionCount * 1_000 + sorted.length * 20 - daysSinceLast,
+  };
+}
+
+function intervalBenchmarkInsight(
+  workouts: ReadonlyArray<Workout>,
+  latestTimestamp: number,
+): IntervalBenchmarkInsight | null {
+  const lookbackStart = latestTimestamp - INTERVAL_LOOKBACK_DAYS * DAY_MILLISECONDS;
+  const groups = new Map<string, IntervalObservation[]>();
+  for (const workout of workouts) {
+    if (Date.parse(workout.performedAt) <= lookbackStart) continue;
+    const observation = intervalObservation(workout);
+    if (observation === null) continue;
+    const fingerprint = intervalFingerprint(observation);
+    const group = groups.get(fingerprint) ?? [];
+    group.push(observation);
+    groups.set(fingerprint, group);
+  }
+  const families = [...groups.values()]
+    .map((observations) => intervalFamily(observations, latestTimestamp))
+    .filter((family) => family.insight.recentSessionCount > 0)
+    .sort((left, right) => right.score - left.score);
+  const primary = families[0];
+  if (!primary) return null;
+  return {
+    primary: primary.insight,
+    alternatives: families
+      .slice(1)
+      .filter((family) => family.insight.sessionCount >= 2)
+      .slice(0, 2)
+      .map((family) => family.insight),
   };
 }
 
@@ -320,7 +366,7 @@ export function createTrainingDashboard(
     through: latest.performedAt,
     workoutCount: windows.current.length,
     easyPace: easyPaceInsight(windows.current, windows.previous),
-    kilometerIntervals: kilometerIntervalInsight(windows.current, windows.previous),
+    referenceIntervals: intervalBenchmarkInsight(workouts, Date.parse(latest.performedAt)),
     weeklyVolume: weeklyVolumeInsight(windows),
     trainingMix: trainingMixInsight(windows.current),
   };
