@@ -20,8 +20,13 @@ describe("mock workout fixtures", () => {
       "free-run",
       "steady-structured-run",
       "free-run",
+      "intervals",
       "progressive",
       "free-run",
+      "free-run",
+      "intervals",
+      "free-run",
+      "intervals",
     ]);
   });
 });

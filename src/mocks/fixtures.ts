@@ -80,6 +80,29 @@ function workout(input: {
   };
 }
 
+function kilometerIntervals(input: {
+  id: string;
+  performedAt: string;
+  name: string;
+  repetitionSeconds: ReadonlyArray<number>;
+}): MockWorkout {
+  const laps: MockLap[] = [lap(1, "Warm up", 2_500, 840, 0, 136, 151)];
+  input.repetitionSeconds.forEach((seconds, offset) => {
+    laps.push(lap(2 + offset * 2, `Rep ${offset + 1}`, 1_000, seconds));
+    if (offset < input.repetitionSeconds.length - 1) {
+      laps.push(lap(3 + offset * 2, `Recovery ${offset + 1}`, 400, 150));
+    }
+  });
+  laps.push(lap(1 + input.repetitionSeconds.length * 2, "Cool down", 1_800, 630, 0, 139, 153));
+  return workout({
+    id: input.id,
+    performedAt: input.performedAt,
+    name: input.name,
+    description: "A repeatable six-by-one-kilometre session for longitudinal comparison.",
+    laps,
+  });
+}
+
 export const mockUser = {
   id: "mock-user-ada",
   firstName: "Ada",
@@ -233,6 +256,12 @@ export const mockWorkouts: ReadonlyArray<MockWorkout> = [
     sport: "TrailRun",
     laps: [lap(1, "Trail run", 18_700, 6_880, 90, 143, 169)],
   }),
+  kilometerIntervals({
+    id: "mock-intervals-6x1k-june",
+    performedAt: "2026-06-26T05:48:00.000Z",
+    name: "June kilometre repeats",
+    repetitionSeconds: [231, 230, 229, 228, 227, 226],
+  }),
   workout({
     id: "mock-progressive-five",
     performedAt: "2026-06-24T16:50:00.000Z",
@@ -253,5 +282,31 @@ export const mockWorkouts: ReadonlyArray<MockWorkout> = [
     description: "Easy treadmill kilometres while the summer storm passed outside.",
     sport: "VirtualRun",
     laps: [lap(1, "Treadmill run", 7_200, 2_520, 0, null, null)],
+  }),
+  workout({
+    id: "mock-easy-run-baseline-two",
+    performedAt: "2026-06-06T06:40:00.000Z",
+    name: "Easy park baseline",
+    description: "Relaxed conversational running on a flat park loop.",
+    laps: [lap(1, "Run", 10_500, 3_780, 0, 138, 151)],
+  }),
+  kilometerIntervals({
+    id: "mock-intervals-6x1k-baseline-two",
+    performedAt: "2026-06-04T05:52:00.000Z",
+    name: "Early June kilometre repeats",
+    repetitionSeconds: [237, 236, 235, 234, 233, 232],
+  }),
+  workout({
+    id: "mock-easy-run-baseline-one",
+    performedAt: "2026-05-22T06:25:00.000Z",
+    name: "May riverside easy run",
+    description: "An unhurried aerobic run used as an earlier pace baseline.",
+    laps: [lap(1, "Run", 9_400, 3_440, 0, 137, 150)],
+  }),
+  kilometerIntervals({
+    id: "mock-intervals-6x1k-baseline-one",
+    performedAt: "2026-05-18T05:45:00.000Z",
+    name: "May kilometre repeats",
+    repetitionSeconds: [240, 239, 238, 237, 236, 235],
   }),
 ];

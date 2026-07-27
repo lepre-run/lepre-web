@@ -12,6 +12,7 @@ import {
 import { LanguageSelector } from "../i18n/LanguageSelector";
 import { STRAVA_START_URL } from "../infrastructure/api/lepre-backend";
 import { downloadJson } from "../infrastructure/browser/download-json";
+import { ConditionDashboard } from "./condition-dashboard/ConditionDashboard";
 import { WeeklyOverview } from "./weekly-overview/WeeklyOverview";
 
 export { STRAVA_START_URL };
@@ -351,6 +352,7 @@ export function Home(): JSX.Element {
         </div>
       )}
       {notice.kind === "paused" && <output className="notice">{noticeMessage()}</output>}
+      {workouts.length > 0 && <ConditionDashboard workouts={workouts} />}
       <div className="feed-heading">
         <div>
           <p className="eyebrow">{t("feed.eyebrow")}</p>

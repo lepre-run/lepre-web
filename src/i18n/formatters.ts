@@ -69,7 +69,7 @@ function formatStageDuration(seconds: number): string {
   return remainder === 0 ? `${minutes} min` : `${minutes}:${remainder.toString().padStart(2, "0")}`;
 }
 
-function formatStage(stage: StageMeasure, language: string): string {
+export function formatStageMeasure(stage: StageMeasure, language = DEFAULT_LANGUAGE): string {
   return stage.kind === "distance"
     ? formatStageDistance(stage.meters, language)
     : formatStageDuration(stage.seconds);
@@ -84,8 +84,8 @@ export function formatClassification(
     case "intervals":
       return t("classification.intervals", {
         repetitions: classification.repetitions,
-        work: formatStage(classification.work, language),
-        recovery: formatStage(classification.recovery, language),
+        work: formatStageMeasure(classification.work, language),
+        recovery: formatStageMeasure(classification.recovery, language),
       });
     case "progressive":
       return t("classification.progressive", { stageCount: classification.stageCount });
