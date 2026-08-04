@@ -39,6 +39,7 @@ export const italian = {
   },
   notices: {
     synchronizationError: "Al momento non è possibile sincronizzare gli allenamenti.",
+    backfill: "I report recenti sono pronti. Le corse precedenti verranno importate gradualmente.",
     queued: "In attesa del turno di sincronizzazione…",
     rateLimited_one:
       "Strava ha raggiunto il limite di richieste. L’importazione è in pausa e riprenderà automaticamente tra circa {{count}} minuto.",

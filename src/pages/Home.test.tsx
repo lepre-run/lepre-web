@@ -53,6 +53,23 @@ describe("Home", () => {
     expect(application.synchronizeWorkouts).toHaveBeenCalledOnce();
   });
 
+  it("shows that older history will be imported gradually without fetching it immediately", async () => {
+    vi.mocked(application.loadUser).mockResolvedValue({ kind: "connected", user });
+    vi.mocked(application.synchronizeWorkouts).mockResolvedValue({
+      kind: "backfill-paused",
+      retryAfterSeconds: 900,
+    });
+
+    render(<Home />);
+
+    expect(
+      await screen.findByText(
+        "Your recent reports are ready. Older runs will be imported gradually.",
+      ),
+    ).toBeInTheDocument();
+    expect(application.synchronizeWorkouts).toHaveBeenCalledOnce();
+  });
+
   it("offers a manual retry only when an automatic update fails", async () => {
     vi.mocked(application.loadUser).mockResolvedValue({ kind: "connected", user });
     vi.mocked(application.synchronizeWorkouts).mockResolvedValue({

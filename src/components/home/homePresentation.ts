@@ -25,6 +25,7 @@ export function synchronizationState(
 
 export function noticeMessage(notice: Notice, t: TFunction): string {
   if (notice.kind === "none") return "";
+  if (notice.kind === "paused" && notice.reason === "backfill") return t("notices.backfill");
   if (notice.kind === "paused" && notice.reason === "queued") return t("notices.queued");
   if (notice.kind === "paused") return t("notices.rateLimited", { count: notice.minutes });
   return t(

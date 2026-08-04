@@ -37,6 +37,7 @@ export const english = {
   },
   notices: {
     synchronizationError: "Could not synchronize workouts right now.",
+    backfill: "Your recent reports are ready. Older runs will be imported gradually.",
     queued: "Waiting for a fair synchronization turn…",
     rateLimited_one:
       "Strava’s request limit was reached. Import paused and will resume automatically in about {{count}} minute.",

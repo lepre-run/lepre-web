@@ -13,6 +13,7 @@ export type ReadyScreen = Extract<ScreenState, { kind: "ready" }>;
 
 export type Notice =
   | Readonly<{ kind: "none" }>
+  | Readonly<{ kind: "paused"; reason: "backfill" }>
   | Readonly<{ kind: "paused"; reason: "queued" }>
   | Readonly<{ kind: "paused"; reason: "rate-limited"; minutes: number }>
   | Readonly<{

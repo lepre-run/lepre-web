@@ -31,6 +31,10 @@ export function useHomeController() {
     } else if (result.kind === "provider-unavailable") {
       setStatus("failed");
       setNotice({ kind: "error", reason: "synchronization", retryable: true });
+    } else if (result.kind === "backfill-paused") {
+      setRetryAt(Date.now() + result.retryAfterSeconds * 1_000);
+      setStatus("paused");
+      setNotice({ kind: "paused", reason: "backfill" });
     } else if (result.kind === "queued" || result.kind === "rate-limited") {
       setRetryAt(Date.now() + result.retryAfterSeconds * 1_000);
       setStatus("paused");

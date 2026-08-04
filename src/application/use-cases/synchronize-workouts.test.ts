@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { ContinuationToken, SynchronizationCheckpoint } from "../../domain/identity";
+import type { ContinuationToken } from "../../domain/identity";
 import { createWorkout } from "../../domain/workout";
 import type { BackendGateway, LocalStore } from "../ports";
 import { createSynchronizeWorkouts } from "./synchronize-workouts";
 
 describe("SynchronizeWorkouts", () => {
-  it("applies every page and commits the final checkpoint", async () => {
+  it("applies one page and pauses before continuing the historical backfill", async () => {
     const workout = createWorkout({
       id: "strava:7",
       performedAt: "2026-07-15T06:00:00Z",
@@ -33,40 +33,22 @@ describe("SynchronizeWorkouts", () => {
       removed: [],
       continuation: { kind: "more", token: "next" as ContinuationToken },
     } as const;
-    const last = {
-      upserted: [],
-      removed: [],
-      continuation: {
-        kind: "complete",
-        checkpoint: "checkpoint" as SynchronizationCheckpoint,
-      },
-    } as const;
     const applySynchronizationBatch = vi.fn().mockResolvedValue(undefined);
     const store = {
       synchronizationState: vi.fn().mockResolvedValue({ kind: "initial" }),
       applySynchronizationBatch,
     } as unknown as LocalStore;
-    const fetchWorkoutBatch = vi
-      .fn()
-      .mockResolvedValueOnce({ kind: "received", batch: first })
-      .mockResolvedValueOnce({ kind: "received", batch: last });
+    const fetchWorkoutBatch = vi.fn().mockResolvedValue({ kind: "received", batch: first });
     const backend = { fetchWorkoutBatch } as unknown as BackendGateway;
     const afterBatch = vi.fn().mockResolvedValue(undefined);
 
     await expect(createSynchronizeWorkouts(store, backend)(afterBatch)).resolves.toEqual({
-      kind: "synchronized",
+      kind: "backfill-paused",
+      retryAfterSeconds: 900,
     });
     expect(applySynchronizationBatch).toHaveBeenNthCalledWith(1, first);
-    expect(applySynchronizationBatch).toHaveBeenNthCalledWith(2, last);
-    expect(fetchWorkoutBatch).toHaveBeenNthCalledWith(
-      2,
-      { kind: "initial" },
-      {
-        kind: "next",
-        token: "next",
-      },
-    );
-    expect(afterBatch).toHaveBeenCalledTimes(2);
+    expect(fetchWorkoutBatch).toHaveBeenCalledOnce();
+    expect(afterBatch).toHaveBeenCalledOnce();
   });
 
   it("resumes an interrupted import from its stored continuation", async () => {
