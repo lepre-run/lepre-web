@@ -14,6 +14,7 @@ export type WorkoutType =
   | "intervals"
   | "tempo"
   | "repeated-hills"
+  | "hill-circuit"
   | "steady-structured-run"
   | "free-run"
   | "unknown";
@@ -31,6 +32,7 @@ type Classification =
       }>)
   | (ClassificationBase & Readonly<{ kind: "tempo"; distanceMeters: number }>)
   | (ClassificationBase & Readonly<{ kind: "repeated-hills"; repetitions: number }>)
+  | (ClassificationBase & Readonly<{ kind: "hill-circuit"; repetitions: number }>)
   | (ClassificationBase & Readonly<{ kind: "steady-structured-run" }>)
   | (ClassificationBase & Readonly<{ kind: "free-run" }>)
   | (ClassificationBase & Readonly<{ kind: "unknown" }>);
@@ -130,6 +132,51 @@ function alternatingCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<Candidat
           });
         }
       }
+    }
+  }
+  return candidates;
+}
+
+function hillCircuitCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<Candidate> {
+  const candidates: Candidate[] = [];
+  for (let start = 0; start <= laps.length - 7; start += 1) {
+    for (let end = start + 6; end < laps.length; end += 2) {
+      const stages = laps.slice(start, end + 1);
+      const work = stages.filter((_, index) => index % 2 === 0);
+      const recovery = stages.filter((_, index) => index % 2 === 1);
+      if (work.length < 4 || work.length % 2 !== 0) continue;
+
+      const uphill = work.filter((_, index) => index % 2 === 0);
+      const downhill = work.filter((_, index) => index % 2 === 1);
+      const workDistanceVariation = coefficientOfVariation(work.map((lap) => lap.distanceMeters));
+      const recoveryConsistency = Math.min(
+        coefficientOfVariation(recovery.map((lap) => lap.distanceMeters)),
+        coefficientOfVariation(recovery.map((lap) => lap.movingDurationSeconds)),
+      );
+      const uphillPaceVariation = coefficientOfVariation(uphill.map(pace));
+      const downhillPaceVariation = coefficientOfVariation(downhill.map(pace));
+      if (
+        workDistanceVariation > 0.16 ||
+        recoveryConsistency > 0.3 ||
+        uphillPaceVariation > 0.14 ||
+        downhillPaceVariation > 0.14
+      ) {
+        continue;
+      }
+
+      const uphillPace = mean(uphill.map(pace));
+      const downhillPace = mean(downhill.map(pace));
+      const separation = (uphillPace - downhillPace) / uphillPace;
+      if (separation < 0.18) continue;
+
+      candidates.push({
+        kind: "hill-circuit",
+        repetitions: work.length / 2,
+        coreLapIndexes: stages.map((lap) => lap.index),
+        workLapIndexes: work.map((lap) => lap.index),
+        recoveryLapIndexes: recovery.map((lap) => lap.index),
+        score: Math.min(0.98, 0.78 + separation / 2),
+      });
     }
   }
   return candidates;
@@ -277,6 +324,7 @@ export function classifyWorkout(laps: ReadonlyArray<Lap>): ActualWorkoutStructur
     return unstructuredWorkout(laps, "unknown", 0);
   }
   const candidates = [
+    ...hillCircuitCandidates(laps),
     ...alternatingCandidates(laps),
     ...progressiveCandidates(laps),
     ...tempoCandidates(laps),

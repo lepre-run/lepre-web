@@ -42,6 +42,7 @@ export function workoutType(workout: Workout, t: TFunction): string {
     case "tempo":
       return t("weekly.types.tempo");
     case "repeated-hills":
+    case "hill-circuit":
       return t("weekly.types.hills");
     case "steady-structured-run":
       return t("weekly.types.steady");

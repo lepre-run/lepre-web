@@ -141,6 +141,24 @@ export const mockUser = {
 
 const curatedWorkouts: ReadonlyArray<MockWorkout> = [
   workout({
+    id: "mock-hill-circuit-2026-08-04",
+    performedAt: "2026-08-04T10:29:04.000Z",
+    name: "Circuito collinare di Lydiard",
+    description:
+      "Due giri in stile Lydiard: salita controllata, recupero facile, discesa veloce e un altro recupero facile.",
+    laps: [
+      lap(1, "Riscaldamento", 5_254.05, 1_633, 102, 136.5, 160),
+      lap(2, "Salita 1", 1_021.65, 317, 0, 165.5, 174),
+      lap(3, "Recupero 1", 288.08, 100, 0, 162.4, 174),
+      lap(4, "Discesa 1", 1_007.46, 204, 0, 161.8, 168),
+      lap(5, "Recupero 2", 366.76, 114, 32, 161.5, 168),
+      lap(6, "Salita 2", 1_016.08, 329, 0, 172.2, 178),
+      lap(7, "Recupero 3", 296.63, 111, 0, 159.4, 178),
+      lap(8, "Discesa 2", 996.77, 210, 0, 162.9, 171),
+      lap(9, "Defaticamento", 7_516.96, 2_416, 221, 151.6, 170),
+    ],
+  }),
+  workout({
     id: "mock-intervals-8x400",
     performedAt: "2026-07-21T05:50:00.000Z",
     name: "Sunrise 400s",

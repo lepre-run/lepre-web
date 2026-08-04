@@ -1,5 +1,5 @@
 export const ACTUAL_WORKOUT_STRUCTURE_SCHEMA_VERSION = 1 as const;
-export const WORKOUT_CLASSIFIER_VERSION = 1 as const;
+export const WORKOUT_CLASSIFIER_VERSION = 2 as const;
 
 export type StageMeasure =
   | Readonly<{ kind: "distance"; meters: number }>
@@ -34,6 +34,7 @@ export type ActualWorkoutStructure = StructureBase &
     | Readonly<{ kind: "progressive"; stageCount: number }>
     | Readonly<{ kind: "tempo"; distanceMeters: number }>
     | Readonly<{ kind: "repeated-hills"; repetitions: number }>
+    | Readonly<{ kind: "hill-circuit"; repetitions: number }>
     | Readonly<{ kind: "steady-structured-run" }>
     | Readonly<{ kind: "free-run" }>
     | Readonly<{ kind: "unknown" }>
@@ -96,6 +97,7 @@ export function isCurrentActualWorkoutStructure(value: unknown): value is Actual
     case "tempo":
       return isFiniteNonNegative(value.distanceMeters);
     case "repeated-hills":
+    case "hill-circuit":
       return isPositiveInteger(value.repetitions);
     case "steady-structured-run":
     case "free-run":

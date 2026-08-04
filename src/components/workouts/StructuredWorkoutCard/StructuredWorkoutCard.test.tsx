@@ -44,7 +44,7 @@ function tempoWorkout(): Workout {
     ],
     structure: {
       schemaVersion: 1,
-      classifierVersion: 1,
+      classifierVersion: 2,
       source: "inferred_from_strava_laps",
       confidence: 0.94,
       kind: "tempo",
@@ -98,7 +98,7 @@ function repeatedHillsWorkout(): Workout {
     ],
     structure: {
       schemaVersion: 1,
-      classifierVersion: 1,
+      classifierVersion: 2,
       source: "inferred_from_strava_laps",
       confidence: 0.9,
       kind: "repeated-hills",
@@ -195,7 +195,7 @@ describe("StructuredWorkoutCard", () => {
     const workout = buildWorkout({
       structure: {
         schemaVersion: 1,
-        classifierVersion: 1,
+        classifierVersion: 2,
         source: "inferred_from_strava_laps",
         confidence: 0.2,
         kind: "unknown",

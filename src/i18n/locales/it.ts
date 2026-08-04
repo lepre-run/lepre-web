@@ -220,6 +220,8 @@ export const italian = {
     progressiveBadge: "Progressivo",
     tempo: "Corsa a ritmo medio di {{distance}}",
     repeatedHills: "{{repetitions}} ripetute in salita con recupero in corsa lenta",
+    hillCircuit_one: "Circuito estensivo di Lydiard da {{count}} giro",
+    hillCircuit_other: "Circuito estensivo di Lydiard da {{count}} giri",
     steadyStructuredRun: "Corsa strutturata a ritmo costante",
     freeRun: "Corsa libera",
     unknown: "Allenamento non classificato",

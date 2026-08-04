@@ -11,7 +11,7 @@ import { i18n } from "./i18n";
 
 const intervalWorkout = {
   schemaVersion: 1,
-  classifierVersion: 1,
+  classifierVersion: 2,
   source: "inferred_from_strava_laps",
   confidence: 0.94,
   kind: "intervals",
@@ -29,6 +29,24 @@ const intervalWorkout = {
   },
 } as const;
 
+const hillCircuitWorkout = {
+  schemaVersion: 1,
+  classifierVersion: 2,
+  source: "inferred_from_strava_laps",
+  confidence: 0.95,
+  kind: "hill-circuit",
+  repetitions: 2,
+  coreLapIndexes: [2, 3, 4, 5, 6, 7, 8],
+  lapRoles: {
+    warmup: [1],
+    work: [2, 4, 6, 8],
+    recovery: [3, 5, 7],
+    cooldown: [9],
+    main: [],
+    unknown: [],
+  },
+} as const;
+
 describe("presentation formatters", () => {
   it("uses English by default", () => {
     expect(formatWorkoutDate("2026-07-15T06:00:00.000Z")).toBe("Jul 15, 2026");
@@ -40,6 +58,7 @@ describe("presentation formatters", () => {
     expect(formatClassification(intervalWorkout, i18n.t)).toBe(
       "4 × 1 km intervals with 400 m recovery",
     );
+    expect(formatClassification(hillCircuitWorkout, i18n.t)).toBe("2-loop Lydiard hill circuit");
     expect(i18n.t("feed.storedCount", { count: 1 })).toBe("1 stored locally");
     expect(i18n.t("feed.storedCount", { count: 5 })).toBe("5 stored locally");
     expect(i18n.t("workout.averageHeartRateShort")).toBe("avg");
@@ -56,6 +75,9 @@ describe("presentation formatters", () => {
     expect(formatDistance(8_000, "it")).toBe("8,00 km");
     expect(formatClassification(intervalWorkout, t, "it")).toBe(
       "Ripetute: 4 × 1 km, recupero 400 m",
+    );
+    expect(formatClassification(hillCircuitWorkout, t, "it")).toBe(
+      "Circuito estensivo di Lydiard da 2 giri",
     );
     expect(t("feed.storedCount", { count: 1 })).toBe("1 allenamento salvato in locale");
     expect(t("feed.storedCount", { count: 5 })).toBe("5 allenamenti salvati in locale");

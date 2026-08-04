@@ -97,6 +97,10 @@ export function formatClassification(
       return t("classification.repeatedHills", {
         repetitions: classification.repetitions,
       });
+    case "hill-circuit":
+      return t("classification.hillCircuit", {
+        count: classification.repetitions,
+      });
     case "steady-structured-run":
       return t("classification.steadyStructuredRun");
     case "free-run":

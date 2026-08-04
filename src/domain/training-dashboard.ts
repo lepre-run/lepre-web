@@ -335,6 +335,7 @@ function trainingMixInsight(workouts: ReadonlyArray<Workout>): TrainingMixInsigh
         break;
       case "intervals":
       case "repeated-hills":
+      case "hill-circuit":
         high += 1;
         break;
       case "unknown":

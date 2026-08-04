@@ -216,6 +216,8 @@ export const english = {
     progressiveBadge: "Progressive",
     tempo: "{{distance}} tempo",
     repeatedHills: "{{repetitions}} repeated hills with jog recovery",
+    hillCircuit_one: "{{count}}-loop Lydiard hill circuit",
+    hillCircuit_other: "{{count}}-loop Lydiard hill circuit",
     steadyStructuredRun: "Steady structured run",
     freeRun: "Free run",
     unknown: "Unknown workout",

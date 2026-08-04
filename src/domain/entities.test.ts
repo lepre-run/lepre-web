@@ -74,7 +74,7 @@ describe("domain entities", () => {
         ],
         structure: {
           schemaVersion: 1,
-          classifierVersion: 1,
+          classifierVersion: 2,
           source: "inferred_from_strava_laps",
           confidence: 1,
           kind: "free-run",

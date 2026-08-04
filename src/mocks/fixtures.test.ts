@@ -18,6 +18,7 @@ describe("mock workout fixtures", () => {
         "intervals",
         "free-run",
         "repeated-hills",
+        "hill-circuit",
         "progressive",
         "tempo",
         "unknown",
@@ -51,5 +52,43 @@ describe("mock workout fixtures", () => {
         { kind: "distance", meters: 1_000 },
       ]),
     );
+  });
+
+  it("includes the downloaded Lydiard hill circuit as local example data", () => {
+    const fixture = mockWorkouts.find(({ id }) => id === "mock-hill-circuit-2026-08-04");
+    expect(fixture).toBeDefined();
+    if (!fixture) throw new Error("expected hill circuit fixture");
+    expect(fixture).toMatchObject({
+      name: "Circuito collinare di Lydiard",
+      description:
+        "Due giri in stile Lydiard: salita controllata, recupero facile, discesa veloce e un altro recupero facile.",
+    });
+    expect(fixture.laps.map(({ name }) => name)).toEqual([
+      "Riscaldamento",
+      "Salita 1",
+      "Recupero 1",
+      "Discesa 1",
+      "Recupero 2",
+      "Salita 2",
+      "Recupero 3",
+      "Discesa 2",
+      "Defaticamento",
+    ]);
+
+    const result = createWorkout(fixture);
+    expect(result.kind).toBe("created");
+    if (result.kind !== "created") throw new Error("expected workout");
+    expect(result.workout.structure).toMatchObject({
+      classifierVersion: 2,
+      kind: "hill-circuit",
+      repetitions: 2,
+      coreLapIndexes: [2, 3, 4, 5, 6, 7, 8],
+      lapRoles: {
+        warmup: [1],
+        work: [2, 4, 6, 8],
+        recovery: [3, 5, 7],
+        cooldown: [9],
+      },
+    });
   });
 });

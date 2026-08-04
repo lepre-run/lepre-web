@@ -32,7 +32,7 @@ describe("workout classifier", () => {
 
     expect(classifyWorkout(laps)).toMatchObject({
       schemaVersion: 1,
-      classifierVersion: 1,
+      classifierVersion: 2,
       source: "inferred_from_strava_laps",
       confidence: 0.98,
       kind: "intervals",
@@ -92,6 +92,34 @@ describe("workout classifier", () => {
     ).toMatchObject({ kind: "repeated-hills", repetitions: 3 });
   });
 
+  it("recognizes a Lydiard hill circuit with alternating uphill and downhill stages", () => {
+    const structure = classifyWorkout([
+      lap(1, 5_254.05, 311),
+      lap(2, 1_021.65, 310),
+      lap(3, 288.08, 347),
+      lap(4, 1_007.46, 202),
+      lap(5, 366.76, 311),
+      lap(6, 1_016.08, 324),
+      lap(7, 296.63, 374),
+      lap(8, 996.77, 211),
+      lap(9, 7_516.96, 321),
+    ]);
+
+    expect(structure).toMatchObject({
+      schemaVersion: 1,
+      classifierVersion: 2,
+      kind: "hill-circuit",
+      repetitions: 2,
+      coreLapIndexes: [2, 3, 4, 5, 6, 7, 8],
+      lapRoles: {
+        warmup: [1],
+        work: [2, 4, 6, 8],
+        recovery: [3, 5, 7],
+        cooldown: [9],
+      },
+    });
+  });
+
   it("keeps consistent automatic laps as a free run", () => {
     expect(
       classifyWorkout([
@@ -102,7 +130,7 @@ describe("workout classifier", () => {
       ]),
     ).toMatchObject({
       schemaVersion: 1,
-      classifierVersion: 1,
+      classifierVersion: 2,
       source: "inferred_from_strava_laps",
       confidence: 0.9,
       kind: "free-run",
