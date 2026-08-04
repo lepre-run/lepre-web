@@ -1,0 +1,61 @@
+.download-panel {
+  margin: 0 0 1.4rem;
+  border: 1px solid var(--color-carbon);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.download-panel__heading {
+  display: grid;
+  grid-template-columns: minmax(14rem, 1fr) minmax(16rem, 1fr);
+  gap: 2rem;
+  align-items: end;
+  margin-bottom: 1.25rem;
+}
+
+.download-panel__heading h2 {
+  margin: 0.25rem 0 0;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  letter-spacing: -0.04em;
+}
+
+.download-panel__heading > p,
+.download-count {
+  margin: 0;
+  color: var(--color-instrument);
+  line-height: 1.5;
+}
+
+.download-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.download-fields label {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--color-instrument);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.download-fields input {
+  min-width: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface-muted);
+  padding: 0.72rem;
+  color: var(--color-carbon);
+  font: inherit;
+}
+
+.download-count {
+  display: block;
+  margin: 0.85rem 0;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.72rem;
+}

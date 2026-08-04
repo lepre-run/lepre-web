@@ -1,0 +1,103 @@
+.account-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin: -1rem 0 1.5rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+
+.account-panel h2,
+.disconnect-confirmation h3 {
+  margin: 0.25rem 0 0;
+}
+
+.account-panel p,
+.disconnect-confirmation p {
+  max-width: 38rem;
+  margin: 0.45rem 0 0;
+  color: var(--color-instrument);
+  line-height: 1.5;
+}
+
+.account-panel__controls {
+  display: flex;
+  flex: none;
+  align-items: end;
+  gap: 0.75rem;
+}
+
+.language-selector {
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.language-selector legend {
+  margin-bottom: 0.3rem;
+  color: var(--color-instrument);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.language-selector__options {
+  display: flex;
+  gap: 0.14rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-muted);
+  padding: 0.16rem;
+}
+
+.language-selector__options button {
+  border: 0;
+  border-radius: calc(var(--radius-control) - 3px);
+  background: transparent;
+  padding: 0.42rem 0.58rem;
+  color: var(--color-instrument);
+  font-size: 0.68rem;
+  line-height: 1;
+}
+
+.language-selector__options button[aria-pressed="true"] {
+  background: var(--color-carbon);
+  color: var(--color-surface);
+}
+
+.language-selector__options button:focus-visible {
+  outline: 2px solid var(--color-kinetic);
+  outline-offset: 2px;
+}
+
+.danger-action {
+  flex: none;
+  border-color: var(--color-danger);
+  background: transparent;
+  color: var(--color-danger);
+}
+
+.danger-action--solid {
+  background: var(--color-danger);
+  color: var(--color-surface);
+}
+
+.disconnect-confirmation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1.5rem;
+}
+
+.disconnect-actions {
+  display: flex;
+  flex: none;
+  gap: 0.5rem;
+}

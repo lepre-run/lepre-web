@@ -1,0 +1,28 @@
+.feed-heading {
+  align-items: end;
+  margin-bottom: 1.25rem;
+}
+
+.feed-heading h1,
+.feed-heading h2 {
+  margin: 0.25rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.65rem, 3vw, 2.2rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.workout-count {
+  flex: none;
+  margin: 0;
+  color: var(--color-instrument);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.76rem;
+}
+
+.feed-actions,
+.download-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}

@@ -1,0 +1,106 @@
+.weekly-overview__scroll {
+  border: var(--border-heavy);
+  border-radius: var(--radius-card);
+  box-shadow: 8px 8px 0 var(--color-carbon);
+}
+
+.weekly-grid__header {
+  border-bottom: var(--border-heavy);
+  background: var(--color-threshold);
+}
+
+.weekly-grid__header > span {
+  border-inline-start: 2px solid var(--color-carbon);
+  color: var(--color-carbon);
+  font-weight: 800;
+}
+
+.weekly-grid__week {
+  border-bottom: var(--border-heavy);
+}
+
+.weekly-summary {
+  background: var(--color-violet);
+}
+
+.weekly-summary > time,
+.weekly-summary dt {
+  color: var(--color-carbon);
+  font-weight: 700;
+}
+
+.weekly-summary > strong {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.weekly-summary__metric {
+  border-top: 2px solid var(--color-carbon);
+  padding-top: 0.35rem;
+}
+
+.weekly-day {
+  border-inline-start: 2px solid var(--color-carbon);
+  background: var(--color-surface);
+  padding: 0.7rem;
+}
+
+.weekly-day[data-empty="true"] {
+  background: var(--color-surface-muted);
+}
+
+.weekly-workout {
+  border: 2px solid var(--color-carbon);
+  border-radius: var(--radius-panel);
+  background: color-mix(in oklch, var(--weekly-accent) 22%, var(--color-surface));
+  box-shadow: 3px 3px 0 var(--color-carbon);
+  transition:
+    transform 110ms ease,
+    box-shadow 110ms ease,
+    background-color 110ms ease;
+}
+
+.weekly-workout[aria-expanded="true"] {
+  border-color: var(--color-carbon);
+  background: color-mix(in oklch, var(--weekly-accent) 38%, var(--color-surface));
+  box-shadow: 0 0 0 var(--color-carbon);
+  transform: translate(3px, 3px);
+}
+
+.weekly-workout__type,
+.weekly-workout small {
+  color: var(--color-carbon);
+  font-weight: 700;
+}
+
+@media (hover: hover) {
+  .weekly-workout:not(:disabled):hover {
+    border-color: var(--color-carbon);
+    background: color-mix(in oklch, var(--weekly-accent) 34%, var(--color-surface));
+    color: var(--color-carbon);
+  }
+}
+
+.weekly-pagination {
+  margin-top: 1.25rem;
+}
+
+.weekly-pagination > span {
+  border: 2px solid var(--color-carbon);
+  border-radius: 2px;
+  background: var(--color-surface);
+  padding: 0.35rem 0.5rem;
+  color: var(--color-carbon);
+  font-weight: 700;
+}
+
+.weekly-detail {
+  border-top: var(--border-heavy);
+  background: var(--color-cyan);
+  padding: 1.6rem 1.5rem 2rem;
+}
+
+.weekly-detail > header h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+}

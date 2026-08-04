@@ -1,0 +1,251 @@
+@media (max-width: 760px) {
+  .shell {
+    width: min(100% - 1rem, 1080px);
+    padding: 0.8rem 0 3rem;
+  }
+
+  .app-header {
+    align-items: center;
+    flex-direction: row;
+    padding-bottom: 1.3rem;
+  }
+
+  .runner-name {
+    display: none;
+  }
+
+  .header-controls {
+    width: auto;
+    gap: 0.35rem;
+  }
+
+  .sync-status {
+    margin-right: 0;
+    font-size: 0.62rem;
+  }
+
+  button,
+  .primary-action {
+    padding: 0.58rem 0.78rem;
+  }
+
+  .feed-heading {
+    align-items: center;
+    flex-direction: row;
+    margin-bottom: 0.85rem;
+  }
+
+  .feed-heading .eyebrow {
+    display: none;
+  }
+
+  .feed-heading h1,
+  .feed-heading h2 {
+    max-width: 12ch;
+    margin: 0;
+    font-size: clamp(1.6rem, 8vw, 2rem);
+    line-height: 1.05;
+  }
+
+  .feed-actions {
+    width: auto;
+    justify-content: flex-end;
+    gap: 0.4rem;
+  }
+
+  .workout-count {
+    font-size: 0.62rem;
+  }
+
+  .workout-card__header {
+    display: block;
+    padding: 1.1rem;
+  }
+
+  .workout-card h2 {
+    margin-top: 0.45rem;
+    font-size: clamp(1.4rem, 7vw, 1.8rem);
+  }
+
+  .workout-classification {
+    font-size: 0.78rem;
+  }
+
+  .workout-summary {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 1rem;
+  }
+
+  .workout-summary > div {
+    min-width: 0;
+    padding: 0 0.65rem;
+  }
+
+  .workout-summary dt {
+    font-size: 0.6rem;
+  }
+
+  .workout-summary dd {
+    font-size: 0.82rem;
+  }
+
+  .workout-card__structure {
+    padding: 1rem;
+  }
+
+  .repetition-matrix__labels,
+  .repetition-row {
+    grid-template-columns: 2.6rem minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.32rem;
+  }
+
+  .repetition-matrix__labels {
+    padding-inline: 0.45rem;
+  }
+
+  .repetition-row {
+    padding: 0.32rem;
+  }
+
+  .repetition-row__identity {
+    padding-inline: 0.2rem;
+  }
+
+  .repetition-row__identity span,
+  .repetition-row__identity em {
+    display: none;
+  }
+
+  .repetition-cell {
+    padding: 0.58rem 0.55rem;
+  }
+
+  .repetition-cell__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .repetition-cell strong {
+    font-size: 0.9rem;
+  }
+
+  .repetition-cell__heart-rate {
+    display: none;
+  }
+
+  .stage-row {
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 0.5rem 0.75rem;
+  }
+
+  .stage-row__heart-rate {
+    text-align: right;
+  }
+
+  .evidence-table-scroll {
+    overflow: visible;
+  }
+
+  .evidence-table {
+    min-width: 0;
+  }
+
+  .evidence-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .evidence-table tbody {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .evidence-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.25fr);
+    gap: 0.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-panel);
+    background: var(--color-surface);
+    padding: 0.62rem;
+  }
+
+  .evidence-row td {
+    display: grid;
+    min-width: 0;
+    gap: 0.12rem;
+    border: 0;
+    padding: 0;
+    font-size: 0.62rem;
+  }
+
+  .evidence-row td::before {
+    overflow: hidden;
+    color: var(--color-instrument);
+    content: attr(data-label);
+    font-size: 0.5rem;
+    letter-spacing: 0.035em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .evidence-row td:first-child {
+    grid-column: 1 / 4;
+    box-shadow: none;
+  }
+
+  .evidence-row td:nth-child(2) {
+    grid-column: 4;
+  }
+
+  .evidence-row td:last-child {
+    white-space: nowrap;
+  }
+
+  .evidence-row__lap strong {
+    font-size: 0.68rem;
+  }
+
+  .account-panel,
+  .disconnect-confirmation,
+  .notice--action {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .account-panel {
+    margin-top: 0;
+  }
+
+  .account-panel__controls {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .account-panel__controls .language-selector {
+    align-self: flex-start;
+  }
+
+  .disconnect-actions {
+    flex-direction: column;
+  }
+
+  .notice-action {
+    align-self: flex-start;
+  }
+
+  .download-panel__heading,
+  .download-fields {
+    grid-template-columns: 1fr;
+  }
+}

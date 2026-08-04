@@ -1,0 +1,77 @@
+.shell {
+  width: min(100% - 2rem, 1380px);
+  margin: 0 auto;
+  padding: 2rem 0 5rem;
+}
+
+.shell--centered {
+  display: grid;
+  min-height: 100vh;
+  align-content: center;
+  justify-items: start;
+  max-width: 680px;
+}
+
+.shell--centered h1 {
+  max-width: 10ch;
+  margin: 0;
+  font-size: clamp(3rem, 10vw, 6rem);
+  line-height: 0.94;
+  letter-spacing: -0.07em;
+}
+
+.public-settings {
+  display: flex;
+  width: 100%;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.wordmark,
+.eyebrow {
+  margin: 0;
+  color: var(--color-carbon);
+}
+
+.wordmark {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 1.15rem;
+}
+
+.wordmark::before {
+  width: 0.62rem;
+  height: 0.62rem;
+  background: var(--color-kinetic);
+  content: "";
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--color-instrument);
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.eyebrow::before {
+  width: 1.5rem;
+  height: 2px;
+  background: var(--color-kinetic);
+  content: "";
+}
+
+.lede {
+  max-width: 35rem;
+  color: var(--color-instrument);
+  font-size: 1.15rem;
+}

@@ -1,0 +1,148 @@
+:root {
+  --color-carbon: #18181b;
+  --color-lab-paper: #fffdf4;
+  --color-instrument: #454545;
+  --color-kinetic: #b8ff61;
+  --color-threshold: #ffdf4f;
+  --color-danger: #ff6b6b;
+  --color-line: #18181b;
+  --color-line-strong: #18181b;
+  --color-surface: #fffdf4;
+  --color-surface-muted: #f4f0e6;
+  --color-context: #d9d4ff;
+  --color-work: #a8d8ff;
+  --color-work-ink: #18181b;
+  --color-recovery: #fff4a8;
+  --color-sunrise: #ff9d66;
+  --color-sunrise-glow: rgb(255 157 102 / 18%);
+  --color-shadow: #18181b;
+  --color-kinetic-glow: rgb(184 255 97 / 22%);
+  --color-violet: #a8a6ff;
+  --color-pink: #ffa6f6;
+  --color-cyan: #a6faff;
+  --color-interactive-muted: color-mix(in oklch, var(--color-kinetic) 12%, var(--color-surface));
+  --radius-card: 5px;
+  --radius-panel: 3px;
+  --radius-control: 3px;
+  --shadow-card: 6px 6px 0 var(--color-shadow);
+  --shadow-control: 3px 3px 0 var(--color-shadow);
+  --border-heavy: 3px solid var(--color-carbon);
+  --font-display: "Barlow", "Avenir Next", "Segoe UI Variable Display", sans-serif;
+  --font-journal: "Barlow", "Avenir Next", "Segoe UI", sans-serif;
+  --font-data: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  color: var(--color-carbon);
+  background: var(--color-surface);
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  font-variant-numeric: tabular-nums;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--color-surface);
+}
+
+button,
+a {
+  font: inherit;
+}
+
+button,
+.primary-action,
+.notice-action {
+  border: 1px solid var(--color-carbon);
+  border-radius: var(--radius-control);
+  background: var(--color-carbon);
+  color: var(--color-lab-paper);
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+
+button:focus-visible,
+.primary-action:focus-visible,
+.notice-action:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--color-kinetic);
+  outline-offset: 2px;
+}
+
+.quiet-action {
+  background: transparent;
+  color: var(--color-carbon);
+}
+
+.primary-action {
+  display: inline-block;
+  margin-top: 1rem;
+  border-color: var(--color-kinetic);
+  background: var(--color-kinetic);
+  color: var(--color-carbon);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  button:not(:disabled):hover,
+  .notice-action:hover {
+    border-color: var(--color-carbon);
+    background: color-mix(in oklch, var(--color-carbon) 88%, var(--color-surface));
+  }
+
+  .quiet-action:not(:disabled):hover {
+    border-color: var(--color-line-strong);
+    background: var(--color-interactive-muted);
+    color: var(--color-carbon);
+  }
+
+  .danger-action:not(:disabled):hover {
+    border-color: var(--color-danger);
+    background: color-mix(in oklch, var(--color-danger) 9%, transparent);
+    color: var(--color-danger);
+  }
+
+  .danger-action--solid:not(:disabled):hover {
+    background: color-mix(in oklch, var(--color-danger) 88%, var(--color-carbon));
+    color: var(--color-surface);
+  }
+
+  .language-selector__options button:not([aria-pressed="true"]):not(:disabled):hover {
+    background: var(--color-interactive-muted);
+    color: var(--color-carbon);
+  }
+
+  .language-selector__options button[aria-pressed="true"]:hover {
+    background: var(--color-carbon);
+  }
+
+  .primary-action:hover {
+    border-color: var(--color-carbon);
+    background: color-mix(in oklch, var(--color-kinetic) 82%, var(--color-carbon));
+  }
+}

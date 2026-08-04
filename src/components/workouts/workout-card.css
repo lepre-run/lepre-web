@@ -1,0 +1,375 @@
+.workout-card {
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.workout-summary dt {
+  color: var(--color-instrument);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.67rem;
+  text-transform: uppercase;
+}
+
+.workout-summary dd {
+  margin: 0.18rem 0 0;
+  font-weight: 700;
+}
+
+/* Workout feed direction B: paired work and recovery with restrained semantics. */
+
+.workout-feed__item,
+.workout-card,
+.workout-card__structure,
+.source-evidence,
+.evidence-table-scroll {
+  min-width: 0;
+}
+
+.workout-card__header {
+  display: grid;
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 2rem;
+  padding: 1.25rem 1.4rem 1.2rem;
+}
+
+.workout-card__topline,
+.execution-section__heading,
+.source-evidence summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.workout-card__topline {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  min-height: 1.5rem;
+  color: var(--color-instrument);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.workout-card h2 {
+  max-width: 28ch;
+  grid-column: 1;
+  grid-row: 2;
+  margin: 0.6rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3.5vw, 2.55rem);
+  line-height: 1.02;
+  letter-spacing: -0.055em;
+}
+
+.workout-card--compact h2 {
+  font-size: clamp(1.45rem, 3vw, 1.95rem);
+}
+
+.workout-classification {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  grid-column: 1;
+  grid-row: 3;
+  margin: 0.5rem 0 0;
+  color: var(--color-instrument);
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.workout-classification::before {
+  flex: none;
+  width: 1.35rem;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-sunrise), var(--color-kinetic));
+  content: "";
+}
+
+.workout-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0;
+  grid-column: 2;
+  grid-row: 2 / 4;
+  align-self: center;
+  margin: 0;
+}
+
+.workout-summary > div {
+  min-width: 7.5rem;
+  border-inline-start: 1px solid var(--color-line);
+  padding: 0 1rem;
+}
+
+.workout-summary > div:first-child {
+  border: 0;
+  padding-inline-start: 0;
+}
+
+.workout-summary__secondary dd {
+  color: var(--color-instrument);
+  font-weight: 600;
+}
+
+.workout-description {
+  max-width: 44rem;
+  grid-column: 1 / -1;
+  grid-row: 4;
+  margin: 1.2rem 0 0;
+  color: color-mix(in oklch, var(--color-carbon) 76%, var(--color-instrument));
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.workout-private-description {
+  max-width: 44rem;
+  grid-column: 1 / -1;
+  margin-top: 0.8rem;
+  border-inline-start: 2px solid var(--color-line-strong);
+  padding-inline-start: 0.8rem;
+  color: var(--color-instrument);
+}
+
+.workout-private-description > span {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.workout-private-description > p {
+  margin: 0.25rem 0 0;
+  line-height: 1.55;
+}
+
+.no-laps {
+  margin: 0;
+  border-top: 1px solid var(--color-line);
+  background: var(--color-surface-muted);
+  padding: 1rem 1.4rem;
+  color: var(--color-instrument);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.7rem;
+}
+
+.workout-card__structure {
+  border-top: 1px solid var(--color-line);
+  background: var(--color-surface);
+  padding: 1.2rem 1.4rem 1.35rem;
+}
+
+.workout-card__structure > .source-evidence:first-child {
+  margin-top: 0;
+  border-top: 0;
+  padding-top: 0;
+}
+
+.execution-section__heading {
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+}
+
+.execution-section__heading h3 {
+  margin: 0;
+  font-size: 0.76rem;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.execution-section__heading span {
+  color: var(--color-instrument);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.67rem;
+}
+
+.execution-section {
+  margin-top: 0;
+}
+
+.repetition-matrix__labels,
+.repetition-row {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr) minmax(0, 0.92fr);
+  gap: 0.55rem;
+}
+
+.repetition-matrix__labels {
+  padding: 0 0.75rem 0.45rem;
+  color: var(--color-instrument);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.61rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.repetition-matrix {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-block: 1px solid var(--color-line);
+  padding: 0;
+  list-style: none;
+}
+
+.repetition-row {
+  align-items: stretch;
+  border-bottom: 1px solid var(--color-line);
+  background: transparent;
+  padding: 0.4rem 0;
+}
+
+.repetition-row:last-child {
+  border-bottom: 0;
+}
+
+.repetition-row[data-fastest="true"] {
+  box-shadow: inset 3px 0 0 var(--color-work-ink);
+}
+
+.repetition-row__identity {
+  display: grid;
+  align-content: center;
+  padding-inline: 0.35rem;
+}
+
+.repetition-row__identity strong {
+  font-size: 1.15rem;
+}
+
+.repetition-row__identity span {
+  color: var(--color-instrument);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.61rem;
+}
+
+.repetition-row__identity em {
+  justify-self: start;
+  margin-top: 0.25rem;
+  border-radius: 999px;
+  background: var(--color-carbon);
+  padding: 0.16rem 0.35rem;
+  color: var(--color-surface);
+  font-size: 0.55rem;
+  font-style: normal;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.repetition-cell {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.2rem 0.65rem;
+  overflow: hidden;
+  border-radius: calc(var(--radius-panel) - 2px);
+  padding: 0.55rem 0.7rem;
+}
+
+.repetition-cell--work {
+  background: var(--color-work);
+}
+
+.repetition-cell--work::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 3px;
+  background: var(--color-work-ink);
+  content: "";
+}
+
+.repetition-cell--recovery {
+  border: 1px dashed var(--color-line-strong);
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-recovery) 0 8px,
+    var(--color-surface) 8px 16px
+  );
+}
+
+.repetition-cell--missing {
+  opacity: 0.62;
+}
+
+.repetition-cell__label {
+  grid-column: 1 / -1;
+  color: var(--color-instrument);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.61rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.repetition-cell strong {
+  grid-column: 1;
+  font-size: 1.05rem;
+}
+
+.repetition-cell > span:not(.repetition-cell__label) {
+  color: var(--color-instrument);
+  font-size: 0.68rem;
+}
+
+.repetition-cell__heart-rate {
+  grid-column: 2;
+  grid-row: 2 / 4;
+  align-self: end;
+  margin: 0;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  text-align: right;
+}
+
+.stage-matrix {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-block: 1px solid var(--color-line);
+  background: var(--color-surface);
+  padding: 0;
+  list-style: none;
+}
+
+.stage-row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.7fr) minmax(10rem, 1.2fr) 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  border-bottom: 1px solid var(--color-line);
+  padding: 0.7rem 0.8rem;
+}
+
+.stage-row:last-child {
+  border-bottom: 0;
+}
+
+.stage-row__identity,
+.stage-row__pace {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.stage-row__identity span {
+  font-weight: 700;
+}
+
+.stage-row__identity small,
+.stage-row__heart-rate {
+  color: var(--color-instrument);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.62rem;
+}
+
+.stage-row__bar {
+  width: var(--stage-progress);
+  height: 0.24rem;
+  border-radius: 999px;
+  background: var(--color-work-ink);
+}

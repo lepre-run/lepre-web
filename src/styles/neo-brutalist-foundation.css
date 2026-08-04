@@ -1,0 +1,73 @@
+/* Neo-brutalist skin: bold outlines, flat color, and physical interaction states. */
+
+body {
+  background-color: var(--color-surface-muted);
+  background-image:
+    linear-gradient(rgb(24 24 27 / 4%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(24 24 27 / 4%) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+button,
+.primary-action,
+.notice-action {
+  border: var(--border-heavy);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-control);
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  transition:
+    transform 110ms ease,
+    box-shadow 110ms ease,
+    background-color 110ms ease,
+    color 110ms ease;
+}
+
+button:not(:disabled):active,
+.primary-action:active,
+.notice-action:active {
+  box-shadow: 0 0 0 var(--color-carbon);
+  transform: translate(3px, 3px);
+}
+
+button:disabled {
+  filter: grayscale(0.35);
+}
+
+.quiet-action {
+  background: var(--color-surface);
+  color: var(--color-carbon);
+}
+
+.primary-action {
+  border-color: var(--color-carbon);
+  background: var(--color-kinetic);
+}
+
+@media (hover: hover) {
+  button:not(:disabled):hover,
+  .notice-action:hover {
+    border-color: var(--color-carbon);
+    background: var(--color-violet);
+    color: var(--color-carbon);
+  }
+
+  .quiet-action:not(:disabled):hover {
+    border-color: var(--color-carbon);
+    background: var(--color-threshold);
+  }
+
+  .danger-action:not(:disabled):hover,
+  .danger-action--solid:not(:disabled):hover {
+    border-color: var(--color-carbon);
+    background: var(--color-pink);
+    color: var(--color-carbon);
+  }
+
+  .primary-action:hover {
+    border-color: var(--color-carbon);
+    background: var(--color-threshold);
+  }
+}

@@ -1,0 +1,121 @@
+.workout-card {
+  border: var(--border-heavy);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.workout-card__header {
+  background: var(--color-surface);
+}
+
+.workout-card__topline,
+.workout-summary dt {
+  color: var(--color-carbon);
+  font-weight: 700;
+}
+
+.workout-card h2 {
+  font-weight: 700;
+}
+
+.workout-classification {
+  width: fit-content;
+  border: 2px solid var(--color-carbon);
+  border-radius: 2px;
+  background: var(--color-threshold);
+  padding: 0.22rem 0.45rem;
+  color: var(--color-carbon);
+}
+
+.workout-classification::before {
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid var(--color-carbon);
+  background: var(--color-pink);
+}
+
+.workout-summary > div {
+  border-inline-start: 2px solid var(--color-carbon);
+}
+
+.workout-card__structure,
+.no-laps {
+  border-top: var(--border-heavy);
+}
+
+.no-laps {
+  background: var(--color-threshold);
+  color: var(--color-carbon);
+  font-weight: 700;
+}
+
+.repetition-matrix,
+.stage-matrix {
+  border-block: 2px solid var(--color-carbon);
+}
+
+.repetition-row,
+.stage-row {
+  border-bottom: 2px solid var(--color-carbon);
+}
+
+.repetition-row[data-fastest="true"] {
+  background: var(--color-kinetic);
+  box-shadow: inset 6px 0 0 var(--color-carbon);
+}
+
+.repetition-cell {
+  border: 2px solid var(--color-carbon);
+  border-radius: var(--radius-panel);
+}
+
+.repetition-cell--work {
+  background: var(--color-work);
+}
+
+.repetition-cell--work::before {
+  display: none;
+}
+
+.repetition-cell--recovery {
+  border: 2px solid var(--color-carbon);
+  background: var(--color-recovery);
+}
+
+.stage-row__bar {
+  height: 0.45rem;
+  border: 1px solid var(--color-carbon);
+  border-radius: 0;
+}
+
+.source-evidence {
+  border-top: 2px solid var(--color-carbon);
+}
+
+.source-evidence summary {
+  border: 2px solid transparent;
+  border-radius: var(--radius-panel);
+  color: var(--color-carbon);
+}
+
+.source-evidence[open] summary {
+  border-color: var(--color-carbon);
+  background: var(--color-threshold);
+  box-shadow: 2px 2px 0 var(--color-carbon);
+}
+
+.evidence-table {
+  border: 2px solid var(--color-carbon);
+  border-radius: var(--radius-panel);
+}
+
+.evidence-table th {
+  background: var(--color-carbon);
+  color: var(--color-surface);
+  font-weight: 700;
+}
+
+.evidence-row td {
+  border-bottom: 2px solid var(--color-carbon);
+  color: var(--color-carbon);
+}

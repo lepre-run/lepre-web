@@ -1,0 +1,109 @@
+.shell {
+  width: min(100% - 2.5rem, 1380px);
+  padding-top: 1.25rem;
+}
+
+.shell--centered {
+  width: min(100% - 2rem, 720px);
+  min-height: auto;
+  margin: clamp(1rem, 10vh, 7rem) auto;
+  border: var(--border-heavy);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  padding: clamp(1.5rem, 6vw, 4rem);
+  box-shadow: 10px 10px 0 var(--color-carbon);
+}
+
+.shell--centered h1 {
+  max-width: 11ch;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.065em;
+  text-wrap: balance;
+}
+
+.shell--centered > p:not(.lede) {
+  max-width: 42rem;
+  line-height: 1.55;
+}
+
+.wordmark {
+  width: fit-content;
+  border: var(--border-heavy);
+  border-radius: var(--radius-panel);
+  background: var(--color-carbon);
+  padding: 0.5rem 0.68rem;
+  color: var(--color-surface);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  box-shadow: 4px 4px 0 var(--color-kinetic);
+}
+
+.wordmark::before {
+  border: 1px solid var(--color-carbon);
+  background: var(--color-kinetic);
+}
+
+.eyebrow {
+  width: fit-content;
+  gap: 0.35rem;
+  border: 2px solid var(--color-carbon);
+  border-radius: 2px;
+  background: var(--color-threshold);
+  padding: 0.2rem 0.42rem;
+  color: var(--color-carbon);
+  font-family: var(--font-display);
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.eyebrow::before {
+  width: 0.45rem;
+  height: 0.45rem;
+  border: 1px solid var(--color-carbon);
+  background: var(--color-pink);
+}
+
+.lede {
+  color: var(--color-carbon);
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 2.5vw, 1.3rem);
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.app-header {
+  margin-bottom: 2.25rem;
+  border-bottom: var(--border-heavy);
+  background: var(--color-surface);
+  padding: 1rem 0 1.35rem;
+}
+
+.runner-name {
+  margin-top: 0.65rem;
+  color: var(--color-carbon);
+  font-family: var(--font-data);
+  font-weight: 700;
+}
+
+.sync-status {
+  margin-right: 0.55rem;
+  border: 2px solid var(--color-carbon);
+  border-radius: 2px;
+  background: var(--color-cyan);
+  padding: 0.45rem 0.55rem;
+  color: var(--color-carbon);
+  font-weight: 700;
+  box-shadow: 2px 2px 0 var(--color-carbon);
+  text-transform: uppercase;
+}
+
+.sync-status span {
+  border: 1px solid var(--color-carbon);
+  border-radius: 0;
+  box-shadow: none;
+}

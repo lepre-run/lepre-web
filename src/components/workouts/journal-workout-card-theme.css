@@ -1,0 +1,92 @@
+.workout-card--free-run {
+  --color-card-accent: #55d88c;
+}
+
+.workout-card--progressive {
+  --color-card-accent: var(--color-sunrise);
+}
+
+.workout-card--intervals {
+  --color-card-accent: #7aa7ff;
+}
+
+.workout-card--race {
+  --color-card-accent: var(--color-danger);
+}
+
+.workout-card--journal {
+  overflow: visible;
+  border: var(--border-heavy);
+  border-radius: var(--radius-card);
+  box-shadow: 7px 7px 0 var(--color-carbon);
+}
+
+.journal-card__outline,
+.journal-card__type svg {
+  display: none;
+}
+
+.journal-card__type {
+  top: -1.3rem;
+  left: 1.6rem;
+  width: auto;
+  height: auto;
+  border: var(--border-heavy);
+  border-radius: 2px;
+  background: var(--color-card-accent);
+  padding: 0.38rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  box-shadow: 3px 3px 0 var(--color-carbon);
+  text-transform: uppercase;
+}
+
+.workout-card--journal .workout-card__header {
+  padding-top: 2.7rem;
+}
+
+.workout-card--journal .workout-metric {
+  border: 2px solid var(--color-carbon);
+  border-radius: var(--radius-panel);
+  background: color-mix(in oklch, var(--color-card-accent) 28%, var(--color-surface));
+  padding: 0.7rem;
+  box-shadow: 3px 3px 0 var(--color-carbon);
+}
+
+.workout-card--journal .workout-metric dt {
+  color: var(--color-carbon);
+}
+
+.workout-card--journal .workout-metric dd {
+  font-weight: 700;
+}
+
+.workout-card--progressive .workout-card__structure,
+.workout-card--intervals .workout-card__structure,
+.workout-card--race .workout-card__structure {
+  border-top-color: var(--color-carbon);
+  background: var(--color-surface);
+}
+
+.workout-card--intervals .interval-repetition-matrix {
+  border-block: 2px solid var(--color-carbon);
+}
+
+.workout-card--intervals .repetition-row {
+  border-bottom-color: var(--color-carbon);
+}
+
+.workout-card--intervals .repetition-row__identity strong {
+  border-color: var(--color-carbon);
+  border-radius: 2px;
+  background: var(--color-threshold);
+  box-shadow: 2px 2px 0 var(--color-carbon);
+  transform: none;
+}
+
+.workout-card--intervals .repetition-row:nth-child(even) .repetition-row__identity strong {
+  border-radius: 2px;
+  background: var(--color-cyan);
+  transform: none;
+}

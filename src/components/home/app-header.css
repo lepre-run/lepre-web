@@ -1,0 +1,82 @@
+.app-header,
+.feed-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.app-header {
+  padding-bottom: 2.5rem;
+}
+
+.runner-name {
+  margin: 0.3rem 0 0;
+  color: var(--color-instrument);
+  font-size: 0.82rem;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0.35rem 0 0;
+  color: var(--color-instrument);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.72rem;
+}
+
+.sync-status span {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 50%;
+  background: var(--color-kinetic);
+  box-shadow: 0 0 0 3px var(--color-kinetic-glow);
+}
+
+.sync-status[data-state="checking"] span,
+.sync-status[data-state="syncing"] span {
+  background: var(--color-instrument);
+  animation: sync-pulse 1.2s ease-in-out infinite alternate;
+}
+
+.sync-status[data-state="paused"] span {
+  background: var(--color-threshold);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-threshold) 16%, transparent);
+}
+
+.sync-status[data-state="failed"] span {
+  background: var(--color-danger);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-danger) 16%, transparent);
+}
+
+.sync-status[data-state="offline"] span {
+  background: var(--color-instrument);
+  box-shadow: none;
+}
+
+@keyframes sync-pulse {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button,
+  .primary-action,
+  .notice-action,
+  .sync-status span {
+    transition: none;
+    animation: none;
+  }
+}
