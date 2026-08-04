@@ -102,8 +102,14 @@
   text-transform: uppercase;
 }
 
-.sync-status span {
+.sync-status__indicator {
   border: 1px solid var(--color-carbon);
   border-radius: 0;
+  box-shadow: none;
+}
+
+.sync-status__action {
+  border: 2px solid var(--color-carbon);
+  border-radius: 2px;
   box-shadow: none;
 }

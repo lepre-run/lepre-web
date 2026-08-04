@@ -118,18 +118,15 @@
   box-shadow: 3px 3px 0 var(--color-carbon);
 }
 
-.notice,
 .empty-state {
+  display: block;
+  margin: 0 0 1.5rem;
   border: var(--border-heavy);
   border-radius: var(--radius-control);
   background: var(--color-threshold);
+  padding: 1rem 1.2rem;
   color: var(--color-carbon);
   box-shadow: 5px 5px 0 var(--color-carbon);
-}
-
-.notice--error {
-  border-color: var(--color-carbon);
-  background: var(--color-pink);
 }
 
 .empty-state {

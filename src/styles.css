@@ -4,7 +4,6 @@
 @import "./components/home/AccountPanel/account-panel.css";
 @import "./components/home/FeedHeader/feed-header.css";
 @import "./components/home/DownloadPanel/download-panel.css";
-@import "./components/home/HomeNotices/home-notices.css";
 @import "./components/weekly-overview/WeeklyOverview/weekly-overview.css";
 @import "./components/workouts/WorkoutCard/workout-card.css";
 @import "./components/workouts/SourceLapEvidence/source-lap-evidence.css";

@@ -216,8 +216,7 @@
   }
 
   .account-panel,
-  .disconnect-confirmation,
-  .notice--action {
+  .disconnect-confirmation {
     align-items: stretch;
     flex-direction: column;
   }
@@ -238,10 +237,6 @@
 
   .disconnect-actions {
     flex-direction: column;
-  }
-
-  .notice-action {
-    align-self: flex-start;
   }
 
   .download-panel__heading,

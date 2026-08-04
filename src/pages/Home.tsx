@@ -5,7 +5,6 @@ import { AccountPanel } from "../components/home/AccountPanel/AccountPanel";
 import { AppHeader } from "../components/home/AppHeader/AppHeader";
 import { DownloadPanel } from "../components/home/DownloadPanel/DownloadPanel";
 import { FeedHeader } from "../components/home/FeedHeader/FeedHeader";
-import { HomeNotices } from "../components/home/HomeNotices/HomeNotices";
 import { DisconnectedHome, LoadingHome } from "../components/home/PublicHome/PublicHome";
 import { WeeklyOverview } from "../components/weekly-overview/WeeklyOverview/WeeklyOverview";
 import { useHomeController } from "../hooks/useHomeController";
@@ -31,7 +30,10 @@ export function Home(): JSX.Element {
       <AppHeader
         screen={screen}
         status={controller.status}
+        notice={controller.notice}
+        syncing={controller.syncing}
         accountOpen={accountOpen}
+        onRetry={() => void controller.sync()}
         onToggleAccount={() => setAccountOpen((open) => !open)}
       />
       {accountOpen && (
@@ -41,12 +43,6 @@ export function Home(): JSX.Element {
           onDisconnect={disconnect}
         />
       )}
-      <HomeNotices
-        screen={screen}
-        notice={controller.notice}
-        syncing={controller.syncing}
-        onRetry={() => void controller.sync()}
-      />
       {controller.workouts.length > 0 && <ConditionDashboard workouts={controller.workouts} />}
       <FeedHeader workoutCount={controller.workouts.length} onDownload={workoutExport.show} />
       {workoutExport.open && (

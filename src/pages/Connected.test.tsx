@@ -122,19 +122,18 @@ describe("Connected", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(
       "Import paused and will resume automatically in about 15 minutes",
     );
-    expect(screen.getByText("Updates paused")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Sync" })).not.toBeInTheDocument();
   });
 
-  it("shows that synchronization is waiting for its fair turn", async () => {
+  it("does not show a layout-shifting notice while synchronization waits its turn", async () => {
     synchronizeWorkouts.mockResolvedValue({ kind: "queued", retryAfterSeconds: 60 });
 
     render(<Connected />);
 
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "Waiting for a fair synchronization turn",
+      "Waiting for a fair synchronization turn…",
     );
-    expect(screen.getByText("Updates paused")).toBeInTheDocument();
+    expect(screen.queryByText("Updates paused")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Sync" })).not.toBeInTheDocument();
   });
 

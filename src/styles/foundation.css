@@ -66,8 +66,7 @@ a {
 }
 
 button,
-.primary-action,
-.notice-action {
+.primary-action {
   border: 1px solid var(--color-carbon);
   border-radius: var(--radius-control);
   background: var(--color-carbon);
@@ -88,7 +87,6 @@ button:disabled {
 
 button:focus-visible,
 .primary-action:focus-visible,
-.notice-action:focus-visible,
 input:focus-visible {
   outline: 2px solid var(--color-kinetic);
   outline-offset: 2px;
@@ -109,8 +107,7 @@ input:focus-visible {
 }
 
 @media (hover: hover) {
-  button:not(:disabled):hover,
-  .notice-action:hover {
+  button:not(:disabled):hover {
     border-color: var(--color-carbon);
     background: color-mix(in oklch, var(--color-carbon) 88%, var(--color-surface));
   }

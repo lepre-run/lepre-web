@@ -9,8 +9,7 @@ body {
 }
 
 button,
-.primary-action,
-.notice-action {
+.primary-action {
   border: var(--border-heavy);
   border-radius: var(--radius-control);
   box-shadow: var(--shadow-control);
@@ -26,8 +25,7 @@ button,
 }
 
 button:not(:disabled):active,
-.primary-action:active,
-.notice-action:active {
+.primary-action:active {
   box-shadow: 0 0 0 var(--color-carbon);
   transform: translate(3px, 3px);
 }
@@ -47,8 +45,7 @@ button:disabled {
 }
 
 @media (hover: hover) {
-  button:not(:disabled):hover,
-  .notice-action:hover {
+  button:not(:disabled):hover {
     border-color: var(--color-carbon);
     background: var(--color-violet);
     color: var(--color-carbon);

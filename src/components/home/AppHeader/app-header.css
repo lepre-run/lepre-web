@@ -20,19 +20,23 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .sync-status {
   display: flex;
   align-items: center;
   gap: 0.45rem;
+  min-width: 0;
+  max-width: min(44rem, 65vw);
   margin: 0 0.35rem 0 0;
   color: var(--color-instrument);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.72rem;
 }
 
-.sync-status span {
+.sync-status__indicator {
+  flex: none;
   width: 0.48rem;
   height: 0.48rem;
   border-radius: 50%;
@@ -40,25 +44,43 @@
   box-shadow: 0 0 0 3px var(--color-kinetic-glow);
 }
 
-.sync-status[data-state="checking"] span,
-.sync-status[data-state="syncing"] span {
+.sync-status[data-state="checking"] .sync-status__indicator,
+.sync-status[data-state="syncing"] .sync-status__indicator {
   background: var(--color-instrument);
   animation: sync-pulse 1.2s ease-in-out infinite alternate;
 }
 
-.sync-status[data-state="paused"] span {
+.sync-status[data-state="paused"] .sync-status__indicator {
   background: var(--color-threshold);
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-threshold) 16%, transparent);
 }
 
-.sync-status[data-state="failed"] span {
+.sync-status[data-state="failed"] .sync-status__indicator {
   background: var(--color-danger);
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-danger) 16%, transparent);
 }
 
-.sync-status[data-state="offline"] span {
+.sync-status[data-state="offline"] .sync-status__indicator {
   background: var(--color-instrument);
   box-shadow: none;
+}
+
+.sync-status__message {
+  line-height: 1.3;
+}
+
+.sync-status__action {
+  flex: none;
+  border: 1px solid var(--color-carbon);
+  border-radius: var(--radius-control);
+  background: var(--color-carbon);
+  padding: 0.28rem 0.42rem;
+  color: var(--color-lab-paper);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
 @keyframes sync-pulse {
@@ -74,8 +96,7 @@
 @media (prefers-reduced-motion: reduce) {
   button,
   .primary-action,
-  .notice-action,
-  .sync-status span {
+  .sync-status__indicator {
     transition: none;
     animation: none;
   }

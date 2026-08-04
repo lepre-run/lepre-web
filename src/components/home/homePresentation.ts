@@ -4,10 +4,12 @@ import type { Notice, ReadyScreen, SynchronizationStatus } from "./homeTypes";
 export function synchronizationLabel(
   screen: ReadyScreen,
   status: SynchronizationStatus,
+  notice: Notice,
   t: TFunction,
 ): string {
-  if (screen.availability === "offline") return t("syncStatus.offline");
-  if (screen.availability === "reauthorization-required") return t("syncStatus.attention");
+  if (screen.availability === "offline") return t("notices.offline");
+  if (screen.availability === "reauthorization-required") return t("notices.reauthorization");
+  if (notice.kind !== "none") return noticeMessage(notice, t);
   if (status === "syncing") return t("syncStatus.updating");
   if (status === "paused") return t("syncStatus.paused");
   if (status === "failed") return t("syncStatus.failed");
