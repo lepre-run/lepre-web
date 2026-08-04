@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { i18n } from "../../../i18n/i18n";
 import { buildWeeklyWorkout, weekdayFormatter, weekFor } from "../../../test/weekly-builders";
@@ -11,7 +11,7 @@ beforeEach(async () => {
 describe("WeekRow", () => {
   it("places selected workout details inside their week", () => {
     const workout = buildWeeklyWorkout("workout:row", "2026-07-20T06:00:00Z", "Park run");
-    render(
+    const { container } = render(
       <WeekRow
         week={weekFor([workout])}
         language="en"
@@ -21,7 +21,8 @@ describe("WeekRow", () => {
         weekdayFormatter={weekdayFormatter}
       />,
     );
-    const row = screen.getByRole("listitem");
+    const row = container.querySelector<HTMLElement>(".weekly-grid__week");
+    if (!row) throw new Error("expected weekly row");
     expect(within(row).getByRole("region", { name: "Workout details" })).toHaveTextContent(
       "Park run",
     );

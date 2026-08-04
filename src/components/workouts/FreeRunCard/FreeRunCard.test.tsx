@@ -17,7 +17,31 @@ describe("FreeRunCard", () => {
         averageHeartRate={{ kind: "recorded", value: 142.4 }}
         performedAt={"2026-07-20T06:00:00Z" as Instant}
         category="workout"
-        sourceLapsAvailable={true}
+        lapData={{
+          kind: "available",
+          laps: [
+            {
+              number: 1,
+              name: "First half",
+              role: { kind: "main" },
+              distance: 5_000 as DistanceMeters,
+              movingTime: 1_600 as DurationSeconds,
+              elapsedTime: 1_620 as DurationSeconds,
+              averageHeartRate: { kind: "recorded", value: 138 },
+              maximumHeartRate: { kind: "recorded", value: 151 },
+            },
+            {
+              number: 2,
+              name: "Second half",
+              role: { kind: "main" },
+              distance: 5_000 as DistanceMeters,
+              movingTime: 1_520 as DurationSeconds,
+              elapsedTime: 1_540 as DurationSeconds,
+              averageHeartRate: { kind: "recorded", value: 146 },
+              maximumHeartRate: { kind: "recorded", value: 160 },
+            },
+          ],
+        }}
         shapeSeed={42}
       />,
     );
@@ -31,6 +55,8 @@ describe("FreeRunCard", () => {
     expect(card).toHaveTextContent("52:00");
     expect(card).toHaveTextContent("84 m");
     expect(card).toHaveTextContent("142 bpm");
+    expect(screen.getAllByTestId("free-run-lap-row")).toHaveLength(2);
+    expect(screen.getByRole("region", { name: "Lap execution" })).toBeInTheDocument();
   });
 
   it("normalizes source limitations without leaking null into required measurements", () => {
@@ -66,6 +92,10 @@ describe("FreeRunCard", () => {
       privateDescription: null,
       elevation: { kind: "unavailable" },
       averageHeartRate: { kind: "unavailable" },
+      lapData: {
+        kind: "available",
+        laps: [{ number: 1, name: "Run", role: { kind: "main" } }],
+      },
     });
   });
 });

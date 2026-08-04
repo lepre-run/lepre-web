@@ -162,6 +162,7 @@ export const english = {
     maxHeartRateShort: "max",
     lapHeartRate: "Heart rate: {{average}} bpm average, {{maximum}} bpm maximum",
     lapStructure: "Lap structure",
+    lapExecution: "Lap execution",
     mainSetExecution: "Main-set execution",
     stageExecution: "Stage execution",
     compareRepetitions: "Work and recovery paired",

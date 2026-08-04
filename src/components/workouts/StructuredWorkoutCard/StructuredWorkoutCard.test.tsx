@@ -125,7 +125,10 @@ describe("StructuredWorkoutCard", () => {
     expect(screen.getByRole("heading", { name: "Friday tempo" })).toBeInTheDocument();
     expect(screen.getByText("5 km tempo")).toBeInTheDocument();
     const execution = screen.getByRole("region", { name: "Stage execution" });
+    expect(within(execution).getAllByTestId("structured-lap-row")).toHaveLength(3);
+    expect(within(execution).getByText("Warm-up")).toBeInTheDocument();
     expect(within(execution).getByText("Work")).toBeInTheDocument();
+    expect(within(execution).getByText("Cool-down")).toBeInTheDocument();
     expect(within(execution).getByText("5.00 km · 23:20")).toBeInTheDocument();
   });
 
@@ -163,6 +166,52 @@ describe("StructuredWorkoutCard", () => {
     expect(within(execution).getAllByText("Recovery")).toHaveLength(2);
   });
 
+  it("retains warm-up and cool-down around paired hills", () => {
+    const paired = repeatedHillsWorkout();
+    const workout = buildWorkout({
+      id: paired.id,
+      name: paired.name,
+      laps: [
+        {
+          index: 1,
+          name: "Warm up",
+          movingDurationSeconds: 600,
+          elapsedDurationSeconds: 600,
+          distanceMeters: 1_500,
+        },
+        ...paired.laps.map((lap) => ({ ...lap, index: lap.index + 1 })),
+        {
+          index: 6,
+          name: "Cool down",
+          movingDurationSeconds: 480,
+          elapsedDurationSeconds: 480,
+          distanceMeters: 1_200,
+        },
+      ],
+      structure: {
+        ...paired.structure,
+        coreLapIndexes: [2, 3, 4, 5],
+        lapRoles: {
+          warmup: [1],
+          work: [2, 4],
+          recovery: [3, 5],
+          cooldown: [6],
+          main: [],
+          unknown: [],
+        },
+      },
+    });
+
+    render(<StructuredWorkoutCard workout={workout} />);
+
+    const execution = screen.getByRole("region", { name: "Main-set execution" });
+    expect(within(execution).getAllByTestId("structured-lap-row")).toHaveLength(2);
+    expect(within(execution).getByText("Warm-up")).toBeInTheDocument();
+    expect(within(execution).getByText("Cool-down")).toBeInTheDocument();
+    expect(within(execution).getByText("Laps 2 + 3")).toBeInTheDocument();
+    expect(within(execution).getByText("Laps 4 + 5")).toBeInTheDocument();
+  });
+
   it("makes a missing hill recovery explicit", () => {
     const paired = repeatedHillsWorkout();
     const workout = buildWorkout({
@@ -191,7 +240,7 @@ describe("StructuredWorkoutCard", () => {
     expect(screen.queryByRole("region")).not.toBeInTheDocument();
   });
 
-  it("shows only source evidence when the structure is unknown", () => {
+  it("shows every lap when the structure is unknown", () => {
     const workout = buildWorkout({
       structure: {
         schemaVersion: 1,
@@ -214,6 +263,8 @@ describe("StructuredWorkoutCard", () => {
     render(<StructuredWorkoutCard workout={workout} />);
 
     expect(screen.getByText("Expand")).toBeInTheDocument();
-    expect(screen.queryByRole("region")).not.toBeInTheDocument();
+    const execution = screen.getByRole("region", { name: "Stage execution" });
+    expect(within(execution).getAllByTestId("structured-lap-row")).toHaveLength(1);
+    expect(within(execution).getByText("Unknown")).toBeInTheDocument();
   });
 });

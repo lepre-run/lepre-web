@@ -60,12 +60,54 @@ function missingRecoveryCell(t: Translate): JSX.Element {
   );
 }
 
+function stageRows(
+  workout: Workout,
+  laps: ReadonlyArray<Lap>,
+  language: string,
+  t: Translate,
+): JSX.Element | null {
+  if (laps.length === 0) return null;
+  return (
+    <ol className="stage-matrix">
+      {laps.map((lap) => {
+        const appearance = appearanceForLap(workout, lap);
+        return (
+          <li className="stage-row" data-testid="structured-lap-row" key={lap.index}>
+            <div className="stage-row__identity">
+              <span>{formatLapRole(appearance, t)}</span>
+              <small>{t("workout.lapNumber", { number: lap.index })}</small>
+            </div>
+            <div className="stage-row__pace">
+              <strong>{formatPace(lap.movingDurationSeconds, lap.distanceMeters)}</strong>
+              <span className="stage-row__bar" aria-hidden="true" />
+            </div>
+            <span>
+              {formatDistance(lap.distanceMeters, language)} ·{" "}
+              {formatDuration(lap.movingDurationSeconds)}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 function repeatedHillsExecution(workout: Workout, language: string, t: Translate): JSX.Element {
+  const coreIndexes = new Set(workout.structure.coreLapIndexes);
+  const firstCorePosition = workout.laps.findIndex((lap) => coreIndexes.has(lap.index));
+  let lastCorePosition = workout.laps.length - 1;
+  while (lastCorePosition >= 0 && !coreIndexes.has(workout.laps[lastCorePosition].index)) {
+    lastCorePosition -= 1;
+  }
+  const leadingLaps = workout.laps.slice(0, Math.max(0, firstCorePosition));
+  const trailingLaps = workout.laps.slice(lastCorePosition + 1);
+
   return (
     <section className="execution-section" aria-label={t("workout.mainSetExecution")}>
       <div className="execution-section__heading">
         <h3>{t("workout.mainSetExecution")}</h3>
       </div>
+      {stageRows(workout, leadingLaps, language, t)}
       <ol className="repetition-matrix">
         {pairedRepetitions(workout).map(({ work, recovery }, index) => (
           <li className="repetition-row" key={work.index}>
@@ -84,40 +126,18 @@ function repeatedHillsExecution(workout: Workout, language: string, t: Translate
           </li>
         ))}
       </ol>
+      {stageRows(workout, trailingLaps, language, t)}
     </section>
   );
 }
 
 function stageExecution(workout: Workout, language: string, t: Translate): JSX.Element {
-  const coreIndexes = new Set(workout.structure.coreLapIndexes);
-  const coreLaps = workout.laps.filter((lap) => coreIndexes.has(lap.index));
-
   return (
     <section className="execution-section" aria-label={t("workout.stageExecution")}>
       <div className="execution-section__heading">
         <h3>{t("workout.stageExecution")}</h3>
       </div>
-      <ol className="stage-matrix">
-        {coreLaps.map((lap) => {
-          const appearance = appearanceForLap(workout, lap);
-          return (
-            <li className="stage-row" key={lap.index}>
-              <div className="stage-row__identity">
-                <span>{formatLapRole(appearance, t)}</span>
-                <small>{t("workout.lapNumber", { number: lap.index })}</small>
-              </div>
-              <div className="stage-row__pace">
-                <strong>{formatPace(lap.movingDurationSeconds, lap.distanceMeters)}</strong>
-                <span className="stage-row__bar" aria-hidden="true" />
-              </div>
-              <span>
-                {formatDistance(lap.distanceMeters, language)} ·{" "}
-                {formatDuration(lap.movingDurationSeconds)}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
+      {stageRows(workout, workout.laps, language, t)}
     </section>
   );
 }
@@ -195,10 +215,9 @@ export function StructuredWorkoutCard({ workout }: Readonly<{ workout: Workout }
         <p className="no-laps">{t("workout.noLaps")}</p>
       ) : (
         <div className="workout-card__structure">
-          {workout.structure.kind !== "unknown" &&
-            (workout.structure.kind === "repeated-hills"
-              ? repeatedHillsExecution(workout, language, t)
-              : stageExecution(workout, language, t))}
+          {workout.structure.kind === "repeated-hills"
+            ? repeatedHillsExecution(workout, language, t)
+            : stageExecution(workout, language, t)}
           {sourceEvidence(workout, language)}
         </div>
       )}

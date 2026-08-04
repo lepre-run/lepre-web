@@ -166,6 +166,7 @@ export const italian = {
     maxHeartRateShort: "max",
     lapHeartRate: "Frequenza cardiaca: media {{average}} bpm, massima {{maximum}} bpm",
     lapStructure: "Struttura dei lap",
+    lapExecution: "Esecuzione dei lap",
     mainSetExecution: "Esecuzione del blocco principale",
     stageExecution: "Esecuzione delle fasi",
     compareRepetitions: "Lavoro e recupero affiancati",

@@ -77,7 +77,7 @@ describe("WorkoutCard", () => {
     expect(screen.queryByText("Session structure")).not.toBeInTheDocument();
   });
 
-  it("keeps the dominant one-lap free run compact", () => {
+  it("keeps a free run compact while showing every lap", () => {
     const value = workout([lap(1, "Run", 10_000, 3_300)], "Easy river loop");
 
     render(<WorkoutCard workout={value} />);
@@ -86,7 +86,8 @@ describe("WorkoutCard", () => {
     expect(heading.closest("article")).toHaveClass("workout-card--compact");
     expect(screen.getByText("Free run")).toBeInTheDocument();
     expect(screen.queryByText("Session structure")).not.toBeInTheDocument();
-    expect(screen.queryByText("Source-lap evidence")).not.toBeInTheDocument();
+    expect(screen.getAllByTestId("free-run-lap-row")).toHaveLength(1);
+    expect(screen.getByRole("region", { name: "Lap execution" })).toBeInTheDocument();
   });
 
   it("routes races to their own card instead of an inferred workout card", () => {
