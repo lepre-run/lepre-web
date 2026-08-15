@@ -6,6 +6,8 @@ export const italian = {
     heroTitle: "Allenati con metodo.",
     heroDescription: "Scopri la struttura di ogni corsa, non soltanto la sua media.",
     connectStrava: "Connetti Strava",
+    athleteCapacity:
+      "Lepre ha raggiunto l’attuale limite di atleti Strava. Presto saranno disponibili altri posti.",
   },
   actions: {
     account: "Account",

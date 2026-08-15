@@ -23,9 +23,14 @@ export function DisconnectedHome(): JSX.Element {
       </div>
       <h1>{t("home.heroTitle")}</h1>
       <p className="lede">{t("home.heroDescription")}</p>
-      <a className="primary-action" href={STRAVA_START_URL}>
-        {t("home.connectStrava")}
-      </a>
+      <div className="connection-entry">
+        <a className="primary-action" href={STRAVA_START_URL}>
+          {t("home.connectStrava")}
+        </a>
+        <p className="connection-capacity" role="status">
+          {t("home.athleteCapacity")}
+        </p>
+      </div>
     </main>
   );
 }

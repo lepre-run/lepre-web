@@ -14,6 +14,9 @@ describe("DisconnectedHome", () => {
       "href",
       "https://api.lepre.run/v1/auth/strava/start",
     );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Lepre has reached its current Strava athlete limit. More spots coming later.",
+    );
     expect(screen.getByRole("button", { name: "English" })).toBeInTheDocument();
   });
 });

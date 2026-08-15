@@ -4,6 +4,7 @@ export const english = {
     heroTitle: "Train with direction.",
     heroDescription: "See the structure inside every run, not just its average.",
     connectStrava: "Connect with Strava",
+    athleteCapacity: "Lepre has reached its current Strava athlete limit. More spots coming later.",
   },
   actions: {
     account: "Account",

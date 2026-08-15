@@ -1,0 +1,19 @@
+.connection-entry {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+}
+
+.connection-capacity {
+  max-width: 34rem;
+  margin: 0;
+  border: var(--border-heavy);
+  border-radius: var(--radius-panel);
+  background: var(--color-threshold);
+  padding: 0.65rem 0.8rem;
+  color: var(--color-carbon);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.45;
+  box-shadow: 3px 3px 0 var(--color-carbon);
+}
