@@ -38,8 +38,8 @@ afterEach(async () => {
 describe("Home", () => {
   it("offers Strava authorization when there is no Lepre session", async () => {
     render(<Home />);
-    const link = await screen.findByRole("link", { name: /connect with strava/i });
-    expect(link).toHaveAttribute("href", STRAVA_START_URL);
+    const links = await screen.findAllByRole("link", { name: /connect with strava/i });
+    expect(links[0]).toHaveAttribute("href", STRAVA_START_URL);
     expect(STRAVA_START_URL).toBe("https://api.lepre.run/v1/auth/strava/start");
   });
 
@@ -112,7 +112,7 @@ describe("Home", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Disconnect and remove data" }));
 
-    expect(await screen.findByRole("link", { name: "Connect with Strava" })).toBeInTheDocument();
+    expect(await screen.findAllByRole("link", { name: "Connect with Strava" })).toHaveLength(2);
     expect(application.disconnectProvider).toHaveBeenCalledOnce();
   });
 
