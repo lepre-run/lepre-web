@@ -2,6 +2,15 @@ type RetryAfterDto = Readonly<{
   retryAfterSeconds?: number;
 }>;
 
+async function bodySeconds(response: Response): Promise<number | undefined> {
+  try {
+    const seconds = Number(((await response.json()) as RetryAfterDto).retryAfterSeconds);
+    return Number.isFinite(seconds) ? seconds : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function headerSeconds(value: string | null): number | undefined {
   if (!value) return undefined;
   const seconds = Number(value);
@@ -13,14 +22,10 @@ function headerSeconds(value: string | null): number | undefined {
 }
 
 export async function retryAfterSeconds(response: Response, fallback: number): Promise<number> {
-  let bodySeconds = Number.NaN;
-  try {
-    bodySeconds = Number(((await response.json()) as RetryAfterDto).retryAfterSeconds);
-  } catch {
-    // The Retry-After header remains the fallback for a malformed response body.
-  }
-  const selected = Number.isFinite(bodySeconds)
-    ? bodySeconds
-    : (headerSeconds(response.headers.get("Retry-After")) ?? fallback);
+  const parsedBodySeconds = await bodySeconds(response);
+  const selected =
+    parsedBodySeconds !== undefined
+      ? parsedBodySeconds
+      : (headerSeconds(response.headers.get("Retry-After")) ?? fallback);
   return Math.max(1, selected);
 }
