@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import i18n from "i18next";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { DistanceMeters, DurationSeconds } from "../../../domain/identity";
-import { i18n } from "../../../i18n/i18n";
 import { SourceLapEvidence } from "../SourceLapEvidence/SourceLapEvidence";
 
 beforeEach(async () => {

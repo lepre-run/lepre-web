@@ -1,7 +1,7 @@
 import type { LapRoles } from "./actual-workout-structure";
 import type { Lap, Workout } from "./workout";
 
-export type LapRole = keyof LapRoles;
+type LapRole = keyof LapRoles;
 
 export type LapAppearance = Readonly<{
   role: LapRole;

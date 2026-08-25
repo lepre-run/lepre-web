@@ -1,7 +1,7 @@
 import type { SynchronizationContinuationRequest } from "../model";
 import type { BackendGateway, LocalStore } from "../ports";
 
-export type SynchronizeWorkoutsResult =
+type SynchronizeWorkoutsResult =
   | Readonly<{ kind: "synchronized" }>
   | Readonly<{ kind: "backfill-paused"; retryAfterSeconds: number }>
   | Readonly<{ kind: "queued"; retryAfterSeconds: number }>

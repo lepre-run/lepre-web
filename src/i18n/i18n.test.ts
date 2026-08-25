@@ -1,11 +1,9 @@
+import i18n from "i18next";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  i18n,
-  LANGUAGE_STORAGE_KEY,
-  resolveLanguage,
-  selectLanguage,
-  supportedLanguage,
-} from "./i18n";
+import { selectLanguage } from "./i18n";
+import { resolveLanguage, supportedLanguage } from "./language-detection";
+
+const LANGUAGE_STORAGE_KEY = "lepre.language";
 
 afterEach(async () => {
   vi.restoreAllMocks();

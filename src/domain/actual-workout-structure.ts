@@ -72,19 +72,23 @@ function isLapRoles(value: unknown): value is LapRoles {
 }
 
 export function isCurrentActualWorkoutStructure(value: unknown): value is ActualWorkoutStructure {
-  if (
-    !isRecord(value) ||
-    value.schemaVersion !== ACTUAL_WORKOUT_STRUCTURE_SCHEMA_VERSION ||
-    value.classifierVersion !== WORKOUT_CLASSIFIER_VERSION ||
-    value.source !== "inferred_from_strava_laps" ||
-    !isFiniteNonNegative(value.confidence) ||
-    value.confidence > 1 ||
-    !isLapIndexes(value.coreLapIndexes) ||
-    !isLapRoles(value.lapRoles)
-  ) {
-    return false;
-  }
+  return isStructureBase(value) && isStructureVariant(value);
+}
 
+function isStructureBase(value: unknown): value is Record<string, unknown> {
+  return (
+    isRecord(value) &&
+    value.schemaVersion === ACTUAL_WORKOUT_STRUCTURE_SCHEMA_VERSION &&
+    value.classifierVersion === WORKOUT_CLASSIFIER_VERSION &&
+    value.source === "inferred_from_strava_laps" &&
+    isFiniteNonNegative(value.confidence) &&
+    value.confidence <= 1 &&
+    isLapIndexes(value.coreLapIndexes) &&
+    isLapRoles(value.lapRoles)
+  );
+}
+
+function isStructureVariant(value: Record<string, unknown>): boolean {
   switch (value.kind) {
     case "intervals":
       return (

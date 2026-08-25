@@ -1,5 +1,9 @@
 import { createTrainingDashboard } from "../domain/training-dashboard";
 import { createWorkout } from "../domain/workout";
+import {
+  HILL_CIRCUIT_CORE_LAPS,
+  HILL_CIRCUIT_LAP_ROLES,
+} from "../test/classification-expectations";
 import { mockWorkouts } from "./fixtures";
 
 describe("mock workout fixtures", () => {
@@ -82,13 +86,8 @@ describe("mock workout fixtures", () => {
       classifierVersion: 2,
       kind: "hill-circuit",
       repetitions: 2,
-      coreLapIndexes: [2, 3, 4, 5, 6, 7, 8],
-      lapRoles: {
-        warmup: [1],
-        work: [2, 4, 6, 8],
-        recovery: [3, 5, 7],
-        cooldown: [9],
-      },
+      coreLapIndexes: HILL_CIRCUIT_CORE_LAPS,
+      lapRoles: HILL_CIRCUIT_LAP_ROLES,
     });
   });
 });

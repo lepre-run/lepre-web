@@ -6,9 +6,16 @@ import type {
 import type { LocalStore } from "../../application/ports";
 import { isCurrentActualWorkoutStructure } from "../../domain/actual-workout-structure";
 import type { ContinuationToken, SynchronizationCheckpoint } from "../../domain/identity";
-import { createProviderConnection } from "../../domain/provider-connection";
-import { createUser, type User } from "../../domain/user";
-import { createWorkout, type Workout } from "../../domain/workout";
+import type { User } from "../../domain/user";
+import type { Workout } from "../../domain/workout";
+import {
+  type StoredUserRecord,
+  type StoredWorkoutRecord,
+  userFromRecord,
+  userRecord,
+  workoutFromRecord,
+  workoutRecord,
+} from "./local-records";
 
 const DATABASE_NAME = "lepre";
 const DATABASE_VERSION = 5;
@@ -17,43 +24,6 @@ const WORKOUT_STORE = "workouts";
 const META_STORE = "meta";
 const USER_KEY = "current";
 const SYNC_KEY = "synchronization";
-
-type StoredConnectionRecord = Readonly<{
-  id: string;
-  provider: string;
-  externalAccountId: string;
-}>;
-
-type StoredUserRecord = Readonly<{
-  id: string;
-  firstName: string;
-  lastName: string;
-  connection: StoredConnectionRecord;
-}>;
-
-type StoredWorkoutRecord = Readonly<{
-  id: string;
-  performedAt: string;
-  name: string;
-  description: string;
-  type: string;
-  sport: string;
-  durationSeconds: number;
-  elapsedDurationSeconds: number;
-  distanceMeters: number;
-  averageHeartRateBpm: number | null;
-  maxHeartRateBpm: number | null;
-  laps: ReadonlyArray<{
-    index: number;
-    name: string;
-    movingDurationSeconds: number;
-    elapsedDurationSeconds: number;
-    distanceMeters: number;
-    averageHeartRateBpm: number | null;
-    maxHeartRateBpm: number | null;
-  }>;
-  structure?: unknown;
-}>;
 
 type StoredSynchronizationRecord =
   | Readonly<{ kind: "importing"; token: string }>
@@ -96,51 +66,6 @@ function openDatabase(): Promise<IDBDatabase> {
       reject(request.error ?? new Error("Could not open local application database"));
     request.onblocked = () => reject(new Error("Local application database upgrade was blocked"));
   });
-}
-
-function userFromRecord(record: StoredUserRecord): User {
-  const connection = createProviderConnection(record.connection);
-  if (connection.kind !== "created") throw new Error("invalid stored provider connection");
-  const user = createUser({ ...record, connection: connection.connection });
-  if (user.kind !== "created") throw new Error("invalid stored user");
-  return user.user;
-}
-
-function workoutFromRecord(record: StoredWorkoutRecord): Workout {
-  const result = createWorkout(record);
-  if (result.kind !== "created") throw new Error("invalid stored workout");
-  return result.workout;
-}
-
-function userRecord(user: User): StoredUserRecord {
-  return {
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    connection: {
-      id: user.connection.id,
-      provider: user.connection.provider,
-      externalAccountId: user.connection.externalAccountId,
-    },
-  };
-}
-
-function workoutRecord(workout: Workout): StoredWorkoutRecord {
-  return {
-    id: workout.id,
-    performedAt: workout.performedAt,
-    name: workout.name,
-    description: workout.description,
-    type: workout.type,
-    sport: workout.sport,
-    durationSeconds: workout.durationSeconds,
-    elapsedDurationSeconds: workout.elapsedDurationSeconds,
-    distanceMeters: workout.distanceMeters,
-    averageHeartRateBpm: workout.averageHeartRateBpm,
-    maxHeartRateBpm: workout.maxHeartRateBpm,
-    laps: workout.laps,
-    structure: workout.structure,
-  };
 }
 
 async function loadUser(): Promise<StoredUser> {

@@ -1,6 +1,6 @@
 import type { ConnectionId, ExternalAccountId } from "./identity";
 
-export type ProviderId = "strava";
+type ProviderId = "strava";
 
 export type ProviderConnection = Readonly<{
   id: ConnectionId;

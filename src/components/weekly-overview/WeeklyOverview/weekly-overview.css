@@ -4,10 +4,6 @@
 
 .weekly-overview__scroll {
   overflow-x: auto;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
 }
 
 .weekly-grid {

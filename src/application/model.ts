@@ -13,7 +13,7 @@ export type SynchronizationContinuationRequest =
   | Readonly<{ kind: "first" }>
   | Readonly<{ kind: "next"; token: ContinuationToken }>;
 
-export type SynchronizationContinuation =
+type SynchronizationContinuation =
   | Readonly<{ kind: "more"; token: ContinuationToken }>
   | Readonly<{ kind: "complete"; checkpoint: SynchronizationCheckpoint }>;
 

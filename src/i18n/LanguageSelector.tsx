@@ -1,11 +1,7 @@
 import type { JSX } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  DEFAULT_LANGUAGE,
-  type SupportedLanguage,
-  selectLanguage,
-  supportedLanguage,
-} from "./i18n";
+import { selectLanguage } from "./i18n";
+import { DEFAULT_LANGUAGE, type SupportedLanguage, supportedLanguage } from "./language-detection";
 
 const LANGUAGE_OPTIONS: ReadonlyArray<Readonly<{ code: SupportedLanguage; name: string }>> = [
   { code: "en", name: "English" },

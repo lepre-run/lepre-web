@@ -1,13 +1,16 @@
+import i18n from "i18next";
 import { describe, expect, it } from "vitest";
+import {
+  HILL_CIRCUIT_CORE_LAPS,
+  HILL_CIRCUIT_LAP_ROLES,
+} from "../test/classification-expectations";
 import {
   formatClassification,
   formatDistance,
   formatHeartRate,
-  formatHeartRateValue,
   formatLapRole,
   formatWorkoutDate,
 } from "./formatters";
-import { i18n } from "./i18n";
 
 const intervalWorkout = {
   schemaVersion: 1,
@@ -36,15 +39,8 @@ const hillCircuitWorkout = {
   confidence: 0.95,
   kind: "hill-circuit",
   repetitions: 2,
-  coreLapIndexes: [2, 3, 4, 5, 6, 7, 8],
-  lapRoles: {
-    warmup: [1],
-    work: [2, 4, 6, 8],
-    recovery: [3, 5, 7],
-    cooldown: [9],
-    main: [],
-    unknown: [],
-  },
+  coreLapIndexes: HILL_CIRCUIT_CORE_LAPS,
+  lapRoles: { ...HILL_CIRCUIT_LAP_ROLES, main: [], unknown: [] },
 } as const;
 
 describe("presentation formatters", () => {
@@ -53,8 +49,6 @@ describe("presentation formatters", () => {
     expect(formatDistance(8_000)).toBe("8.00 km");
     expect(formatHeartRate(148.2)).toBe("148 bpm");
     expect(formatHeartRate(null)).toBe("—");
-    expect(formatHeartRateValue(148.2)).toBe("148");
-    expect(formatHeartRateValue(null)).toBe("—");
     expect(formatClassification(intervalWorkout, i18n.t)).toBe(
       "4 × 1 km intervals with 400 m recovery",
     );

@@ -34,7 +34,3 @@ export function createUser(input: {
     },
   };
 }
-
-export function replaceProviderConnection(user: User, connection: ProviderConnection): User {
-  return { ...user, connection };
-}

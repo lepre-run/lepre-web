@@ -9,9 +9,6 @@ import { DisconnectedHome, LoadingHome } from "../components/home/PublicHome/Pub
 import { WeeklyOverview } from "../components/weekly-overview/WeeklyOverview/WeeklyOverview";
 import { useHomeController } from "../hooks/useHomeController";
 import { useWorkoutExport } from "../hooks/useWorkoutExport";
-import { STRAVA_START_URL } from "../infrastructure/api/lepre-backend";
-
-export { STRAVA_START_URL };
 
 export function Home(): JSX.Element {
   const controller = useHomeController();

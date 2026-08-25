@@ -23,7 +23,7 @@ describe("domain entities", () => {
   });
 
   it("creates a workout using seconds and meters", () => {
-    const result = createWorkout({
+    const input = {
       id: "strava:7",
       performedAt: "2026-07-15T06:00:00Z",
       name: "Morning Run",
@@ -46,32 +46,12 @@ describe("domain entities", () => {
           maxHeartRateBpm: 176,
         },
       ],
-    });
+    } as const;
+    const result = createWorkout(input);
     expect(result).toEqual({
       kind: "created",
       workout: {
-        id: "strava:7",
-        performedAt: "2026-07-15T06:00:00Z",
-        name: "Morning Run",
-        description: "Easy morning",
-        type: "race",
-        sport: "Run",
-        durationSeconds: 3_601,
-        elapsedDurationSeconds: 3_700,
-        distanceMeters: 10_050.5,
-        averageHeartRateBpm: 148.2,
-        maxHeartRateBpm: 176,
-        laps: [
-          {
-            index: 1,
-            name: "Lap 1",
-            movingDurationSeconds: 3_601,
-            elapsedDurationSeconds: 3_700,
-            distanceMeters: 10_050.5,
-            averageHeartRateBpm: 148.2,
-            maxHeartRateBpm: 176,
-          },
-        ],
+        ...input,
         structure: {
           schemaVersion: 1,
           classifierVersion: 2,

@@ -1,7 +1,7 @@
 import type { User } from "../../domain/user";
 import type { BackendGateway, LocalStore } from "../ports";
 
-export type LoadUserResult =
+type LoadUserResult =
   | Readonly<{ kind: "connected"; user: User }>
   | Readonly<{ kind: "offline"; user: User }>
   | Readonly<{ kind: "reauthorization-required"; user: User }>

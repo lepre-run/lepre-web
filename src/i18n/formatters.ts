@@ -1,7 +1,8 @@
 import type { TFunction } from "i18next";
 import type { ActualWorkoutStructure, StageMeasure } from "../domain/actual-workout-structure";
 import type { LapAppearance } from "../domain/lap-appearance";
-import { DEFAULT_LANGUAGE, localeFor } from "./i18n";
+import { localeFor } from "./i18n";
+import { DEFAULT_LANGUAGE } from "./language-detection";
 
 function decimal(
   value: number,
@@ -48,10 +49,6 @@ export function formatPace(seconds: number, meters: number): string {
 
 export function formatHeartRate(beatsPerMinute: number | null): string {
   return beatsPerMinute === null ? "—" : `${Math.round(beatsPerMinute)} bpm`;
-}
-
-export function formatHeartRateValue(beatsPerMinute: number | null): string {
-  return beatsPerMinute === null ? "—" : Math.round(beatsPerMinute).toString();
 }
 
 function formatStageDistance(meters: number, language: string): string {

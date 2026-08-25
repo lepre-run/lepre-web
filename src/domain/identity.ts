@@ -1,6 +1,6 @@
 declare const brand: unique symbol;
 
-export type Branded<Value, Name extends string> = Value & {
+type Branded<Value, Name extends string> = Value & {
   readonly [brand]: Name;
 };
 

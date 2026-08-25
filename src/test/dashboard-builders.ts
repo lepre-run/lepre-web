@@ -16,7 +16,7 @@ export const easyPaceInsight: EasyPaceInsight = {
   trend: { direction: "up", percent: 2.4 },
 };
 
-export const intervalFormatInsight: IntervalFormatInsight = {
+const intervalFormatInsight: IntervalFormatInsight = {
   work: { kind: "distance", meters: 1_000 },
   recovery: { kind: "duration", seconds: 120 },
   secondsPerKilometer: 240,

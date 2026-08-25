@@ -1,7 +1,7 @@
 import type { Workout } from "../../domain/workout";
 import type { LocalStore } from "../ports";
 
-export type ListWorkoutsResult =
+type ListWorkoutsResult =
   | Readonly<{ kind: "loaded"; workouts: ReadonlyArray<Workout> }>
   | Readonly<{ kind: "storage-unavailable" }>;
 

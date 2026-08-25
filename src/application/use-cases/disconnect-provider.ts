@@ -1,6 +1,6 @@
 import type { BackendGateway, LocalStore } from "../ports";
 
-export type DisconnectProviderResult =
+type DisconnectProviderResult =
   | Readonly<{ kind: "disconnected" }>
   | Readonly<{ kind: "provider-unavailable" }>;
 

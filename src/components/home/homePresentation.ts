@@ -25,7 +25,7 @@ export function synchronizationState(
   return screen.availability === "reauthorization-required" ? "failed" : status;
 }
 
-export function noticeMessage(notice: Notice, t: TFunction): string {
+function noticeMessage(notice: Notice, t: TFunction): string {
   if (notice.kind === "none") return "";
   if (notice.kind === "paused" && notice.reason === "backfill") return t("notices.backfill");
   if (notice.kind === "paused" && notice.reason === "queued") return t("notices.queued");

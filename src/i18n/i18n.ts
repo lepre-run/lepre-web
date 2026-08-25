@@ -1,32 +1,16 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import {
+  DEFAULT_LANGUAGE,
+  resolveLanguage,
+  SUPPORTED_LANGUAGES,
+  type SupportedLanguage,
+  supportedLanguage,
+} from "./language-detection";
 import { english } from "./locales/en";
 import { italian } from "./locales/it";
 
-export const DEFAULT_LANGUAGE = "en";
-export const SUPPORTED_LANGUAGES = ["en", "it"] as const;
-export const LANGUAGE_STORAGE_KEY = "lepre.language";
-
-export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
-
-export function supportedLanguage(language: string | null | undefined): SupportedLanguage | null {
-  const baseLanguage = language?.trim().toLowerCase().split(/[-_]/)[0];
-  return SUPPORTED_LANGUAGES.find((supported) => supported === baseLanguage) ?? null;
-}
-
-export function resolveLanguage(
-  savedLanguage: string | null,
-  preferredLanguages: ReadonlyArray<string>,
-): SupportedLanguage {
-  const saved = supportedLanguage(savedLanguage);
-  if (saved) return saved;
-
-  for (const preference of preferredLanguages) {
-    const detected = supportedLanguage(preference);
-    if (detected) return detected;
-  }
-  return DEFAULT_LANGUAGE;
-}
+const LANGUAGE_STORAGE_KEY = "lepre.language";
 
 function savedLanguage(): string | null {
   if (typeof window === "undefined") return null;
@@ -88,5 +72,3 @@ export async function selectLanguage(language: SupportedLanguage): Promise<void>
   saveLanguage(language);
   await i18n.changeLanguage(language);
 }
-
-export { i18n };

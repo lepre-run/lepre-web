@@ -1,40 +1,9 @@
+import { englishDashboard } from "./en-dashboard";
+
+import { englishHome } from "./en-home";
+
 export const english = {
-  home: {
-    opening: "Opening your local workouts…",
-    eyebrow: "Your runs, interpreted",
-    heroTitle: "Understand the training behind your runs.",
-    heroDescription:
-      "Lepre turns your Strava history into a clear training journal. It recognizes intervals, progressions, races, and easy runs—then shows how you executed them and how your training is evolving.",
-    heroContrast: "Strava records the activity. Lepre explains the workout.",
-    connectStrava: "Connect with Strava",
-    connectionNote: "Your workout history stays on this device. Disconnect anytime.",
-    previewEyebrow: "A run, interpreted",
-    previewType: "Intervals",
-    previewTitle: "6 × 1 km · 400 m recovery",
-    previewSource: "From “Tuesday morning run” on Strava",
-    previewDistance: "Distance",
-    previewTime: "Moving time",
-    previewExecution: "Rep variation",
-    previewStructureLabel: "Three of six work and recovery repetitions",
-    previewWork: "1 km work",
-    previewRecovery: "400 m recovery",
-    previewInsight: "Six consistent repetitions, with the final three getting faster.",
-    benefitsEyebrow: "Beyond the activity feed",
-    benefitsTitle: "From running history to training insight.",
-    structureTitle: "Recognize every session",
-    structureDescription:
-      "Turn raw laps into intervals, progressions, tempo work, races, and easy runs you can understand at a glance.",
-    weeklyTitle: "See your training rhythm",
-    weeklyDescription:
-      "Review each week as a whole, with distance, duration, training days, and the purpose of every run in context.",
-    conditionTitle: "Track what is changing",
-    conditionDescription:
-      "Follow easy pace, comparable interval sessions, running volume, and training mix as evidence builds over time.",
-    privacyEyebrow: "Private by design",
-    privacyTitle: "Your running history belongs to you.",
-    privacyDescription:
-      "Workouts are analyzed and stored in your browser, not kept on Lepre’s servers. Your Strava connection can be removed at any time.",
-  },
+  home: englishHome,
   actions: {
     account: "Account",
     download: "Download",
@@ -86,75 +55,7 @@ export const english = {
     emptyTitle: "No runs found",
     emptyDescription: "Completed workouts will appear here after their laps have been classified.",
   },
-  dashboard: {
-    eyebrow: "Condition snapshot",
-    title: "Your running condition",
-    summary_one: "A six-week view built from {{count}} recent workout.",
-    summary_other: "A six-week view built from {{count}} recent workouts.",
-    window: "Last 6 weeks",
-    through: "Through {{date}}",
-    notEnoughData: "Not enough data yet",
-    perWeek: "Per week",
-    method:
-      "Pace trends compare equivalent six-week periods. Training mix uses session purpose; heart-rate time in zone will require personal thresholds and activity streams.",
-    evidence: {
-      early: "Early estimate",
-      growing: "Growing evidence",
-      strong: "Strong evidence",
-    },
-    trend: {
-      up: "{{value}}% faster than prior 6 weeks",
-      down: "{{value}}% slower than prior 6 weeks",
-      steady: "Stable against prior 6 weeks",
-      noComparison: "Waiting for a comparable prior period",
-      volumeUp: "{{value}}% more distance",
-      volumeDown: "{{value}}% less distance",
-      volumeSteady: "Distance is steady",
-      noVolumeComparison: "First volume baseline",
-    },
-    easyPace: {
-      title: "Easy pace",
-      range: "{{fastest}}–{{slowest}} /km observed range",
-      rangeWithHeartRate: "{{fastest}}–{{slowest}} /km observed range · {{heartRate}} bpm median",
-      runs_one: "{{count}} supporting run",
-      runs_other: "{{count}} supporting runs",
-      empty: "A road or treadmill free run over 20 minutes will start this baseline.",
-    },
-    intervals: {
-      title: "Reference intervals",
-      protocol: "{{repetitions}} × {{work}} · {{recovery}} recovery · {{variation}}% variation",
-      selectedReason_one:
-        "Your most repeated recent format · {{count}} comparable session in the last year",
-      selectedReason_other:
-        "Your most repeated recent format · {{count}} comparable sessions in the last year",
-      sessions_one: "{{count}} matched session",
-      sessions_other: "{{count}} matched sessions",
-      alternatives_one: "{{count}} other matched format",
-      alternatives_other: "{{count}} other matched formats",
-      up: "{{value}}% faster across recent matched sessions",
-      down: "{{value}}% slower across recent matched sessions",
-      steady: "Stable across recent matched sessions",
-      noComparison: "More matched sessions needed for a trend",
-      empty: "Complete a session with repeated work laps to establish an interval benchmark.",
-    },
-    volume: {
-      title: "Running volume",
-      total_one: "{{distance}} km across {{count}} workout",
-      total_other: "{{distance}} km across {{count}} workouts",
-      window: "{{count}}-week average",
-    },
-    mix: {
-      title: "Training mix",
-      sessionPurpose: "By session purpose",
-      low: "low",
-      lowCount: "{{count}} low",
-      moderateCount: "{{count}} moderate",
-      highCount: "{{count}} high",
-      coverage: "{{value}}% classified",
-      reference: "80% low reference",
-      ariaLabel: "{{low}} low, {{moderate}} moderate and {{high}} high-intensity sessions",
-    },
-  },
+  dashboard: englishDashboard,
   weekly: {
     label: "Weekly training overview",
     week: "Week",

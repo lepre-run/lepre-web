@@ -3,6 +3,27 @@ import { useTranslation } from "react-i18next";
 import type { RelativeTrend } from "../../../domain/training-dashboard";
 import { decimal } from "../dashboardFormatters";
 
+const TREND_KEYS = {
+  pace: {
+    none: "dashboard.trend.noComparison",
+    steady: "dashboard.trend.steady",
+    up: "dashboard.trend.up",
+    down: "dashboard.trend.down",
+  },
+  volume: {
+    none: "dashboard.trend.noVolumeComparison",
+    steady: "dashboard.trend.volumeSteady",
+    up: "dashboard.trend.volumeUp",
+    down: "dashboard.trend.volumeDown",
+  },
+  intervals: {
+    none: "dashboard.intervals.noComparison",
+    steady: "dashboard.intervals.steady",
+    up: "dashboard.intervals.up",
+    down: "dashboard.intervals.down",
+  },
+} as const;
+
 export function Trend({
   trend,
   language,
@@ -13,32 +34,12 @@ export function Trend({
   kind: "pace" | "volume" | "intervals";
 }>): JSX.Element {
   const { t } = useTranslation();
+  const keys = TREND_KEYS[kind];
   if (trend === null) {
-    const label =
-      kind === "volume"
-        ? t("dashboard.trend.noVolumeComparison")
-        : kind === "intervals"
-          ? t("dashboard.intervals.noComparison")
-          : t("dashboard.trend.noComparison");
-    return <span className="condition-card__trend">{label}</span>;
+    return <span className="condition-card__trend">{t(keys.none)}</span>;
   }
   const value = decimal(Math.abs(trend.percent), language, kind === "volume" ? 0 : 1);
-  const label =
-    kind === "volume"
-      ? trend.direction === "steady"
-        ? t("dashboard.trend.volumeSteady")
-        : t(trend.direction === "up" ? "dashboard.trend.volumeUp" : "dashboard.trend.volumeDown", {
-            value,
-          })
-      : kind === "intervals"
-        ? trend.direction === "steady"
-          ? t("dashboard.intervals.steady")
-          : t(trend.direction === "up" ? "dashboard.intervals.up" : "dashboard.intervals.down", {
-              value,
-            })
-        : trend.direction === "steady"
-          ? t("dashboard.trend.steady")
-          : t(trend.direction === "up" ? "dashboard.trend.up" : "dashboard.trend.down", { value });
+  const label = trend.direction === "steady" ? t(keys.steady) : t(keys[trend.direction], { value });
   return (
     <span className="condition-card__trend" data-direction={trend.direction}>
       {label}

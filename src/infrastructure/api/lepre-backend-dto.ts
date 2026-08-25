@@ -6,7 +6,7 @@ import type {
 } from "../../domain/identity";
 import { createProviderConnection } from "../../domain/provider-connection";
 import { createUser, type User } from "../../domain/user";
-import { createWorkout, type Workout } from "../../domain/workout";
+import { createWorkout, type Workout, type WorkoutInput } from "../../domain/workout";
 
 export type UserDto = Readonly<{
   id: string;
@@ -19,28 +19,7 @@ export type UserDto = Readonly<{
   }>;
 }>;
 
-type WorkoutDto = Readonly<{
-  id: string;
-  performedAt: string;
-  name: string;
-  description: string;
-  type: string;
-  sport: string;
-  durationSeconds: number;
-  elapsedDurationSeconds: number;
-  distanceMeters: number;
-  averageHeartRateBpm: number | null;
-  maxHeartRateBpm: number | null;
-  laps: ReadonlyArray<{
-    index: number;
-    name: string;
-    movingDurationSeconds: number;
-    elapsedDurationSeconds: number;
-    distanceMeters: number;
-    averageHeartRateBpm: number | null;
-    maxHeartRateBpm: number | null;
-  }>;
-}>;
+type WorkoutDto = WorkoutInput;
 
 export type BatchDto = Readonly<{
   upserted: ReadonlyArray<WorkoutDto>;

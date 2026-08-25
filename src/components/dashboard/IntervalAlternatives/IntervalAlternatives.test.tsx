@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
+import i18n from "i18next";
 import { beforeEach, describe, expect, it } from "vitest";
-import { i18n } from "../../../i18n/i18n";
 import { intervalBenchmarkInsight } from "../../../test/dashboard-builders";
 import { IntervalAlternatives } from "../IntervalAlternatives/IntervalAlternatives";
 

@@ -6,6 +6,7 @@ import type { SynchronizationCheckpoint } from "../../domain/identity";
 import { createProviderConnection } from "../../domain/provider-connection";
 import { createUser } from "../../domain/user";
 import { createWorkout } from "../../domain/workout";
+import { buildWorkout } from "../../test/builders";
 import { indexedDbLocalStore } from "./local-store";
 
 function connectedUser(id: string, connectionId: string) {
@@ -25,38 +26,57 @@ function connectedUser(id: string, connectionId: string) {
   return user.user;
 }
 
+function storedWorkout(type: "workout" | "race" = "workout") {
+  return buildWorkout({
+    id: "strava:7",
+    performedAt: "2026-07-15T06:00:00Z",
+    name: "Morning Run",
+    description: "",
+    type,
+    sport: "Run",
+    durationSeconds: 2_400,
+    elapsedDurationSeconds: 2_450,
+    distanceMeters: 8_000,
+    averageHeartRateBpm: 148.2,
+    maxHeartRateBpm: 176,
+    laps: [
+      {
+        index: 1,
+        name: "Lap 1",
+        movingDurationSeconds: 2_400,
+        elapsedDurationSeconds: 2_450,
+        distanceMeters: 8_000,
+        averageHeartRateBpm: 148.2,
+        maxHeartRateBpm: 176,
+      },
+    ],
+  });
+}
+
+function openTestDatabase(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("lepre");
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+function readWorkoutRecord(store: IDBObjectStore, id: string): Promise<Record<string, unknown>> {
+  return new Promise((resolve, reject) => {
+    const request = store.get(id);
+    request.onsuccess = () => resolve(request.result as Record<string, unknown>);
+    request.onerror = () => reject(request.error);
+  });
+}
+
 describe("IndexedDB local store", () => {
   afterEach(async () => indexedDbLocalStore.clear());
 
   it("stores the user and complete workout entity", async () => {
-    const workout = createWorkout({
-      id: "strava:7",
-      performedAt: "2026-07-15T06:00:00Z",
-      name: "Morning Run",
-      description: "",
-      type: "race",
-      sport: "Run",
-      durationSeconds: 2_400,
-      elapsedDurationSeconds: 2_450,
-      distanceMeters: 8_000,
-      averageHeartRateBpm: 148.2,
-      maxHeartRateBpm: 176,
-      laps: [
-        {
-          index: 1,
-          name: "Lap 1",
-          movingDurationSeconds: 2_400,
-          elapsedDurationSeconds: 2_450,
-          distanceMeters: 8_000,
-          averageHeartRateBpm: 148.2,
-          maxHeartRateBpm: 176,
-        },
-      ],
-    });
-    if (workout.kind !== "created") throw new Error("expected workout");
+    const workout = storedWorkout("race");
     await indexedDbLocalStore.reconcileUser(connectedUser("user-1", "connection-1"));
     await indexedDbLocalStore.applySynchronizationBatch({
-      upserted: [workout.workout],
+      upserted: [workout],
       removed: [],
       continuation: {
         kind: "complete",
@@ -64,7 +84,7 @@ describe("IndexedDB local store", () => {
       },
     });
 
-    await expect(indexedDbLocalStore.listWorkouts()).resolves.toEqual([workout.workout]);
+    await expect(indexedDbLocalStore.listWorkouts()).resolves.toEqual([workout]);
     await expect(indexedDbLocalStore.synchronizationState()).resolves.toEqual({
       kind: "incremental",
       checkpoint: "complete",
@@ -99,18 +119,10 @@ describe("IndexedDB local store", () => {
       continuation: { kind: "complete", checkpoint: "complete" as SynchronizationCheckpoint },
     });
 
-    const database = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open("lepre");
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
+    const database = await openTestDatabase();
     const downgrade = database.transaction("workouts", "readwrite");
     const store = downgrade.objectStore("workouts");
-    const record = await new Promise<Record<string, unknown>>((resolve, reject) => {
-      const request = store.get("strava:legacy");
-      request.onsuccess = () => resolve(request.result as Record<string, unknown>);
-      request.onerror = () => reject(request.error);
-    });
+    const record = await readWorkoutRecord(store, "strava:legacy");
     store.put({ ...record, structure: { classifierVersion: 0 } });
     await new Promise<void>((resolve, reject) => {
       downgrade.oncomplete = () => resolve();
@@ -121,46 +133,18 @@ describe("IndexedDB local store", () => {
     const loaded = await indexedDbLocalStore.listWorkouts();
     expect(loaded[0].structure).toEqual(created.workout.structure);
 
-    const verificationDatabase = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open("lepre");
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
+    const verificationDatabase = await openTestDatabase();
     const verification = verificationDatabase.transaction("workouts", "readonly");
-    const migrated = await new Promise<Record<string, unknown>>((resolve, reject) => {
-      const request = verification.objectStore("workouts").get("strava:legacy");
-      request.onsuccess = () => resolve(request.result as Record<string, unknown>);
-      request.onerror = () => reject(request.error);
-    });
+    const migrated = await readWorkoutRecord(verification.objectStore("workouts"), "strava:legacy");
     expect(migrated.structure).toEqual(created.workout.structure);
     verificationDatabase.close();
   });
 
   it("clears workouts when the singleton user changes", async () => {
-    const workout = createWorkout({
-      id: "strava:7",
-      performedAt: "2026-07-15T06:00:00Z",
-      name: "Morning Run",
-      description: "",
-      type: "workout",
-      sport: "Run",
-      durationSeconds: 2_400,
-      elapsedDurationSeconds: 2_450,
-      distanceMeters: 8_000,
-      laps: [
-        {
-          index: 1,
-          name: "Lap 1",
-          movingDurationSeconds: 2_400,
-          elapsedDurationSeconds: 2_450,
-          distanceMeters: 8_000,
-        },
-      ],
-    });
-    if (workout.kind !== "created") throw new Error("expected workout");
+    const workout = storedWorkout();
     await indexedDbLocalStore.reconcileUser(connectedUser("user-1", "connection-1"));
     await indexedDbLocalStore.applySynchronizationBatch({
-      upserted: [workout.workout],
+      upserted: [workout],
       removed: [],
       continuation: { kind: "more", token: "next" as never },
     });

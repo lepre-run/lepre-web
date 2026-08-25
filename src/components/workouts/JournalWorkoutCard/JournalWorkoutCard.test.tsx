@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
+import i18n from "i18next";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { DistanceMeters, DurationSeconds, Instant } from "../../../domain/identity";
-import { i18n } from "../../../i18n/i18n";
 import { JournalWorkoutCard } from "../JournalWorkoutCard/JournalWorkoutCard";
 
 beforeEach(async () => {

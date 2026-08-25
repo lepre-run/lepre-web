@@ -1,6 +1,6 @@
 import { render, within } from "@testing-library/react";
+import i18n from "i18next";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { i18n } from "../../../i18n/i18n";
 import { buildWeeklyWorkout, weekdayFormatter, weekFor } from "../../../test/weekly-builders";
 import { WeekRow } from "../WeekRow/WeekRow";
 

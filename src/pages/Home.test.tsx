@@ -1,10 +1,13 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import i18n from "i18next";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { application } from "../composition/application";
 import type { User } from "../domain/user";
-import { i18n, LANGUAGE_STORAGE_KEY } from "../i18n/i18n";
+import { STRAVA_START_URL } from "../infrastructure/api/lepre-backend";
 import { mockUser } from "../mocks/fixtures";
-import { Home, STRAVA_START_URL } from "./Home";
+import { Home } from "./Home";
+
+const LANGUAGE_STORAGE_KEY = "lepre.language";
 
 vi.mock("../composition/application", () => ({
   application: {

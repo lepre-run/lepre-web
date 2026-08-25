@@ -8,7 +8,7 @@ import {
 } from "../domain/workout-history-export";
 import { downloadJson } from "../infrastructure/browser/download-json";
 
-export function useWorkoutExport(workouts: ReadonlyArray<Workout>) {
+function useExportSelection(workouts: ReadonlyArray<Workout>) {
   const [open, setOpen] = useState(false);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -21,27 +21,32 @@ export function useWorkoutExport(workouts: ReadonlyArray<Workout>) {
       from.length > 0 && to.length > 0 && from <= to ? workoutsInRange(workouts, { from, to }) : [],
     [from, to, workouts],
   );
+  return { open, setOpen, from, setFrom, to, setTo, bounds, selected };
+}
+
+export function useWorkoutExport(workouts: ReadonlyArray<Workout>) {
+  const state = useExportSelection(workouts);
   const show = (): void => {
-    setFrom(bounds.earliest);
-    setTo(bounds.latest);
-    setOpen(true);
+    state.setFrom(state.bounds.earliest);
+    state.setTo(state.bounds.latest);
+    state.setOpen(true);
   };
   const download = (): void => {
-    if (selected.length === 0) return;
-    const range = { from, to };
+    if (state.selected.length === 0) return;
+    const range = { from: state.from, to: state.to };
     downloadJson(workoutHistoryFilename(range), createWorkoutHistoryExport(workouts, range));
-    setOpen(false);
+    state.setOpen(false);
   };
   return {
-    open,
-    from,
-    to,
-    bounds,
-    selectedCount: selected.length,
+    open: state.open,
+    from: state.from,
+    to: state.to,
+    bounds: state.bounds,
+    selectedCount: state.selected.length,
     show,
-    close: () => setOpen(false),
-    setFrom,
-    setTo,
+    close: () => state.setOpen(false),
+    setFrom: state.setFrom,
+    setTo: state.setTo,
     download,
   };
 }

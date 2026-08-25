@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ContinuationToken, SynchronizationCheckpoint } from "../../domain/identity";
-import { API_BASE_URL, createLepreBackend } from "./lepre-backend";
+import { API_BASE_URL, createLepreBackend } from "./lepre-backend-factory";
 
 const userDto = {
   id: "user:1",

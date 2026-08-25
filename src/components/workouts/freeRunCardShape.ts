@@ -39,24 +39,29 @@ export function freeRunShapeSeed(workoutId: string): number {
 }
 
 export function freeRunCardShape(seed: number): FreeRunCardShape {
-  const outlineRandom = seededRandom(seed);
-  const badgeRandom = seededRandom(seed ^ 0x9e3779b9);
+  return { outlinePath: outlinePath(seed), badgePath: badgePath(seed) };
+}
 
-  const outlinePath = [
-    `M ${vary(outlineRandom, 29, 3)} ${vary(outlineRandom, 14, 3)}`,
-    `C ${vary(outlineRandom, 176, 5)} ${vary(outlineRandom, 8, 4)}, ${vary(outlineRandom, 338, 5)} ${vary(outlineRandom, 20, 4)}, ${vary(outlineRandom, 505, 5)} ${vary(outlineRandom, 12, 4)}`,
-    `C ${vary(outlineRandom, 676, 5)} ${vary(outlineRandom, 5, 3)}, ${vary(outlineRandom, 837, 5)} ${vary(outlineRandom, 20, 4)}, ${vary(outlineRandom, 970, 3)} ${vary(outlineRandom, 14, 3)}`,
-    `Q ${vary(outlineRandom, 993, 2)} ${vary(outlineRandom, 16, 3)}, ${vary(outlineRandom, 994, 2)} ${vary(outlineRandom, 55, 5)}`,
-    `C ${vary(outlineRandom, 998, 2)} ${vary(outlineRandom, 280, 15)}, ${vary(outlineRandom, 991, 2)} ${vary(outlineRandom, 650, 15)}, ${vary(outlineRandom, 995, 2)} ${vary(outlineRandom, 945, 8)}`,
-    `Q ${vary(outlineRandom, 994, 2)} ${vary(outlineRandom, 986, 4)}, ${vary(outlineRandom, 965, 3)} ${vary(outlineRandom, 986, 4)}`,
-    `C ${vary(outlineRandom, 786, 5)} ${vary(outlineRandom, 996, 3)}, ${vary(outlineRandom, 611, 5)} ${vary(outlineRandom, 975, 4)}, ${vary(outlineRandom, 431, 5)} ${vary(outlineRandom, 990, 4)}`,
-    `C ${vary(outlineRandom, 256, 5)} ${vary(outlineRandom, 998, 3)}, ${vary(outlineRandom, 118, 5)} ${vary(outlineRandom, 978, 4)}, ${vary(outlineRandom, 32, 3)} ${vary(outlineRandom, 990, 4)}`,
-    `Q ${vary(outlineRandom, 6, 2)} ${vary(outlineRandom, 986, 4)}, ${vary(outlineRandom, 7, 2)} ${vary(outlineRandom, 945, 8)}`,
-    `C ${vary(outlineRandom, 3, 2)} ${vary(outlineRandom, 700, 15)}, ${vary(outlineRandom, 10, 2)} ${vary(outlineRandom, 300, 15)}, ${vary(outlineRandom, 7, 2)} ${vary(outlineRandom, 55, 5)}`,
-    `Q ${vary(outlineRandom, 7, 2)} ${vary(outlineRandom, 18, 3)}, ${vary(outlineRandom, 29, 3)} ${vary(outlineRandom, 14, 3)} Z`,
+function outlinePath(seed: number): string {
+  const random = seededRandom(seed);
+  return [
+    `M ${vary(random, 29, 3)} ${vary(random, 14, 3)}`,
+    `C ${vary(random, 176, 5)} ${vary(random, 8, 4)}, ${vary(random, 338, 5)} ${vary(random, 20, 4)}, ${vary(random, 505, 5)} ${vary(random, 12, 4)}`,
+    `C ${vary(random, 676, 5)} ${vary(random, 5, 3)}, ${vary(random, 837, 5)} ${vary(random, 20, 4)}, ${vary(random, 970, 3)} ${vary(random, 14, 3)}`,
+    `Q ${vary(random, 993, 2)} ${vary(random, 16, 3)}, ${vary(random, 994, 2)} ${vary(random, 55, 5)}`,
+    `C ${vary(random, 998, 2)} ${vary(random, 280, 15)}, ${vary(random, 991, 2)} ${vary(random, 650, 15)}, ${vary(random, 995, 2)} ${vary(random, 945, 8)}`,
+    `Q ${vary(random, 994, 2)} ${vary(random, 986, 4)}, ${vary(random, 965, 3)} ${vary(random, 986, 4)}`,
+    `C ${vary(random, 786, 5)} ${vary(random, 996, 3)}, ${vary(random, 611, 5)} ${vary(random, 975, 4)}, ${vary(random, 431, 5)} ${vary(random, 990, 4)}`,
+    `C ${vary(random, 256, 5)} ${vary(random, 998, 3)}, ${vary(random, 118, 5)} ${vary(random, 978, 4)}, ${vary(random, 32, 3)} ${vary(random, 990, 4)}`,
+    `Q ${vary(random, 6, 2)} ${vary(random, 986, 4)}, ${vary(random, 7, 2)} ${vary(random, 945, 8)}`,
+    `C ${vary(random, 3, 2)} ${vary(random, 700, 15)}, ${vary(random, 10, 2)} ${vary(random, 300, 15)}, ${vary(random, 7, 2)} ${vary(random, 55, 5)}`,
+    `Q ${vary(random, 7, 2)} ${vary(random, 18, 3)}, ${vary(random, 29, 3)} ${vary(random, 14, 3)} Z`,
   ].join(" ");
+}
 
-  const badgePath = [
+function badgePath(seed: number): string {
+  const badgeRandom = seededRandom(seed ^ 0x9e3779b9);
+  return [
     `M ${vary(badgeRandom, 15, 2)} ${vary(badgeRandom, 5, 1.5)}`,
     `C ${vary(badgeRandom, 71, 3)} ${vary(badgeRandom, 1, 1.5)}, ${vary(badgeRandom, 126, 3)} ${vary(badgeRandom, 7, 1.5)}, ${vary(badgeRandom, 181, 3)} ${vary(badgeRandom, 4, 1.5)}`,
     `C ${vary(badgeRandom, 229, 3)} ${vary(badgeRandom, 2, 1.5)}, ${vary(badgeRandom, 268, 2)} ${vary(badgeRandom, 5, 1.5)}, ${vary(badgeRandom, 285, 2)} ${vary(badgeRandom, 8, 1.5)}`,
@@ -67,6 +72,4 @@ export function freeRunCardShape(seed: number): FreeRunCardShape {
     `Q ${vary(badgeRandom, 3, 1.5)} ${vary(badgeRandom, 60, 2)}, ${vary(badgeRandom, 5, 1.5)} ${vary(badgeRandom, 45, 2)}`,
     `C ${vary(badgeRandom, 7, 1.5)} ${vary(badgeRandom, 31, 2)}, ${vary(badgeRandom, 2, 1.5)} ${vary(badgeRandom, 16, 2)}, ${vary(badgeRandom, 15, 2)} ${vary(badgeRandom, 5, 1.5)} Z`,
   ].join(" ");
-
-  return { outlinePath, badgePath };
 }

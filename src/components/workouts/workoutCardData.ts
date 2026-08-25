@@ -19,6 +19,11 @@ export type CommonWorkoutCardProps = Readonly<{
   averageHeartRate: Measurement<number>;
 }>;
 
+const fieldsUnavailableFromWorkoutSource = {
+  privateDescription: null,
+  elevation: { kind: "unavailable" },
+} as const satisfies Pick<CommonWorkoutCardProps, "privateDescription" | "elevation">;
+
 export function recordedOrUnavailable(value: number | null): Measurement<number> {
   return value === null ? { kind: "unavailable" } : { kind: "recorded", value };
 }
@@ -32,13 +37,11 @@ export function commonWorkoutCardPropsFromWorkout(workout: Workout): CommonWorko
   return {
     title: workout.name,
     description: nullableDescription(workout.description),
-    // Elevation and private notes are not exposed by the current workout source.
-    privateDescription: null,
+    ...fieldsUnavailableFromWorkoutSource,
     performedAt: workout.performedAt,
     category: workout.type,
     distance: workout.distanceMeters,
     time: workout.durationSeconds,
-    elevation: { kind: "unavailable" },
     averageHeartRate: recordedOrUnavailable(workout.averageHeartRateBpm),
   };
 }

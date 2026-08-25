@@ -1,43 +1,9 @@
 import type { TranslationCatalog } from "./en";
+import { italianDashboard } from "./it-dashboard";
+import { italianHome } from "./it-home";
 
 export const italian = {
-  home: {
-    opening: "Apertura degli allenamenti locali…",
-    eyebrow: "Le tue corse, interpretate",
-    heroTitle: "Capisci l’allenamento dietro ogni corsa.",
-    heroDescription:
-      "Lepre trasforma la cronologia Strava in un diario di allenamento chiaro. Riconosce ripetute, progressivi, gare e corse facili, poi mostra come li hai eseguiti e come sta evolvendo il tuo allenamento.",
-    heroContrast: "Strava registra l’attività. Lepre spiega l’allenamento.",
-    connectStrava: "Connetti Strava",
-    connectionNote:
-      "La cronologia degli allenamenti resta su questo dispositivo. Puoi disconnetterti in qualsiasi momento.",
-    previewEyebrow: "Una corsa, interpretata",
-    previewType: "Ripetute",
-    previewTitle: "6 × 1 km · recupero 400 m",
-    previewSource: "Da «Corsa del martedì mattina» su Strava",
-    previewDistance: "Distanza",
-    previewTime: "Tempo in movimento",
-    previewExecution: "Variazione ripetute",
-    previewStructureLabel: "Tre delle sei ripetute con recupero",
-    previewWork: "1 km veloce",
-    previewRecovery: "400 m recupero",
-    previewInsight: "Sei ripetute costanti, con le ultime tre sempre più veloci.",
-    benefitsEyebrow: "Oltre il feed delle attività",
-    benefitsTitle: "Dalla cronologia delle corse alla lettura dell’allenamento.",
-    structureTitle: "Riconosci ogni seduta",
-    structureDescription:
-      "Trasforma i lap grezzi in ripetute, progressivi, tempo, gare e corse facili comprensibili a colpo d’occhio.",
-    weeklyTitle: "Vedi il ritmo delle settimane",
-    weeklyDescription:
-      "Rileggi ogni settimana nel suo insieme: distanza, durata, giorni di allenamento e scopo di ogni corsa.",
-    conditionTitle: "Segui ciò che cambia",
-    conditionDescription:
-      "Osserva passo facile, ripetute confrontabili, volume e distribuzione dell’allenamento mentre i dati aumentano.",
-    privacyEyebrow: "Privato per scelta",
-    privacyTitle: "La tua cronologia di corsa appartiene a te.",
-    privacyDescription:
-      "Gli allenamenti vengono analizzati e salvati nel browser, non sui server di Lepre. Puoi rimuovere la connessione Strava in qualsiasi momento.",
-  },
+  home: italianHome,
   actions: {
     account: "Account",
     download: "Scarica",
@@ -90,76 +56,7 @@ export const italian = {
     emptyTitle: "Nessuna corsa trovata",
     emptyDescription: "Gli allenamenti completati appariranno qui dopo la classificazione dei lap.",
   },
-  dashboard: {
-    eyebrow: "Stato di forma",
-    title: "La tua condizione nella corsa",
-    summary_one: "Una lettura di sei settimane basata su {{count}} allenamento recente.",
-    summary_other: "Una lettura di sei settimane basata su {{count}} allenamenti recenti.",
-    window: "Ultime 6 settimane",
-    through: "Fino al {{date}}",
-    notEnoughData: "Dati ancora insufficienti",
-    perWeek: "A settimana",
-    method:
-      "Le tendenze del passo confrontano periodi equivalenti di sei settimane. La distribuzione usa lo scopo della seduta; il tempo nelle zone cardiache richiederà soglie personali e stream delle attività.",
-    evidence: {
-      early: "Prima stima",
-      growing: "Evidenza in crescita",
-      strong: "Evidenza solida",
-    },
-    trend: {
-      up: "{{value}}% più veloce delle 6 settimane precedenti",
-      down: "{{value}}% più lento delle 6 settimane precedenti",
-      steady: "Stabile rispetto alle 6 settimane precedenti",
-      noComparison: "In attesa di un periodo precedente confrontabile",
-      volumeUp: "{{value}}% di distanza in più",
-      volumeDown: "{{value}}% di distanza in meno",
-      volumeSteady: "Distanza stabile",
-      noVolumeComparison: "Prima base di volume",
-    },
-    easyPace: {
-      title: "Passo lento",
-      range: "Intervallo osservato {{fastest}}–{{slowest}} /km",
-      rangeWithHeartRate:
-        "Intervallo osservato {{fastest}}–{{slowest}} /km · mediana {{heartRate}} bpm",
-      runs_one: "{{count}} corsa di supporto",
-      runs_other: "{{count}} corse di supporto",
-      empty: "Una corsa libera su strada o tapis roulant di oltre 20 minuti creerà la base.",
-    },
-    intervals: {
-      title: "Ripetute di riferimento",
-      protocol: "{{repetitions}} × {{work}} · recupero {{recovery}} · variabilità {{variation}}%",
-      selectedReason_one:
-        "Il formato recente più ripetuto · {{count}} seduta confrontabile nell’ultimo anno",
-      selectedReason_other:
-        "Il formato recente più ripetuto · {{count}} sedute confrontabili nell’ultimo anno",
-      sessions_one: "{{count}} seduta confrontabile",
-      sessions_other: "{{count}} sedute confrontabili",
-      alternatives_one: "{{count}} altro formato confrontabile",
-      alternatives_other: "{{count}} altri formati confrontabili",
-      up: "{{value}}% più veloce nelle sedute recenti confrontabili",
-      down: "{{value}}% più lento nelle sedute recenti confrontabili",
-      steady: "Stabile nelle sedute recenti confrontabili",
-      noComparison: "Servono altre sedute confrontabili per una tendenza",
-      empty: "Completa una seduta con ripetute per creare un riferimento sugli intervalli.",
-    },
-    volume: {
-      title: "Volume di corsa",
-      total_one: "{{distance}} km in {{count}} allenamento",
-      total_other: "{{distance}} km in {{count}} allenamenti",
-      window: "Media di {{count}} settimane",
-    },
-    mix: {
-      title: "Distribuzione",
-      sessionPurpose: "Per scopo della seduta",
-      low: "lento",
-      lowCount: "{{count}} lente",
-      moderateCount: "{{count}} moderate",
-      highCount: "{{count}} intense",
-      coverage: "{{value}}% classificato",
-      reference: "Riferimento 80% lento",
-      ariaLabel: "{{low}} sedute lente, {{moderate}} moderate e {{high}} ad alta intensità",
-    },
-  },
+  dashboard: italianDashboard,
   weekly: {
     label: "Panoramica settimanale degli allenamenti",
     week: "Settimana",

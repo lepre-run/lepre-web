@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { ContinuationToken } from "../../domain/identity";
-import { createWorkout } from "../../domain/workout";
+import { buildWorkout } from "../../test/builders";
 import type { BackendGateway, LocalStore } from "../ports";
 import { createSynchronizeWorkouts } from "./synchronize-workouts";
 
 describe("SynchronizeWorkouts", () => {
   it("applies one page and pauses before continuing the historical backfill", async () => {
-    const workout = createWorkout({
+    const workout = buildWorkout({
       id: "strava:7",
       performedAt: "2026-07-15T06:00:00Z",
       name: "Morning Run",
@@ -27,9 +27,8 @@ describe("SynchronizeWorkouts", () => {
         },
       ],
     });
-    if (workout.kind !== "created") throw new Error("expected workout");
     const first = {
-      upserted: [workout.workout],
+      upserted: [workout],
       removed: [],
       continuation: { kind: "more", token: "next" as ContinuationToken },
     } as const;
@@ -75,40 +74,26 @@ describe("SynchronizeWorkouts", () => {
   });
 
   it("returns a retryable pause without changing the checkpoint", async () => {
-    const applySynchronizationBatch = vi.fn();
-    const store = {
-      synchronizationState: vi.fn().mockResolvedValue({ kind: "initial" }),
-      applySynchronizationBatch,
-    } as unknown as LocalStore;
-    const backend = {
-      fetchWorkoutBatch: vi.fn().mockResolvedValue({
-        kind: "rate-limited",
-        retryAfterSeconds: 900,
-      }),
-    } as unknown as BackendGateway;
-
-    await expect(createSynchronizeWorkouts(store, backend)(async () => undefined)).resolves.toEqual(
-      { kind: "rate-limited", retryAfterSeconds: 900 },
-    );
-    expect(applySynchronizationBatch).not.toHaveBeenCalled();
+    await expectSynchronizationPause("rate-limited", 900);
   });
 
   it("preserves the local checkpoint while waiting for a fair turn", async () => {
-    const applySynchronizationBatch = vi.fn();
-    const store = {
-      synchronizationState: vi.fn().mockResolvedValue({ kind: "initial" }),
-      applySynchronizationBatch,
-    } as unknown as LocalStore;
-    const backend = {
-      fetchWorkoutBatch: vi.fn().mockResolvedValue({
-        kind: "queued",
-        retryAfterSeconds: 5,
-      }),
-    } as unknown as BackendGateway;
-
-    await expect(createSynchronizeWorkouts(store, backend)(async () => undefined)).resolves.toEqual(
-      { kind: "queued", retryAfterSeconds: 5 },
-    );
-    expect(applySynchronizationBatch).not.toHaveBeenCalled();
+    await expectSynchronizationPause("queued", 5);
   });
 });
+
+async function expectSynchronizationPause(kind: "rate-limited" | "queued", seconds: number) {
+  const applySynchronizationBatch = vi.fn();
+  const store = {
+    synchronizationState: vi.fn().mockResolvedValue({ kind: "initial" }),
+    applySynchronizationBatch,
+  } as unknown as LocalStore;
+  const backend = {
+    fetchWorkoutBatch: vi.fn().mockResolvedValue({ kind, retryAfterSeconds: seconds }),
+  } as unknown as BackendGateway;
+  await expect(createSynchronizeWorkouts(store, backend)(async () => undefined)).resolves.toEqual({
+    kind,
+    retryAfterSeconds: seconds,
+  });
+  expect(applySynchronizationBatch).not.toHaveBeenCalled();
+}

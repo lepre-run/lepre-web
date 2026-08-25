@@ -1,6 +1,6 @@
 import type { Workout } from "../../domain/workout";
 
-export const WEEKS_PER_PAGE = 4;
+const WEEKS_PER_PAGE = 4;
 
 export type WorkoutDay = Readonly<{
   date: Date;
@@ -44,7 +44,14 @@ function mondayOf(date: Date): Date {
 
 export function workoutWeeks(workouts: ReadonlyArray<Workout>): ReadonlyArray<WorkoutWeek> {
   if (workouts.length === 0) return [];
+  const workoutsByDay = groupWorkoutsByDay(workouts);
+  const timestamps = workouts.map((workout) => new Date(workout.performedAt).getTime());
+  const latestMonday = mondayOf(new Date(Math.max(...timestamps)));
+  const earliestMonday = mondayOf(new Date(Math.min(...timestamps)));
+  return weeksBetween(latestMonday, earliestMonday, workoutsByDay);
+}
 
+function groupWorkoutsByDay(workouts: ReadonlyArray<Workout>): ReadonlyMap<string, Array<Workout>> {
   const workoutsByDay = new Map<string, Array<Workout>>();
   for (const workout of workouts) {
     const key = localDateKey(new Date(workout.performedAt));
@@ -56,34 +63,44 @@ export function workoutWeeks(workouts: ReadonlyArray<Workout>): ReadonlyArray<Wo
     day.sort((left, right) => right.performedAt.localeCompare(left.performedAt));
   }
 
-  const timestamps = workouts.map((workout) => new Date(workout.performedAt).getTime());
-  const latestMonday = mondayOf(new Date(Math.max(...timestamps)));
-  const earliestMonday = mondayOf(new Date(Math.min(...timestamps)));
-  const weeks: Array<WorkoutWeek> = [];
+  return workoutsByDay;
+}
 
+function weeksBetween(
+  latestMonday: Date,
+  earliestMonday: Date,
+  workoutsByDay: ReadonlyMap<string, ReadonlyArray<Workout>>,
+): ReadonlyArray<WorkoutWeek> {
+  const weeks: Array<WorkoutWeek> = [];
   for (
     let start = latestMonday;
     start.getTime() >= earliestMonday.getTime();
     start = addDays(start, -7)
   ) {
-    const days = Array.from({ length: 7 }, (_, index): WorkoutDay => {
-      const date = addDays(start, index);
-      const dateKey = localDateKey(date);
-      return { date, dateKey, workouts: workoutsByDay.get(dateKey) ?? [] };
-    });
-    const weekWorkouts = days.flatMap((day) => day.workouts);
-    weeks.push({
-      start,
-      end: addDays(start, 6),
-      dateKey: localDateKey(start),
-      days,
-      workouts: weekWorkouts,
-      distanceMeters: weekWorkouts.reduce((total, workout) => total + workout.distanceMeters, 0),
-      durationSeconds: weekWorkouts.reduce((total, workout) => total + workout.durationSeconds, 0),
-    });
+    weeks.push(workoutWeek(start, workoutsByDay));
   }
-
   return weeks;
+}
+
+function workoutWeek(
+  start: Date,
+  workoutsByDay: ReadonlyMap<string, ReadonlyArray<Workout>>,
+): WorkoutWeek {
+  const days = Array.from({ length: 7 }, (_, index): WorkoutDay => {
+    const date = addDays(start, index);
+    const dateKey = localDateKey(date);
+    return { date, dateKey, workouts: workoutsByDay.get(dateKey) ?? [] };
+  });
+  const workouts = days.flatMap((day) => day.workouts);
+  return {
+    start,
+    end: addDays(start, 6),
+    dateKey: localDateKey(start),
+    days,
+    workouts,
+    distanceMeters: workouts.reduce((total, workout) => total + workout.distanceMeters, 0),
+    durationSeconds: workouts.reduce((total, workout) => total + workout.durationSeconds, 0),
+  };
 }
 
 export function pageCount(weeks: ReadonlyArray<WorkoutWeek>): number {

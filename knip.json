@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["src/main.tsx!", "src/**/*.test.{ts,tsx}"],
-  "project": ["src/**/*.{ts,tsx}!", "vite.config.ts!"],
+  "project": ["src/**/*.{ts,tsx}!", "!src/test/**", "!src/test-setup.ts", "vite.config.ts!"],
   "ignoreDependencies": ["jscpd", "typescript-compiler"]
 }

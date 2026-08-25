@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-
+import {
+  HILL_CIRCUIT_CORE_LAPS,
+  HILL_CIRCUIT_LAP_ROLES,
+  INTERVAL_CORE_LAPS,
+  INTERVAL_LAP_ROLES,
+} from "../test/classification-expectations";
 import { classifyWorkout } from "./classifier";
 import type { Lap } from "./workout";
 
@@ -39,15 +44,8 @@ describe("workout classifier", () => {
       repetitions: 4,
       work: { kind: "distance", meters: 1_000 },
       recovery: { kind: "distance", meters: 400 },
-      coreLapIndexes: [2, 3, 4, 5, 6, 7, 8],
-      lapRoles: {
-        warmup: [1],
-        work: [2, 4, 6, 8],
-        recovery: [3, 5, 7],
-        cooldown: [9],
-        main: [],
-        unknown: [],
-      },
+      coreLapIndexes: INTERVAL_CORE_LAPS,
+      lapRoles: INTERVAL_LAP_ROLES,
     });
   });
 
@@ -110,13 +108,8 @@ describe("workout classifier", () => {
       classifierVersion: 2,
       kind: "hill-circuit",
       repetitions: 2,
-      coreLapIndexes: [2, 3, 4, 5, 6, 7, 8],
-      lapRoles: {
-        warmup: [1],
-        work: [2, 4, 6, 8],
-        recovery: [3, 5, 7],
-        cooldown: [9],
-      },
+      coreLapIndexes: HILL_CIRCUIT_CORE_LAPS,
+      lapRoles: HILL_CIRCUIT_LAP_ROLES,
     });
   });
 
