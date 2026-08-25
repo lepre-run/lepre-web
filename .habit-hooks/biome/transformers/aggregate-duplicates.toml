@@ -1,0 +1,1 @@
+command = "${python} ${dir}/aggregate_duplicates.py"

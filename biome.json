@@ -1,17 +1,63 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
-  "files": { "ignoreUnknown": false, "includes": ["**", "!**/dist", "!**/node_modules"] },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": ["**", "!!**/dist", "!!**/node_modules", "!!public/mockServiceWorker.js"]
+  },
   "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
+    "domains": { "react": "recommended" },
     "rules": {
       "preset": "recommended",
+      "complexity": {
+        "noExcessiveLinesPerFunction": {
+          "level": "off",
+          "options": { "maxLines": 25, "skipBlankLines": true }
+        },
+        "useMaxParams": {
+          "level": "off",
+          "options": { "max": 4 }
+        }
+      },
       "style": {
+        "noExcessiveLinesPerFile": {
+          "level": "off",
+          "options": { "maxLines": 200 }
+        },
         "useImportType": "warn",
         "useNamingConvention": "off"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noExcessiveLinesPerFunction": {
+              "level": "off",
+              "options": { "maxLines": 150, "skipBlankLines": true }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.tsx"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noExcessiveLinesPerFunction": {
+              "level": "off",
+              "options": { "maxLines": 75, "skipBlankLines": true }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

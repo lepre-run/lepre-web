@@ -1,0 +1,1 @@
+command = "node ${dir}/swallowed_exception.cjs ${files}"

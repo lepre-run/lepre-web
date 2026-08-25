@@ -1,0 +1,8 @@
+language = "typescript"
+files = ["**/*.ts", "**/*.tsx", "!**/node_modules/**", "!src/vite-env.d.ts"]
+sensors = ["knip"]
+
+detectors = [
+  { name = "node", kind = "command", install = "brew install node" },
+  { name = "knip", kind = "command", install = "npm install --save-dev --save-exact knip@6.32.2" },
+]

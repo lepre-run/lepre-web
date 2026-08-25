@@ -1,0 +1,1 @@
+command = "node ${dir}/non_essential_comment.cjs ${files}"

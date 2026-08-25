@@ -52,10 +52,33 @@ current source fields can be reimported from Strava.
 
 ```bash
 npm ci
-npm run lint
+npm run check
 npm test -- --run
 npm run build
 ```
+
+## Habit Hooks
+
+Habit Hooks provides local, agent-oriented code-smell guidance using the project's existing Biome
+and TypeScript installations. Biome reports parse errors, complexity and size limits, excessive
+parameters, unused imports and variables, mutable bindings, legacy `var` declarations, explicit
+`any` types, loose equality, non-null assertions, and trivially inferred type annotations. Knip
+reports unused files, exports, class members, and dependencies.
+
+Local TypeScript sensors report repeated imports, control flow nested beyond four levels, empty
+catch clauses, unresolved warning markers, and explanatory comments that suggest the code could be
+clearer. They use a TypeScript 6 compiler-API alias because the application's TypeScript 7 package
+does not expose that JavaScript API. The generic `jscpd` sensor reports duplicated code, with clone
+pairs grouped into one coaching section.
+
+Install [uv](https://docs.astral.sh/uv/) and run:
+
+```bash
+npm run habits:check
+```
+
+Habit Hooks is local coaching and intentionally does not run in CI. Validate the custom sensors and
+Biome adapter with `npm run test:habits`.
 
 ## Local mocked feed
 

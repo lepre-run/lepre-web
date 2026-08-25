@@ -1,0 +1,10 @@
+language = "typescript"
+files = ["**/*.ts", "**/*.tsx", "!**/node_modules/**", "!src/vite-env.d.ts"]
+sensors = ["biome", "duplicate-import", "max-depth", "non-essential-comment", "swallowed-exception", "warning-comment"]
+
+detectors = [
+  { name = "node", kind = "command", install = "brew install node" },
+  { name = "biome", kind = "command", install = "npm install --save-dev --save-exact @biomejs/biome" },
+  { name = "typescript", kind = "node-module", install = "npm install --save-dev --save-exact typescript" },
+  { name = "typescript-compiler", kind = "node-module", install = "npm install --save-dev --save-exact typescript-compiler@npm:typescript@6.0.3" },
+]

@@ -1,0 +1,81 @@
+plugins = ["biome", "typescript", "generic"]
+transformers = ["aggregate-duplicates", "snooze"]
+files = ["**/*.ts", "**/*.tsx", "!**/node_modules/**", "!src/vite-env.d.ts"]
+uncoached = "suggest"
+
+# Biome owns size checks; the generic plugin supplies duplicate-code detection
+# and the shared coaching guides.
+[sensors.line-count]
+disabled = true
+
+[smells.high-complexity]
+severity = "enforced"
+
+[smells.deep-nesting]
+severity = "enforced"
+
+[smells.oversized-function]
+severity = "enforced"
+
+[smells.oversized-file]
+severity = "enforced"
+
+[smells.duplicated-code]
+severity = "enforced"
+
+[smells.duplicate-import]
+severity = "enforced"
+
+[smells.unused-import]
+severity = "enforced"
+
+[smells.unused-variable]
+severity = "enforced"
+
+[smells.non-const-binding]
+severity = "enforced"
+
+[smells.var-declaration]
+severity = "enforced"
+
+[smells.explicit-any]
+severity = "enforced"
+
+[smells.loose-equality]
+severity = "enforced"
+
+[smells.non-null-assertion]
+severity = "enforced"
+
+[smells.redundant-type-annotation]
+severity = "enforced"
+
+[smells.swallowed-exception]
+severity = "enforced"
+
+[smells.warning-comment]
+severity = "enforced"
+
+[smells.parse-error]
+severity = "enforced"
+
+[smells.non-essential-comment]
+severity = "enforced"
+
+[smells.unused-file]
+severity = "enforced"
+
+[smells.unused-export]
+severity = "enforced"
+
+[smells.unused-dependency]
+severity = "enforced"
+
+[smells.unused-class-member]
+severity = "enforced"
+
+[smells.test-only-dead-code]
+severity = "enforced"
+
+[smells.too-many-parameters]
+severity = "enforced"

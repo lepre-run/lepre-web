@@ -1,0 +1,1 @@
+command = "node ${dir}/max_depth.cjs ${files}"

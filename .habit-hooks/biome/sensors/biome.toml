@@ -1,0 +1,21 @@
+command = """
+biome lint --reporter=rdjson ${args} ${files} | ${python} ${dir}/biome_adapter.py
+statuses=("${PIPESTATUS[@]}")
+if [ "${statuses[1]}" -ne 0 ]; then exit "${statuses[1]}"; fi
+if [ "${statuses[0]}" -gt 1 ]; then exit "${statuses[0]}"; fi
+"""
+args = [
+  "--only=lint/complexity/noExcessiveCognitiveComplexity",
+  "--only=lint/complexity/noExcessiveLinesPerFunction",
+  "--only=lint/complexity/noExcessiveNestedTestSuites",
+  "--only=lint/complexity/useMaxParams",
+  "--only=lint/correctness/noUnusedImports",
+  "--only=lint/correctness/noUnusedVariables",
+  "--only=lint/style/noExcessiveLinesPerFile",
+  "--only=lint/style/noInferrableTypes",
+  "--only=lint/style/noNonNullAssertion",
+  "--only=lint/style/useConst",
+  "--only=lint/suspicious/noDoubleEquals",
+  "--only=lint/suspicious/noExplicitAny",
+  "--only=lint/suspicious/noVar",
+]
