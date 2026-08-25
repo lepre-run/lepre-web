@@ -3,12 +3,6 @@ import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 import { LanguageSelector } from "../i18n/LanguageSelector";
 
-/**
- * `GET /connect-failed?reason=<slug>&id=<correlation_id>` — the Lambda's
- * failure exit. The set of recognised reason slugs is closed; an
- * unrecognised value renders a generic fallback so adding a new slug on
- * the Lambda before the frontend update doesn't crash the page.
- */
 const REASON_MESSAGE_KEYS = {
   user_denied: "connectFailed.reasons.userDenied",
   state_invalid: "connectFailed.reasons.stateInvalid",
