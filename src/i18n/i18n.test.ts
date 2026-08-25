@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   i18n,
   LANGUAGE_STORAGE_KEY,
@@ -8,6 +8,7 @@ import {
 } from "./i18n";
 
 afterEach(async () => {
+  vi.restoreAllMocks();
   window.localStorage.removeItem(LANGUAGE_STORAGE_KEY);
   await i18n.changeLanguage("en");
 });
@@ -35,5 +36,19 @@ describe("interface language", () => {
     expect(i18n.resolvedLanguage).toBe("it");
     expect(document.documentElement).toHaveAttribute("lang", "it");
     expect(document.documentElement).toHaveAttribute("dir", "ltr");
+  });
+
+  it("changes language and reports when browser storage is unavailable", async () => {
+    const storageError = new DOMException("Storage is blocked", "SecurityError");
+    vi.spyOn(window.localStorage, "setItem").mockImplementation(() => {
+      throw storageError;
+    });
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    await expect(selectLanguage("it")).resolves.toBeUndefined();
+
+    expect(warning).toHaveBeenCalledWith("Could not persist language preference.", storageError);
+    expect(i18n.resolvedLanguage).toBe("it");
+    expect(document.documentElement).toHaveAttribute("lang", "it");
   });
 });

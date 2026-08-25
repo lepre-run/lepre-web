@@ -58,8 +58,8 @@ function saveLanguage(language: SupportedLanguage): void {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
-  } catch {
-    // A blocked storage API should not prevent the language from changing.
+  } catch (error) {
+    console.warn("Could not persist language preference.", error);
   }
 }
 
