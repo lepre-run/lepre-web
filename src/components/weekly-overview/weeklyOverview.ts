@@ -60,7 +60,11 @@ function groupWorkoutsByDay(workouts: ReadonlyArray<Workout>): ReadonlyMap<strin
     workoutsByDay.set(key, day);
   }
   for (const day of workoutsByDay.values()) {
-    day.sort((left, right) => right.performedAt.localeCompare(left.performedAt));
+    day.sort(
+      (left, right) =>
+        Date.parse(left.performedAt) - Date.parse(right.performedAt) ||
+        left.id.localeCompare(right.id),
+    );
   }
 
   return workoutsByDay;
