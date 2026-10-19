@@ -52,10 +52,10 @@ describe("weekly overview grouping", () => {
 
   it("orders workouts within a day by start time ascending, then by id", () => {
     const weeks = workoutWeeks([
-      workout("evening", "2026-07-22T15:00:00Z"),
-      workout("afternoon-b", "2026-07-22T12:00:00Z"),
-      workout("afternoon-a", "2026-07-22T12:00:00Z"),
-      workout("morning", "2026-07-22T08:00:00Z"),
+      workout("evening", "2026-07-22T13:00:00Z"),
+      workout("afternoon-b", "2026-07-22T11:00:00Z"),
+      workout("afternoon-a", "2026-07-22T11:00:00Z"),
+      workout("morning", "2026-07-22T09:00:00Z"),
     ]);
 
     expect(weeks[0].days[2].workouts.map((value) => value.id)).toEqual([
