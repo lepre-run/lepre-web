@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import i18n from "i18next";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { application } from "../composition/application";
@@ -163,5 +163,46 @@ describe("Home", () => {
       "true",
     );
     expect(screen.getByRole("button", { name: /Open Stored run/ })).not.toHaveAttribute("data-new");
+  });
+
+  it("shows the hopping hare in the empty state while the first import runs", async () => {
+    const finish: Array<() => void> = [];
+    vi.mocked(application.loadUser).mockResolvedValue({ kind: "connected", user });
+    vi.mocked(application.synchronizeWorkouts).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finish.push(() => resolve({ kind: "synchronized" }));
+        }),
+    );
+
+    const { container } = render(<Home />);
+
+    expect(
+      await screen.findByRole("heading", { name: "The hare is fetching your recent runs…" }),
+    ).toBeInTheDocument();
+    expect(container.querySelector(".empty-state .hare-loader")).toBeInTheDocument();
+
+    await act(async () => {
+      for (const resolve of finish) resolve();
+    });
+
+    expect(await screen.findByRole("heading", { name: "No tracks here yet" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Head out for a run: completed workouts hop in here as soon as their laps have been classified.",
+      ),
+    ).toBeInTheDocument();
+    expect(container.querySelector(".empty-state .hare-loader")).toBeNull();
+  });
+
+  it("explains the empty state in Italian", async () => {
+    await i18n.changeLanguage("it");
+    vi.mocked(application.loadUser).mockResolvedValue({ kind: "connected", user });
+
+    render(<Home />);
+
+    expect(
+      await screen.findByRole("heading", { name: "Ancora nessuna traccia" }),
+    ).toBeInTheDocument();
   });
 });

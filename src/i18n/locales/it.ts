@@ -52,9 +52,10 @@ export const italian = {
     title: "Allenamento settimanale",
     storedCount_one: "{{count}} allenamento salvato in locale",
     storedCount_other: "{{count}} allenamenti salvati in locale",
-    importing: "Importazione delle corse recenti…",
-    emptyTitle: "Nessuna corsa trovata",
-    emptyDescription: "Gli allenamenti completati appariranno qui dopo la classificazione dei lap.",
+    importing: "La lepre sta recuperando le tue corse recenti…",
+    emptyTitle: "Ancora nessuna traccia",
+    emptyDescription:
+      "Esci a correre: gli allenamenti completati arrivano qui di corsa, appena classificati i lap.",
   },
   dashboard: italianDashboard,
   weekly: {

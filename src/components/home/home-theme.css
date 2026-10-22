@@ -131,4 +131,17 @@
 
 .empty-state {
   background: var(--color-cyan);
+  animation: empty-state-enter var(--motion-duration-slow) var(--motion-ease-out) backwards;
+}
+
+.empty-state__hare {
+  width: 3.5rem;
+  margin-bottom: 0.5rem;
+}
+
+@keyframes empty-state-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }

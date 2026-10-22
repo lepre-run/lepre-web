@@ -6,6 +6,7 @@ import { AppHeader } from "../components/home/AppHeader/AppHeader";
 import { DownloadPanel } from "../components/home/DownloadPanel/DownloadPanel";
 import { FeedHeader } from "../components/home/FeedHeader/FeedHeader";
 import { DisconnectedHome, LoadingHome } from "../components/home/PublicHome/PublicHome";
+import { HareLoader } from "../components/ui";
 import { WeeklyOverview } from "../components/weekly-overview/WeeklyOverview/WeeklyOverview";
 import { useHomeController } from "../hooks/useHomeController";
 import { useWorkoutArrivals } from "../hooks/useWorkoutArrivals";
@@ -70,6 +71,7 @@ function EmptyWorkoutFeed({ syncing }: Readonly<{ syncing: boolean }>): JSX.Elem
   const { t } = useTranslation();
   return (
     <div className="empty-state">
+      {syncing && <HareLoader className="empty-state__hare" />}
       <h2>{syncing ? t("feed.importing") : t("feed.emptyTitle")}</h2>
       <p>{t("feed.emptyDescription")}</p>
     </div>

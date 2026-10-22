@@ -51,9 +51,10 @@ export const english = {
     title: "Weekly training",
     storedCount_one: "{{count}} stored locally",
     storedCount_other: "{{count}} stored locally",
-    importing: "Importing your recent runs…",
-    emptyTitle: "No runs found",
-    emptyDescription: "Completed workouts will appear here after their laps have been classified.",
+    importing: "The hare is fetching your recent runs…",
+    emptyTitle: "No tracks here yet",
+    emptyDescription:
+      "Head out for a run: completed workouts hop in here as soon as their laps have been classified.",
   },
   dashboard: englishDashboard,
   weekly: {
