@@ -40,6 +40,10 @@
     var(--motion-loop-iterations);
 }
 
+.hare-loader[data-motion="reduced"] :is(.hare-loader__hare, .hare-loader__ground) {
+  animation: none;
+}
+
 @keyframes hare-hop {
   50% {
     transform: translateY(-22%) rotate(-8deg);

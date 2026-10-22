@@ -1,9 +1,12 @@
 import type { JSX } from "react";
+import { usePrefersReducedMotion } from "../../../hooks/usePrefersReducedMotion";
 
 export function HareLoader({ className }: Readonly<{ className?: string }>): JSX.Element {
+  const reducedMotion = usePrefersReducedMotion();
   return (
     <svg
       className={["hare-loader", className].filter(Boolean).join(" ")}
+      data-motion={reducedMotion ? "reduced" : "full"}
       viewBox="0 0 48 32"
       aria-hidden="true"
       focusable="false"
