@@ -2,7 +2,7 @@ import type { JSX } from "react";
 import { useTranslation } from "react-i18next";
 import { STRAVA_START_URL } from "../../../infrastructure/api/lepre-backend";
 import { Button, HareLoader } from "../../ui";
-import { synchronizationLabel, synchronizationState } from "../homePresentation";
+import { synchronizationLabels, synchronizationState } from "../homePresentation";
 import type { Notice, ReadyScreen, SynchronizationStatus } from "../homeTypes";
 
 export function AppHeader({
@@ -27,6 +27,7 @@ export function AppHeader({
   const retryableError = notice.kind === "error" && notice.retryable;
   const state = synchronizationState(screen, status);
   const inProgress = state === "checking" || state === "syncing";
+  const label = synchronizationLabels(screen, status, notice, t);
   return (
     <header className="app-header">
       <div>
@@ -50,7 +51,16 @@ export function AppHeader({
             )}
           </span>
           <span className="sync-status__message">
-            {synchronizationLabel(screen, status, notice, t)}
+            {label.short === label.full ? (
+              label.full
+            ) : (
+              <>
+                <span className="sync-status__label--full">{label.full}</span>
+                <span className="sync-status__label--short" aria-hidden="true">
+                  {label.short}
+                </span>
+              </>
+            )}
           </span>
           {needsReauthorization && (
             <a className="sync-status__action" href={STRAVA_START_URL}>

@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import i18n from "i18next";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { renderHeader } from "../../../test/app-header";
 import { readyScreen } from "../../../test/home-builders";
-import type { SynchronizationStatus } from "../homeTypes";
 import { AppHeader } from "./AppHeader";
 
 beforeEach(async () => {
@@ -89,20 +89,6 @@ describe("AppHeader", () => {
     );
   });
 });
-
-function renderHeader(status: SynchronizationStatus) {
-  return render(
-    <AppHeader
-      screen={readyScreen}
-      status={status}
-      notice={{ kind: "none" }}
-      syncing={status === "syncing"}
-      accountOpen={false}
-      onRetry={vi.fn()}
-      onToggleAccount={vi.fn()}
-    />,
-  );
-}
 
 describe("AppHeader synchronization indicator", () => {
   it.each([
