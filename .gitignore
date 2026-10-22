@@ -8,3 +8,5 @@ dist
 # Python tooling used by local Habit Hooks tests
 __pycache__/
 *.py[cod]
+
+*.step-review
