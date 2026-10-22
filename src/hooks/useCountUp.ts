@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { MOTION_DURATION_SLOW_MS, countUpValue } from "./countUp";
+import { countUpValue } from "./countUp";
+import { MOTION_DURATION_SLOW_MS } from "./motionDurations";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 
 type CountUpOptions = Readonly<{ duration?: number }>;

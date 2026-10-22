@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Workout } from "../domain/workout";
 import { preferReducedMotion } from "../test/motion";
@@ -6,6 +6,7 @@ import { buildWeeklyWorkout } from "../test/weekly-builders";
 import { useWorkoutArrivals } from "./useWorkoutArrivals";
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
@@ -65,6 +66,18 @@ describe("useWorkoutArrivals", () => {
 
     rerender({ workouts: [first, second], hydrated: true });
 
+    expect(result.current.size).toBe(0);
+  });
+
+  it("clears arrival marks once the entrance animation has finished", () => {
+    vi.useFakeTimers();
+    const { result, rerender } = renderArrivals([first], true);
+    rerender({ workouts: [first, second], hydrated: true });
+    expect(result.current.size).toBe(1);
+
+    act(() => vi.advanceTimersByTime(399));
+    expect(result.current.size).toBe(1);
+    act(() => vi.advanceTimersByTime(1));
     expect(result.current.size).toBe(0);
   });
 });

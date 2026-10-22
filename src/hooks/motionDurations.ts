@@ -1,0 +1,1 @@
+export const MOTION_DURATION_SLOW_MS = 400;
