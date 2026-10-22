@@ -10,6 +10,11 @@ export function expectIntervalExecution(heading: string): void {
   expect(within(boundaries[1]).getByText("Cool-down")).toBeInTheDocument();
   const repetitions = screen.getAllByTestId("interval-repetition-row");
   expect(repetitions).toHaveLength(3);
+  expect(repetitions.map((row) => row.style.getPropertyValue("--rep-order"))).toEqual([
+    "0",
+    "1",
+    "2",
+  ]);
   expect(within(repetitions[0]).getByText(/Interval 1/)).toBeInTheDocument();
   expect(within(repetitions[0]).getByText(/Recovery 1/)).toBeInTheDocument();
   expect(within(repetitions[1]).getByText(/Interval 2/)).toBeInTheDocument();

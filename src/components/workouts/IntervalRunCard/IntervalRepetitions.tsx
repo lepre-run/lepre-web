@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { CSSProperties, JSX } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDistance, formatDuration, formatPace } from "../../../i18n/formatters";
 import { measurementText } from "../sourceLapData";
@@ -101,7 +101,11 @@ export function IntervalRepetitionRow({
 }>): JSX.Element {
   const { t } = useTranslation();
   return (
-    <li className="repetition-row" data-testid="interval-repetition-row">
+    <li
+      className="repetition-row"
+      data-testid="interval-repetition-row"
+      style={{ "--rep-order": repetition.number - 1 } as CSSProperties}
+    >
       <div className="repetition-row__identity">
         <strong>{String(repetition.number).padStart(2, "0")}</strong>
         <span>{lapReference(repetition, t)}</span>
