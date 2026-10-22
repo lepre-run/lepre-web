@@ -44,10 +44,9 @@
   box-shadow: 0 0 0 3px var(--color-kinetic-glow);
 }
 
-.sync-status[data-state="checking"] .sync-status__indicator,
-.sync-status[data-state="syncing"] .sync-status__indicator {
-  background: var(--color-instrument);
-  animation: sync-pulse 1.2s ease-in-out infinite alternate;
+.sync-status__hare {
+  width: 1.5rem;
+  margin-block: -0.2rem;
 }
 
 .sync-status[data-state="paused"] .sync-status__indicator {
@@ -81,14 +80,4 @@
   text-decoration: none;
   text-transform: uppercase;
   cursor: pointer;
-}
-
-@keyframes sync-pulse {
-  from {
-    opacity: 0.4;
-  }
-
-  to {
-    opacity: 1;
-  }
 }

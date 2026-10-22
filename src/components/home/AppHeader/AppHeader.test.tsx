@@ -87,4 +87,44 @@ describe("AppHeader", () => {
       "https://api.lepre.run/v1/auth/strava/start",
     );
   });
+
+  it.each(["checking", "syncing"] as const)(
+    "shows the hopping hare while synchronization is %s",
+    (status) => {
+      const { container } = render(
+        <AppHeader
+          screen={readyScreen}
+          status={status}
+          notice={{ kind: "none" }}
+          syncing={status === "syncing"}
+          accountOpen={false}
+          onRetry={vi.fn()}
+          onToggleAccount={vi.fn()}
+        />,
+      );
+
+      const region = screen.getByRole("status");
+      expect(region).toHaveAttribute("aria-live", "polite");
+      expect(region).toHaveTextContent(status === "syncing" ? "Updating" : "Checking");
+      expect(region.querySelector(".hare-loader")).toHaveAttribute("aria-hidden", "true");
+      expect(container.querySelector(".sync-status__indicator")).toBeNull();
+    },
+  );
+
+  it("keeps the coloured dot once synchronization settles", () => {
+    const { container } = render(
+      <AppHeader
+        screen={readyScreen}
+        status="current"
+        notice={{ kind: "none" }}
+        syncing={false}
+        accountOpen={false}
+        onRetry={vi.fn()}
+        onToggleAccount={vi.fn()}
+      />,
+    );
+
+    expect(container.querySelector(".sync-status__indicator")).toBeInTheDocument();
+    expect(container.querySelector(".hare-loader")).toBeNull();
+  });
 });

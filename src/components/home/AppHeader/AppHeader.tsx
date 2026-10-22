@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 import { useTranslation } from "react-i18next";
 import { STRAVA_START_URL } from "../../../infrastructure/api/lepre-backend";
-import { Button } from "../../ui";
+import { Button, HareLoader } from "../../ui";
 import { synchronizationLabel, synchronizationState } from "../homePresentation";
 import type { Notice, ReadyScreen, SynchronizationStatus } from "../homeTypes";
 
@@ -25,6 +25,8 @@ export function AppHeader({
   const { t } = useTranslation();
   const needsReauthorization = screen.availability === "reauthorization-required";
   const retryableError = notice.kind === "error" && notice.retryable;
+  const state = synchronizationState(screen, status);
+  const inProgress = state === "checking" || state === "syncing";
   return (
     <header className="app-header">
       <div>
@@ -36,11 +38,15 @@ export function AppHeader({
       <div className="header-controls">
         <div
           className="sync-status"
-          data-state={synchronizationState(screen, status)}
+          data-state={state}
           aria-live="polite"
           role={notice.kind === "error" ? "alert" : "status"}
         >
-          <span className="sync-status__indicator" aria-hidden="true" />
+          {inProgress ? (
+            <HareLoader className="sync-status__hare" />
+          ) : (
+            <span className="sync-status__indicator" aria-hidden="true" />
+          )}
           <span className="sync-status__message">
             {synchronizationLabel(screen, status, notice, t)}
           </span>

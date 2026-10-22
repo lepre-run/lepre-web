@@ -9,8 +9,10 @@ beforeEach(async () => {
 
 describe("LoadingHome", () => {
   it("explains loading without exposing unavailable controls", () => {
-    render(<LoadingHome />);
+    const { container } = render(<LoadingHome />);
     expect(screen.getByRole("heading", { name: "lepre" })).toBeInTheDocument();
+    expect(screen.getByText("Opening your local workouts…")).toBeInTheDocument();
+    expect(container.querySelector(".hare-loader")).toHaveAttribute("aria-hidden", "true");
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });
