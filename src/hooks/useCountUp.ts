@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { COUNT_UP_DURATION_MS, countUpValue } from "./countUp";
+import { MOTION_DURATION_SLOW_MS, countUpValue } from "./countUp";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 
 type CountUpOptions = Readonly<{ duration?: number }>;
@@ -23,7 +23,7 @@ function animateCountUp(
 
 export function useCountUp(
   value: number,
-  { duration = COUNT_UP_DURATION_MS }: CountUpOptions = {},
+  { duration = MOTION_DURATION_SLOW_MS }: CountUpOptions = {},
 ): number {
   const reducedMotion = usePrefersReducedMotion();
   const [displayed, setDisplayed] = useState(value);

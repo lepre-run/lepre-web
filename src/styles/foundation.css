@@ -32,6 +32,7 @@
   --font-data: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --motion-duration-fast: 150ms;
   --motion-duration-base: 250ms;
+  /* Mirrored in JavaScript by MOTION_DURATION_SLOW_MS (src/hooks/countUp.ts). */
   --motion-duration-slow: 400ms;
   --motion-duration-loop: 600ms;
   --motion-stagger-step: 30ms;

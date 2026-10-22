@@ -1,4 +1,4 @@
-export const COUNT_UP_DURATION_MS = 400;
+export const MOTION_DURATION_SLOW_MS = 400;
 
 function easeOutCubic(progress: number): number {
   return 1 - (1 - progress) ** 3;
