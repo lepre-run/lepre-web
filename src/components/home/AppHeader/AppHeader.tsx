@@ -42,11 +42,13 @@ export function AppHeader({
           aria-live="polite"
           role={notice.kind === "error" ? "alert" : "status"}
         >
-          {inProgress ? (
-            <HareLoader className="sync-status__hare" />
-          ) : (
-            <span className="sync-status__indicator" aria-hidden="true" />
-          )}
+          <span className="sync-status__slot" aria-hidden="true">
+            {inProgress ? (
+              <HareLoader className="sync-status__hare" />
+            ) : (
+              <span className="sync-status__indicator" />
+            )}
+          </span>
           <span className="sync-status__message">
             {synchronizationLabel(screen, status, notice, t)}
           </span>

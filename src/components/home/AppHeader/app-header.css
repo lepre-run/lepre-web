@@ -44,9 +44,17 @@
   box-shadow: 0 0 0 3px var(--color-kinetic-glow);
 }
 
+.sync-status__slot {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.5rem;
+  block-size: 0.48rem;
+}
+
 .sync-status__hare {
-  width: 1.5rem;
-  margin-block: -0.2rem;
+  width: 100%;
 }
 
 .sync-status[data-state="paused"] .sync-status__indicator {

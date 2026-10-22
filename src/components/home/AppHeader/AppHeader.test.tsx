@@ -114,14 +114,17 @@ describe("AppHeader synchronization indicator", () => {
     const region = screen.getByRole("status");
     expect(region).toHaveAttribute("aria-live", "polite");
     expect(region).toHaveTextContent(message);
-    expect(region.querySelector(".hare-loader")).toHaveAttribute("aria-hidden", "true");
+    expect(region.querySelector(".sync-status__slot .hare-loader")).toBeInTheDocument();
+    expect(region.querySelector(".sync-status__slot")).toHaveAttribute("aria-hidden", "true");
     expect(container.querySelector(".sync-status__indicator")).toBeNull();
   });
 
   it("keeps the coloured dot once synchronization settles", () => {
     const { container } = renderHeader("current");
 
-    expect(container.querySelector(".sync-status__indicator")).toBeInTheDocument();
+    expect(
+      container.querySelector(".sync-status__slot .sync-status__indicator"),
+    ).toBeInTheDocument();
     expect(container.querySelector(".hare-loader")).toBeNull();
   });
 });
