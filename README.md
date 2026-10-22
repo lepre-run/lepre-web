@@ -6,7 +6,7 @@ After Strava authorization, the browser asks the backend to relay detailed
 running activities from Strava. The browser validates and classifies each
 complete activity before synchronizing its selected source data into IndexedDB:
 
-```ts
+```text
 {
   id,
   performedAt,
@@ -38,7 +38,6 @@ checkpoint, shows a paused state and resumes automatically after the API's retry
 interval.
 
 Code follows the Clean Architecture dependency rule:
-
 - `src/domain` contains immutable entities and value objects.
 - `src/application` contains use cases and outbound ports.
 - `src/infrastructure` contains HTTP and IndexedDB adapters.
