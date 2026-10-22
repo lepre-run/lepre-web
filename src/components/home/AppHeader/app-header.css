@@ -49,12 +49,13 @@
   flex: none;
   align-items: center;
   justify-content: center;
-  inline-size: 1.5rem;
+  inline-size: 0.48rem;
   block-size: 0.48rem;
 }
 
 .sync-status__hare {
-  width: 100%;
+  flex: none;
+  width: 1.1rem;
 }
 
 .sync-status[data-state="paused"] .sync-status__indicator {
