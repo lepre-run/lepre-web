@@ -1,6 +1,5 @@
 import type { Workout } from "../../domain/workout";
-
-const STAGGERED_ARRIVAL_LIMIT = 6;
+import { STAGGERED_ARRIVAL_LIMIT } from "../../hooks/motionDurations";
 
 export type WorkoutArrivals = ReadonlyMap<string, number>;
 

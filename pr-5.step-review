@@ -1,0 +1,3097 @@
+#step-review:round
+{
+  "$schema": "https://step-review.dev/schema/v1.json",
+  "version": 1,
+  "createdAt": "2026-10-22T08:30:00Z",
+  "target": {
+    "title": "Joyful micro-animations: motion tokens, run arrival, count-up totals, hare loader, empty state",
+    "url": "https://github.com/lepre-run/lepre-web/pull/5",
+    "baseRef": "main",
+    "headRef": "feat/4-micro-animations",
+    "baseCommit": "ed47c6fdd7f52cb0b6a52e62d858615b2fc690b7",
+    "headCommit": "b89bf6acadabd7e39313208f88a3073bd213a956"
+  },
+  "overview": {
+    "summary": "Implements issue #4. It adds motion tokens with a global reduced-motion rule, count-up totals with accessible final values, newest-first arrival animations for runs added by sync (capped at 6 with a 30 ms stagger, marks clearing after 400 ms), a hopping SVG hare for loading and sync, and a friendlier English/Italian empty state. It adds no dependencies (+1.3 kB gz JS / +0.6 kB gz CSS against main) and doesn't touch the domain, application, infrastructure or composition layers. At this head, all 9 findings from the first review are addressed. The remaining issues are small: the width of the fixed sync slot on narrow phones, the expiry timer having no margin, and two missing timer tests.",
+    "areas": [
+      {
+        "title": "Foundation",
+        "points": [
+          "Tokens in `src/styles/foundation.css`, plus a two-layer reduced-motion rule ([explainer](note:n1)).",
+          "`usePrefersReducedMotion` follows live media-query changes."
+        ]
+      },
+      {
+        "title": "Arrivals",
+        "points": [
+          "The baseline is the first `ready` render; the race is accepted and documented ([explainer](note:n11)).",
+          "Expiry timer and identity check ([explainer](note:n8)); no-margin timing ([issue](note:n9)); missing tests ([issue](note:n10))."
+        ]
+      },
+      {
+        "title": "Hare and sync status",
+        "points": [
+          "The fixed 1.5rem slot removes the width jump but may crowd narrow phones ([issue](note:n16))."
+        ]
+      }
+    ],
+    "readingPlan": "Read the foundation first: every later step relies on its tokens and reduced-motion rule. Then the two logic steps, count-up and arrivals, which deserve the most attention. The hare loader is mostly CSS and accessibility wiring; the empty state and copy are skimmable."
+  },
+  "steps": [
+    {
+      "id": "motion-foundation",
+      "title": "Motion tokens and reduced-motion foundation",
+      "attention": "high",
+      "intro": "Adds duration, easing, stagger and loop tokens. Moves existing transitions onto them, and adds a two-layer reduced-motion rule: token overrides plus an `!important` catch-all. Also adds `usePrefersReducedMotion` and the `matchMedia` test stub. What to check: the scope of the catch-all and that the old local reduced-motion blocks are gone.",
+      "files": [
+        {
+          "path": "src/styles/foundation.css",
+          "notes": [
+            {
+              "id": "n1",
+              "kind": "explainer",
+              "body": "Two layers. The `:root` overrides collapse every token-driven duration, stagger and loop count. The catch-all on `*, ::before, ::after` handles any hard-coded duration. It changes only duration, delay and iteration count, never `animation-name`, so `animation: none` rules such as the hare's reduced-motion pose still apply. Nothing in `src` listens for `animationend` or `transitionend`, and 1 ms durations still fire those events anyway.",
+              "anchor": {
+                "side": "new",
+                "line": 163,
+                "text": "@media (prefers-reduced-motion: reduce) {",
+                "endLine": 187
+              }
+            },
+            {
+              "id": "n2",
+              "kind": "explainer",
+              "body": "Biome 2.x range suppression. It covers only the five `!important` declarations, and `npm run check` passes at this head.",
+              "anchor": {
+                "side": "new",
+                "line": 180,
+                "text": "    /* biome-ignore-start lint/complexity/noImportantStyles: reduced motion must beat component animations that hard-code durations. */",
+                "endLine": 186
+              }
+            }
+          ]
+        },
+        {
+          "path": "src/styles/neo-brutalist-foundation.css"
+        },
+        {
+          "path": "src/styles.css"
+        },
+        {
+          "path": "src/components/workouts/SourceLapEvidence/source-lap-evidence.css"
+        },
+        {
+          "path": "src/hooks/motionDurations.ts"
+        },
+        {
+          "path": "src/hooks/usePrefersReducedMotion.ts",
+          "notes": [
+            {
+              "id": "n3",
+              "kind": "explainer",
+              "body": "`useSyncExternalStore` makes the hook follow live media-query changes. It falls back to `false` when `matchMedia` is missing (SSR or tests).",
+              "anchor": {
+                "side": "new",
+                "line": 19,
+                "text": "export function usePrefersReducedMotion(): boolean {",
+                "endLine": 21
+              }
+            }
+          ]
+        },
+        {
+          "path": "src/hooks/usePrefersReducedMotion.test.ts"
+        },
+        {
+          "path": "src/test-setup.ts"
+        },
+        {
+          "path": "src/test/motion.ts"
+        }
+      ]
+    },
+    {
+      "id": "count-up",
+      "title": "Count-up totals",
+      "attention": "high",
+      "intro": "Adds a pure easing helper (`countUpValue`), a `useCountUp` hook built on `requestAnimationFrame`, and an accessible `CountUp` component. These are wired into the volume, training-mix, dashboard-summary and feed counts. Pace is deliberately not counted.",
+      "files": [
+        {
+          "path": "src/hooks/countUp.ts"
+        },
+        {
+          "path": "src/hooks/countUp.test.ts"
+        },
+        {
+          "path": "src/hooks/useCountUp.ts",
+          "notes": [
+            {
+              "id": "n4",
+              "kind": "explainer",
+              "body": "No animation on the first render (`displayedRef` starts at `value`). Under reduced motion the hook jumps straight to the value. An interrupted animation restarts from the last displayed frame, because `displayedRef` is updated on every frame. The effect cleanup cancels the pending frame.",
+              "anchor": {
+                "side": "new",
+                "line": 38,
+                "text": "    if (reducedMotion || displayedRef.current === value) {",
+                "endLine": 45
+              }
+            }
+          ]
+        },
+        {
+          "path": "src/hooks/useCountUp.test.ts"
+        },
+        {
+          "path": "src/components/ui/CountUp/CountUp.tsx",
+          "notes": [
+            {
+              "id": "n5",
+              "kind": "explainer",
+              "body": "Screen readers only get the final value: the animated text is `aria-hidden`, and a visually hidden span holds the final text. Once the count settles, it collapses back to plain text.",
+              "anchor": {
+                "side": "new",
+                "line": 10,
+                "text": "  if (text === finalText) return finalText;",
+                "endLine": 18
+              }
+            }
+          ]
+        },
+        {
+          "path": "src/components/ui/CountUp/CountUp.test.tsx"
+        },
+        {
+          "path": "src/components/ui/index.ts"
+        },
+        {
+          "path": "src/components/dashboard/VolumeCard/VolumeCard.tsx"
+        },
+        {
+          "path": "src/components/dashboard/TrainingMixCard/TrainingMixCard.tsx"
+        },
+        {
+          "path": "src/components/dashboard/ConditionDashboard/ConditionDashboard.tsx"
+        },
+        {
+          "path": "src/components/home/FeedHeader/FeedHeader.tsx"
+        },
+        {
+          "path": "src/components/home/FeedHeader/FeedHeader.test.tsx"
+        }
+      ]
+    },
+    {
+      "id": "arrivals",
+      "title": "New-run arrival detection and animation",
+      "attention": "high",
+      "intro": "Pure helpers find the ids that are new since the last known set and order them newest first, capped at 6. `useWorkoutArrivals` sets its baseline on the first `ready` render and clears marks 400 ms after each batch. `WorkoutButton` gets `data-new` and an `--arrival-order` stagger. What to check: the baseline, the expiry timer, and the replay test.",
+      "files": [
+        {
+          "path": "src/components/weekly-overview/workoutArrivals.ts",
+          "notes": [
+            {
+              "id": "n6",
+              "kind": "explainer",
+              "body": "Arrivals are sorted newest first and capped at `STAGGERED_ARRIVAL_LIMIT` (6). With the 30 ms stagger and the 250 ms base duration, the last item ends at 5×30+250 = 400 ms. Arrivals past the cap appear without animation.",
+              "anchor": {
+                "side": "new",
+                "line": 21,
+                "text": "  const newest = workouts",
+                "endLine": 25
+              }
+            }
+          ]
+        },
+        {
+          "path": "src/components/weekly-overview/workoutArrivals.test.ts"
+        },
+        {
+          "path": "src/hooks/useWorkoutArrivals.ts",
+          "notes": [
+            {
+              "id": "n7",
+              "kind": "explainer",
+              "body": "The tracking state is derived during render (React's \"adjust state while rendering\" pattern), so arrivals are visible in the same commit as the new workouts. A no-new-ids refresh keeps the same `arrivals` map identity, so settled items don't restart.",
+              "anchor": {
+                "side": "new",
+                "line": 46,
+                "text": "  const [tracking, setTracking] = useState(() => trackArrivals(UNTRACKED, workouts, hydrated));",
+                "endLine": 49
+              }
+            },
+            {
+              "id": "n8",
+              "kind": "explainer",
+              "body": "Expiry timer. The cleanup runs on unmount and whenever `current.arrivals` changes. `settleArrivals` only clears the marks if they are still the same map, so an older batch's timeout can't wipe a newer batch's marks.",
+              "anchor": {
+                "side": "new",
+                "line": 50,
+                "text": "  useEffect(() => {",
+                "endLine": 63
+              }
+            },
+            {
+              "id": "n9",
+              "kind": "issue",
+              "severity": "nit",
+              "body": "The timer fires at exactly the longest arrival animation (5×30 ms stagger + 250 ms base = 400 ms), with no margin. If the effect runs before paint, the 6th item can lose its last few ms. The match with `--motion-duration-slow` is also coincidental: changing the stagger or base token would silently desynchronise it. Suggestion: add a small buffer, or derive the constant from the arrival budget (limit, stagger, base) instead of the \"slow\" token.",
+              "anchor": {
+                "side": "new",
+                "line": 55,
+                "text": "      MOTION_DURATION_SLOW_MS,"
+              }
+            }
+          ]
+        },
+        {
+          "path": "src/hooks/useWorkoutArrivals.test.ts",
+          "notes": [
+            {
+              "id": "n10",
+              "kind": "issue",
+              "severity": "nit",
+              "body": "The fake-timer test only covers expiry. Two cases are missing: unmounting before 400 ms (no pending timer, no state update after unmount), and a second batch arriving at about 200 ms (its marks must survive the first batch's deadline and clear 400 ms after their own start). The code handles both already; add the tests so it stays that way.",
+              "anchor": {
+                "side": "new",
+                "line": 72,
+                "text": "  it(\"clears arrival marks once the entrance animation has finished\", () => {",
+                "endLine": 82
+              }
+            }
+          ]
+        },
+        {
+          "path": "src/pages/Home.tsx",
+          "notes": [
+            {
+              "id": "n11",
+              "kind": "explainer",
+              "body": "The baseline is the first render with `screen.kind === \"ready\"`. The known race (the first sync batch committing in the same render as `ready`) is accepted and documented in the PR body. Its worst case is a missed animation, never a wrong one. A guaranteed fix would need a `hydrated` signal from `useHomeController`.",
+              "anchor": {
+                "side": "new",
+                "line": 17,
+                "text": "  const arrivals = useWorkoutArrivals(controller.workouts, controller.screen.kind === \"ready\");"
+              }
+            }
+          ]
+        },
+        {
+          "path": "src/pages/Home.test.tsx"
+        },
+        {
+          "path": "src/components/weekly-overview/WeeklyOverview/WeeklyOverview.tsx"
+        },
+        {
+          "path": "src/components/weekly-overview/WeekRow/WeekRow.tsx"
+        },
+        {
+          "path": "src/components/weekly-overview/WeeklyDay/WeeklyDay.tsx"
+        },
+        {
+          "path": "src/components/weekly-overview/WorkoutButton/WorkoutButton.tsx"
+        },
+        {
+          "path": "src/components/weekly-overview/WorkoutButton/WorkoutButton.test.tsx"
+        },
+        {
+          "path": "src/components/weekly-overview/WeeklyOverview/weekly-overview.css",
+          "notes": [
+            {
+              "id": "n12",
+              "kind": "explainer",
+              "body": "Transform and opacity only, through the shared `motion-settle-in` keyframe. With `backwards` fill, a staggered item stays hidden during its delay instead of flashing in place.",
+              "anchor": {
+                "side": "new",
+                "line": 171,
+                "text": ".weekly-workout[data-new=\"true\"] {",
+                "endLine": 174
+              }
+            }
+          ]
+        },
+        {
+          "path": "src/components/weekly-overview/WeeklyOverview/weekly-overview-theme.css"
+        },
+        {
+          "path": "src/components/weekly-overview/WeeklyOverview/WeeklyOverviewArrivals.test.tsx",
+          "notes": [
+            {
+              "id": "n13",
+              "kind": "explainer",
+              "body": "A regression test for the first review's replay finding: after expiry, paging to older weeks and back must not bring `data-new` back.",
+              "anchor": {
+                "side": "new",
+                "line": 31,
+                "text": "  it(\"does not replay the arrival animation after paging away and back\", () => {",
+                "endLine": 46
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hare-loader",
+      "title": "Hare loader in loading and sync states",
+      "attention": "normal",
+      "intro": "Adds an inline SVG `HareLoader`, which is `aria-hidden` and exposes `data-motion` for its reduced-motion pose. It is used in `LoadingHome` and in the sync status while checking or syncing, sharing one fixed slot with the status dot.",
+      "files": [
+        {
+          "path": "src/components/ui/HareLoader/HareLoader.tsx"
+        },
+        {
+          "path": "src/components/ui/HareLoader/hare-loader.css",
+          "notes": [
+            {
+              "id": "n14",
+              "kind": "explainer",
+              "body": "The reduced-motion pose. `animation: none` resets the animation name, which the global catch-all leaves alone, so the hare stands still instead of playing a single 1 ms hop.",
+              "anchor": {
+                "side": "new",
+                "line": 43,
+                "text": ".hare-loader[data-motion=\"reduced\"] :is(.hare-loader__hare, .hare-loader__ground) {",
+                "endLine": 45
+              }
+            }
+          ]
+        },
+        {
+          "path": "src/components/ui/HareLoader/HareLoader.test.tsx"
+        },
+        {
+          "path": "src/components/home/AppHeader/AppHeader.tsx",
+          "notes": [
+            {
+              "id": "n15",
+              "kind": "explainer",
+              "body": "The slot is `aria-hidden` inside the unchanged `role=status` / `aria-live` region, so screen readers still only announce the text label.",
+              "anchor": {
+                "side": "new",
+                "line": 45,
+                "text": "          <span className=\"sync-status__slot\" aria-hidden=\"true\">",
+                "endLine": 51
+              }
+            }
+          ]
+        },
+        {
+          "path": "src/components/home/AppHeader/app-header.css",
+          "notes": [
+            {
+              "id": "n16",
+              "kind": "issue",
+              "severity": "concern",
+              "body": "The slot is now always 1.5rem wide, including in the settled states that used to have a 0.48rem dot. At ≤420px, `.sync-status` is capped at `max-width: 5.5rem` (`condition-dashboard.css:386-388`), so the label loses about 1rem there and may wrap onto an extra line. On wider screens the gap between the dot and the text roughly doubles. Check it at 360–420px; if it's cramped, left-align the dot (`justify-content: flex-start`) or narrow the slot and the mini hare to about 1.1rem.",
+              "anchor": {
+                "side": "new",
+                "line": 52,
+                "text": "  inline-size: 1.5rem;"
+              }
+            }
+          ]
+        },
+        {
+          "path": "src/components/home/AppHeader/AppHeader.test.tsx"
+        },
+        {
+          "path": "src/components/home/PublicHome/PublicHome.tsx"
+        },
+        {
+          "path": "src/components/home/PublicHome/public-home.css"
+        },
+        {
+          "path": "src/components/home/PublicHome/LoadingHome.test.tsx"
+        }
+      ]
+    },
+    {
+      "id": "empty-state",
+      "title": "Friendlier empty state and copy",
+      "attention": "low",
+      "intro": "Extracts `EmptyWorkoutFeed` from `Home.tsx`, shows the hare while importing, and hides the description during import. Adds a settle-in entrance and updates the English and Italian copy.",
+      "files": [
+        {
+          "path": "src/components/home/EmptyWorkoutFeed/EmptyWorkoutFeed.tsx",
+          "notes": [
+            {
+              "id": "n17",
+              "kind": "explainer",
+              "body": "The description now renders only when not syncing, so \"Head out for a run\" no longer sits under \"The hare is fetching…\". The empty state was never a live region; sync status is announced by the `AppHeader` region.",
+              "anchor": {
+                "side": "new",
+                "line": 11,
+                "text": "      {!syncing && <p>{t(\"feed.emptyDescription\")}</p>}"
+              }
+            }
+          ]
+        },
+        {
+          "path": "src/components/home/EmptyWorkoutFeed/EmptyWorkoutFeed.test.tsx"
+        },
+        {
+          "path": "src/components/home/home-theme.css"
+        },
+        {
+          "path": "src/i18n/locales/en.ts"
+        },
+        {
+          "path": "src/i18n/locales/it.ts"
+        }
+      ]
+    }
+  ]
+}#step-review:diff
+diff --git a/src/components/dashboard/ConditionDashboard/ConditionDashboard.tsx b/src/components/dashboard/ConditionDashboard/ConditionDashboard.tsx
+index 76a7b44..b4807b0 100644
+--- a/src/components/dashboard/ConditionDashboard/ConditionDashboard.tsx
++++ b/src/components/dashboard/ConditionDashboard/ConditionDashboard.tsx
+@@ -1,51 +1,55 @@
+ import type { JSX } from "react";
+ import { useTranslation } from "react-i18next";
+ import { createTrainingDashboard } from "../../../domain/training-dashboard";
+ import type { Workout } from "../../../domain/workout";
+ import { localeFor } from "../../../i18n/i18n";
++import { CountUp } from "../../ui";
+ import { EasyPaceCard } from "../EasyPaceCard/EasyPaceCard";
+ import { IntervalsCard } from "../IntervalsCard/IntervalsCard";
+ import { TrainingMixCard } from "../TrainingMixCard/TrainingMixCard";
+ import { VolumeCard } from "../VolumeCard/VolumeCard";
+ 
+ export function ConditionDashboard({
+   workouts,
+ }: Readonly<{ workouts: ReadonlyArray<Workout> }>): JSX.Element | null {
+   const { t, i18n } = useTranslation();
+   const language = i18n.resolvedLanguage ?? i18n.language;
+   const dashboard = createTrainingDashboard(workouts);
+   if (dashboard === null) return null;
+   const through = new Intl.DateTimeFormat(localeFor(language), {
+     day: "numeric",
+     month: "short",
+     year: "numeric",
+   }).format(new Date(dashboard.through));
+ 
+   return (
+     <section className="condition-dashboard" aria-labelledby="condition-dashboard-title">
+       <header className="condition-dashboard__header">
+         <div>
+           <p className="eyebrow">{t("dashboard.eyebrow")}</p>
+           <h1 id="condition-dashboard-title">{t("dashboard.title")}</h1>
+           <p className="condition-dashboard__summary">
+-            {t("dashboard.summary", { count: dashboard.workoutCount })}
++            <CountUp
++              value={dashboard.workoutCount}
++              format={(count) => t("dashboard.summary", { count: Math.round(count) })}
++            />
+           </p>
+         </div>
+         <div className="condition-dashboard__window">
+           <strong>{t("dashboard.window")}</strong>
+           <span>{t("dashboard.through", { date: through })}</span>
+         </div>
+       </header>
+       <div className="condition-dashboard__grid">
+         <EasyPaceCard insight={dashboard.easyPace} language={language} />
+         <IntervalsCard insight={dashboard.referenceIntervals} language={language} />
+         <VolumeCard
+           insight={dashboard.weeklyVolume}
+           language={language}
+           windowDays={dashboard.windowDays}
+         />
+         <TrainingMixCard mix={dashboard.trainingMix} />
+       </div>
+       <p className="condition-dashboard__method">{t("dashboard.method")}</p>
+     </section>
+   );
+diff --git a/src/components/dashboard/TrainingMixCard/TrainingMixCard.tsx b/src/components/dashboard/TrainingMixCard/TrainingMixCard.tsx
+index 758c24c..5adb9d8 100644
+--- a/src/components/dashboard/TrainingMixCard/TrainingMixCard.tsx
++++ b/src/components/dashboard/TrainingMixCard/TrainingMixCard.tsx
+@@ -1,47 +1,55 @@
+ import type { JSX } from "react";
+ import { useTranslation } from "react-i18next";
+ import type { TrainingMixInsight } from "../../../domain/training-dashboard";
++import { CountUp } from "../../ui";
+ import { DashboardCard } from "../DashboardCard/DashboardCard";
+ 
+ export function TrainingMixCard({ mix }: Readonly<{ mix: TrainingMixInsight }>): JSX.Element {
+   const { t } = useTranslation();
+   const classified = mix.low + mix.moderate + mix.high;
+   const width = (value: number): string => `${classified === 0 ? 0 : (value / classified) * 100}%`;
+   return (
+     <DashboardCard
+       kind="mix"
+       title={t("dashboard.mix.title")}
+       badge={<span className="condition-card__period">{t("dashboard.mix.sessionPurpose")}</span>}
+     >
+       <p className="condition-card__metric">
+-        {mix.lowSharePercent === null ? "—" : Math.round(mix.lowSharePercent)}
++        {mix.lowSharePercent === null ? (
++          "—"
++        ) : (
++          <CountUp value={mix.lowSharePercent} format={(percent) => `${Math.round(percent)}`} />
++        )}
+         <small>% {t("dashboard.mix.low")}</small>
+       </p>
+       <div
+         className="training-mix"
+         role="img"
+         aria-label={t("dashboard.mix.ariaLabel", {
+           low: mix.low,
+           moderate: mix.moderate,
+           high: mix.high,
+         })}
+       >
+         <span className="training-mix__low" style={{ width: width(mix.low) }} />
+         <span className="training-mix__moderate" style={{ width: width(mix.moderate) }} />
+         <span className="training-mix__high" style={{ width: width(mix.high) }} />
+         <i aria-hidden="true" title={t("dashboard.mix.reference")} />
+       </div>
+       <p className="condition-card__context condition-card__context--legend">
+         <span>{t("dashboard.mix.lowCount", { count: mix.low })}</span>
+         <span>{t("dashboard.mix.moderateCount", { count: mix.moderate })}</span>
+         <span>{t("dashboard.mix.highCount", { count: mix.high })}</span>
+       </p>
+       <footer>
+         <span>
+-          {t("dashboard.mix.coverage", { value: Math.round(mix.classifiedSharePercent) })}
++          <CountUp
++            value={mix.classifiedSharePercent}
++            format={(percent) => t("dashboard.mix.coverage", { value: Math.round(percent) })}
++          />
+         </span>
+         <span className="condition-card__trend">{t("dashboard.mix.reference")}</span>
+       </footer>
+     </DashboardCard>
+   );
+ }
+diff --git a/src/components/dashboard/VolumeCard/VolumeCard.tsx b/src/components/dashboard/VolumeCard/VolumeCard.tsx
+index 8e34fad..52cf80e 100644
+--- a/src/components/dashboard/VolumeCard/VolumeCard.tsx
++++ b/src/components/dashboard/VolumeCard/VolumeCard.tsx
+@@ -1,36 +1,45 @@
+ import type { JSX } from "react";
+ import { useTranslation } from "react-i18next";
+ import type { WeeklyVolumeInsight } from "../../../domain/training-dashboard";
++import { CountUp } from "../../ui";
+ import { DashboardCard } from "../DashboardCard/DashboardCard";
+ import { decimal } from "../dashboardFormatters";
+ import { Trend } from "../Trend/Trend";
+ 
+ export function VolumeCard({
+   insight,
+   language,
+   windowDays,
+ }: Readonly<{ insight: WeeklyVolumeInsight; language: string; windowDays: number }>): JSX.Element {
+   const { t } = useTranslation();
+   return (
+     <DashboardCard
+       kind="volume"
+       title={t("dashboard.volume.title")}
+       badge={<span className="condition-card__period">{t("dashboard.perWeek")}</span>}
+     >
+       <p className="condition-card__metric">
+-        {decimal(insight.averageWeeklyDistanceMeters / 1_000, language)}
++        <CountUp
++          value={insight.averageWeeklyDistanceMeters / 1_000}
++          format={(kilometers) => decimal(kilometers, language)}
++        />
+         <small>km</small>
+       </p>
+       <p className="condition-card__context">
+-        {t("dashboard.volume.total", {
+-          distance: decimal(insight.distanceMeters / 1_000, language),
+-          count: insight.workoutCount,
+-        })}
++        <CountUp
++          value={insight.distanceMeters / 1_000}
++          format={(kilometers) =>
++            t("dashboard.volume.total", {
++              distance: decimal(kilometers, language),
++              count: insight.workoutCount,
++            })
++          }
++        />
+       </p>
+       <footer>
+         <span>{t("dashboard.volume.window", { count: windowDays / 7 })}</span>
+         <Trend trend={insight.trend} language={language} kind="volume" />
+       </footer>
+     </DashboardCard>
+   );
+ }
+diff --git a/src/components/home/AppHeader/AppHeader.test.tsx b/src/components/home/AppHeader/AppHeader.test.tsx
+index 77788a6..47ac1b4 100644
+--- a/src/components/home/AppHeader/AppHeader.test.tsx
++++ b/src/components/home/AppHeader/AppHeader.test.tsx
+@@ -1,24 +1,25 @@
+ import { fireEvent, render, screen } from "@testing-library/react";
+ import i18n from "i18next";
+ import { beforeEach, describe, expect, it, vi } from "vitest";
+ import { readyScreen } from "../../../test/home-builders";
++import type { SynchronizationStatus } from "../homeTypes";
+ import { AppHeader } from "./AppHeader";
+ 
+ beforeEach(async () => {
+   await i18n.changeLanguage("en");
+ });
+ 
+ describe("AppHeader", () => {
+   it("shows synchronization state and opens the account", () => {
+     const onToggleAccount = vi.fn();
+     render(
+       <AppHeader
+         screen={readyScreen}
+         status="current"
+         notice={{ kind: "none" }}
+         syncing={false}
+         accountOpen={false}
+         onRetry={vi.fn()}
+         onToggleAccount={onToggleAccount}
+       />,
+     );
+@@ -71,20 +72,59 @@ describe("AppHeader", () => {
+ 
+   it("keeps the reconnect action beside the account", () => {
+     render(
+       <AppHeader
+         screen={{ ...readyScreen, availability: "reauthorization-required" }}
+         status="failed"
+         notice={{ kind: "none" }}
+         syncing={false}
+         accountOpen={false}
+         onRetry={vi.fn()}
+         onToggleAccount={vi.fn()}
+       />,
+     );
+ 
+     expect(screen.getByRole("link", { name: "Reconnect Strava" })).toHaveAttribute(
+       "href",
+       "https://api.lepre.run/v1/auth/strava/start",
+     );
+   });
+ });
++
++function renderHeader(status: SynchronizationStatus) {
++  return render(
++    <AppHeader
++      screen={readyScreen}
++      status={status}
++      notice={{ kind: "none" }}
++      syncing={status === "syncing"}
++      accountOpen={false}
++      onRetry={vi.fn()}
++      onToggleAccount={vi.fn()}
++    />,
++  );
++}
++
++describe("AppHeader synchronization indicator", () => {
++  it.each([
++    ["checking", "Checking for updates…"],
++    ["syncing", "Updating workouts…"],
++  ] as const)("shows the hopping hare while %s", (status, message) => {
++    const { container } = renderHeader(status);
++
++    const region = screen.getByRole("status");
++    expect(region).toHaveAttribute("aria-live", "polite");
++    expect(region).toHaveTextContent(message);
++    expect(region.querySelector(".sync-status__slot .hare-loader")).toBeInTheDocument();
++    expect(region.querySelector(".sync-status__slot")).toHaveAttribute("aria-hidden", "true");
++    expect(container.querySelector(".sync-status__indicator")).toBeNull();
++  });
++
++  it("keeps the coloured dot once synchronization settles", () => {
++    const { container } = renderHeader("current");
++
++    expect(
++      container.querySelector(".sync-status__slot .sync-status__indicator"),
++    ).toBeInTheDocument();
++    expect(container.querySelector(".hare-loader")).toBeNull();
++  });
++});
+diff --git a/src/components/home/AppHeader/AppHeader.tsx b/src/components/home/AppHeader/AppHeader.tsx
+index 7e06064..9d3b2b2 100644
+--- a/src/components/home/AppHeader/AppHeader.tsx
++++ b/src/components/home/AppHeader/AppHeader.tsx
+@@ -1,63 +1,71 @@
+ import type { JSX } from "react";
+ import { useTranslation } from "react-i18next";
+ import { STRAVA_START_URL } from "../../../infrastructure/api/lepre-backend";
+-import { Button } from "../../ui";
++import { Button, HareLoader } from "../../ui";
+ import { synchronizationLabel, synchronizationState } from "../homePresentation";
+ import type { Notice, ReadyScreen, SynchronizationStatus } from "../homeTypes";
+ 
+ export function AppHeader({
+   screen,
+   status,
+   notice,
+   syncing,
+   accountOpen,
+   onRetry,
+   onToggleAccount,
+ }: Readonly<{
+   screen: ReadyScreen;
+   status: SynchronizationStatus;
+   notice: Notice;
+   syncing: boolean;
+   accountOpen: boolean;
+   onRetry: () => void;
+   onToggleAccount: () => void;
+ }>): JSX.Element {
+   const { t } = useTranslation();
+   const needsReauthorization = screen.availability === "reauthorization-required";
+   const retryableError = notice.kind === "error" && notice.retryable;
++  const state = synchronizationState(screen, status);
++  const inProgress = state === "checking" || state === "syncing";
+   return (
+     <header className="app-header">
+       <div>
+         <p className="wordmark">lepre</p>
+         <p className="runner-name">
+           {screen.user.firstName} {screen.user.lastName}
+         </p>
+       </div>
+       <div className="header-controls">
+         <div
+           className="sync-status"
+-          data-state={synchronizationState(screen, status)}
++          data-state={state}
+           aria-live="polite"
+           role={notice.kind === "error" ? "alert" : "status"}
+         >
+-          <span className="sync-status__indicator" aria-hidden="true" />
++          <span className="sync-status__slot" aria-hidden="true">
++            {inProgress ? (
++              <HareLoader className="sync-status__hare" />
++            ) : (
++              <span className="sync-status__indicator" />
++            )}
++          </span>
+           <span className="sync-status__message">
+             {synchronizationLabel(screen, status, notice, t)}
+           </span>
+           {needsReauthorization && (
+             <a className="sync-status__action" href={STRAVA_START_URL}>
+               {t("actions.reconnectStrava")}
+             </a>
+           )}
+           {retryableError && (
+             <Button className="sync-status__action" onClick={onRetry} disabled={syncing}>
+               {t("actions.tryAgain")}
+             </Button>
+           )}
+         </div>
+         <Button
+           variant="quiet"
+           aria-expanded={accountOpen}
+           aria-controls="account-panel"
+           onClick={onToggleAccount}
+         >
+diff --git a/src/components/home/AppHeader/app-header.css b/src/components/home/AppHeader/app-header.css
+index 91326a1..23abf46 100644
+--- a/src/components/home/AppHeader/app-header.css
++++ b/src/components/home/AppHeader/app-header.css
+@@ -27,77 +27,65 @@
+   display: flex;
+   align-items: center;
+   gap: 0.45rem;
+   min-width: 0;
+   max-width: min(44rem, 65vw);
+   margin: 0 0.35rem 0 0;
+   color: var(--color-instrument);
+   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+   font-size: 0.72rem;
+ }
+ 
+ .sync-status__indicator {
+   flex: none;
+   width: 0.48rem;
+   height: 0.48rem;
+   border-radius: 50%;
+   background: var(--color-kinetic);
+   box-shadow: 0 0 0 3px var(--color-kinetic-glow);
+ }
+ 
+-.sync-status[data-state="checking"] .sync-status__indicator,
+-.sync-status[data-state="syncing"] .sync-status__indicator {
+-  background: var(--color-instrument);
+-  animation: sync-pulse 1.2s ease-in-out infinite alternate;
++.sync-status__slot {
++  display: inline-flex;
++  flex: none;
++  align-items: center;
++  justify-content: center;
++  inline-size: 1.5rem;
++  block-size: 0.48rem;
++}
++
++.sync-status__hare {
++  width: 100%;
+ }
+ 
+ .sync-status[data-state="paused"] .sync-status__indicator {
+   background: var(--color-threshold);
+   box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-threshold) 16%, transparent);
+ }
+ 
+ .sync-status[data-state="failed"] .sync-status__indicator {
+   background: var(--color-danger);
+   box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-danger) 16%, transparent);
+ }
+ 
+ .sync-status[data-state="offline"] .sync-status__indicator {
+   background: var(--color-instrument);
+   box-shadow: none;
+ }
+ 
+ .sync-status__message {
+   line-height: 1.3;
+ }
+ 
+ .sync-status__action {
+   flex: none;
+   border: 1px solid var(--color-carbon);
+   border-radius: var(--radius-control);
+   background: var(--color-carbon);
+   padding: 0.28rem 0.42rem;
+   color: var(--color-lab-paper);
+   font: inherit;
+   font-weight: 700;
+   text-decoration: none;
+   text-transform: uppercase;
+   cursor: pointer;
+ }
+-
+-@keyframes sync-pulse {
+-  from {
+-    opacity: 0.4;
+-  }
+-
+-  to {
+-    opacity: 1;
+-  }
+-}
+-
+-@media (prefers-reduced-motion: reduce) {
+-  button,
+-  .primary-action,
+-  .sync-status__indicator {
+-    transition: none;
+-    animation: none;
+-  }
+-}
+diff --git a/src/components/home/EmptyWorkoutFeed/EmptyWorkoutFeed.test.tsx b/src/components/home/EmptyWorkoutFeed/EmptyWorkoutFeed.test.tsx
+new file mode 100644
+index 0000000..8dd947e
+--- /dev/null
++++ b/src/components/home/EmptyWorkoutFeed/EmptyWorkoutFeed.test.tsx
+@@ -0,0 +1,46 @@
++import { render, screen } from "@testing-library/react";
++import i18n from "i18next";
++import { afterEach, describe, expect, it } from "vitest";
++import { EmptyWorkoutFeed } from "./EmptyWorkoutFeed";
++
++afterEach(async () => {
++  await i18n.changeLanguage("en");
++});
++
++describe("EmptyWorkoutFeed", () => {
++  it("invites the runner out when there are no runs yet", async () => {
++    await i18n.changeLanguage("en");
++    const { container } = render(<EmptyWorkoutFeed syncing={false} />);
++
++    expect(screen.getByRole("heading", { name: "No tracks here yet" })).toBeInTheDocument();
++    expect(
++      screen.getByText(
++        "Head out for a run: completed workouts hop in here as soon as their laps have been classified.",
++      ),
++    ).toBeInTheDocument();
++    expect(container.querySelector(".hare-loader")).toBeNull();
++  });
++
++  it("shows the hopping hare while the first import runs", async () => {
++    await i18n.changeLanguage("en");
++    const { container } = render(<EmptyWorkoutFeed syncing />);
++
++    expect(
++      screen.getByRole("heading", { name: "The hare is fetching your recent runs…" }),
++    ).toBeInTheDocument();
++    expect(container.querySelector(".hare-loader")).toHaveAttribute("aria-hidden", "true");
++    expect(screen.queryByText(/Head out for a run/)).not.toBeInTheDocument();
++  });
++
++  it("speaks Italian when the interface is Italian", async () => {
++    await i18n.changeLanguage("it");
++    render(<EmptyWorkoutFeed syncing={false} />);
++
++    expect(screen.getByRole("heading", { name: "Ancora nessuna traccia" })).toBeInTheDocument();
++    expect(
++      screen.getByText(
++        "Esci a correre: gli allenamenti completati arriveranno qui di corsa non appena i lap sono stati classificati.",
++      ),
++    ).toBeInTheDocument();
++  });
++});
+diff --git a/src/components/home/EmptyWorkoutFeed/EmptyWorkoutFeed.tsx b/src/components/home/EmptyWorkoutFeed/EmptyWorkoutFeed.tsx
+new file mode 100644
+index 0000000..882f301
+--- /dev/null
++++ b/src/components/home/EmptyWorkoutFeed/EmptyWorkoutFeed.tsx
+@@ -0,0 +1,14 @@
++import type { JSX } from "react";
++import { useTranslation } from "react-i18next";
++import { HareLoader } from "../../ui";
++
++export function EmptyWorkoutFeed({ syncing }: Readonly<{ syncing: boolean }>): JSX.Element {
++  const { t } = useTranslation();
++  return (
++    <div className="empty-state">
++      {syncing && <HareLoader className="empty-state__hare" />}
++      <h2>{syncing ? t("feed.importing") : t("feed.emptyTitle")}</h2>
++      {!syncing && <p>{t("feed.emptyDescription")}</p>}
++    </div>
++  );
++}
+diff --git a/src/components/home/FeedHeader/FeedHeader.test.tsx b/src/components/home/FeedHeader/FeedHeader.test.tsx
+index 154e1bf..22eebd9 100644
+--- a/src/components/home/FeedHeader/FeedHeader.test.tsx
++++ b/src/components/home/FeedHeader/FeedHeader.test.tsx
+@@ -1,23 +1,42 @@
+-import { fireEvent, render, screen } from "@testing-library/react";
++import { act, fireEvent, render, screen } from "@testing-library/react";
+ import i18n from "i18next";
+-import { beforeEach, describe, expect, it, vi } from "vitest";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import { stubAnimationFrames } from "../../../test/motion";
+ import { FeedHeader } from "./FeedHeader";
+ 
+ beforeEach(async () => {
+   await i18n.changeLanguage("en");
+ });
+ 
++afterEach(() => {
++  vi.unstubAllGlobals();
++});
++
+ describe("FeedHeader", () => {
+   it("reports the stored count and delegates downloads", () => {
+     const onDownload = vi.fn();
+     render(<FeedHeader workoutCount={3} onDownload={onDownload} />);
+     expect(screen.getByText("3 stored locally")).toBeInTheDocument();
+     fireEvent.click(screen.getByRole("button", { name: "Download" }));
+     expect(onDownload).toHaveBeenCalledOnce();
+   });
+ 
+   it("disables download when there is no data", () => {
+     render(<FeedHeader workoutCount={0} onDownload={vi.fn()} />);
+     expect(screen.getByRole("button", { name: "Download" })).toBeDisabled();
+   });
++
++  it("counts up to a newly stored total while announcing only the final count", () => {
++    const frames = stubAnimationFrames();
++    const { rerender } = render(<FeedHeader workoutCount={3} onDownload={vi.fn()} />);
++
++    rerender(<FeedHeader workoutCount={12} onDownload={vi.fn()} />);
++    act(() => frames.runFrame(0));
++    act(() => frames.runFrame(80));
++
++    expect(screen.getByText("12 stored locally")).toHaveClass("visually-hidden");
++    expect(document.querySelector(".count-up")).toHaveAttribute("aria-hidden", "true");
++    act(() => frames.runFrame(400));
++    expect(screen.getByText("12 stored locally")).not.toHaveClass("visually-hidden");
++  });
+ });
+diff --git a/src/components/home/FeedHeader/FeedHeader.tsx b/src/components/home/FeedHeader/FeedHeader.tsx
+index 06f7371..15cb551 100644
+--- a/src/components/home/FeedHeader/FeedHeader.tsx
++++ b/src/components/home/FeedHeader/FeedHeader.tsx
+@@ -1,24 +1,29 @@
+ import type { JSX } from "react";
+ import { useTranslation } from "react-i18next";
+-import { Button } from "../../ui";
++import { Button, CountUp } from "../../ui";
+ 
+ export function FeedHeader({
+   workoutCount,
+   onDownload,
+ }: Readonly<{ workoutCount: number; onDownload: () => void }>): JSX.Element {
+   const { t } = useTranslation();
+   return (
+     <div className="feed-heading">
+       <div>
+         <p className="eyebrow">{t("feed.eyebrow")}</p>
+         <h1>{t("feed.title")}</h1>
+       </div>
+       <div className="feed-actions">
+-        <p className="workout-count">{t("feed.storedCount", { count: workoutCount })}</p>
++        <p className="workout-count">
++          <CountUp
++            value={workoutCount}
++            format={(count) => t("feed.storedCount", { count: Math.round(count) })}
++          />
++        </p>
+         <Button variant="quiet" onClick={onDownload} disabled={workoutCount === 0}>
+           {t("actions.download")}
+         </Button>
+       </div>
+     </div>
+   );
+ }
+diff --git a/src/components/home/PublicHome/LoadingHome.test.tsx b/src/components/home/PublicHome/LoadingHome.test.tsx
+index 55ce920..8ae6a3a 100644
+--- a/src/components/home/PublicHome/LoadingHome.test.tsx
++++ b/src/components/home/PublicHome/LoadingHome.test.tsx
+@@ -1,16 +1,18 @@
+ import { render, screen } from "@testing-library/react";
+ import i18n from "i18next";
+ import { beforeEach, describe, expect, it } from "vitest";
+ import { LoadingHome } from "./PublicHome";
+ 
+ beforeEach(async () => {
+   await i18n.changeLanguage("en");
+ });
+ 
+ describe("LoadingHome", () => {
+   it("explains loading without exposing unavailable controls", () => {
+-    render(<LoadingHome />);
++    const { container } = render(<LoadingHome />);
+     expect(screen.getByRole("heading", { name: "lepre" })).toBeInTheDocument();
++    expect(screen.getByText("Opening your local workouts…")).toBeInTheDocument();
++    expect(container.querySelector(".hare-loader")).toHaveAttribute("aria-hidden", "true");
+     expect(screen.queryByRole("button")).not.toBeInTheDocument();
+   });
+ });
+diff --git a/src/components/home/PublicHome/PublicHome.tsx b/src/components/home/PublicHome/PublicHome.tsx
+index a323a9f..4d91def 100644
+--- a/src/components/home/PublicHome/PublicHome.tsx
++++ b/src/components/home/PublicHome/PublicHome.tsx
+@@ -1,29 +1,31 @@
+ import type { JSX } from "react";
+ import { useTranslation } from "react-i18next";
+ import { LanguageSelector } from "../../../i18n/LanguageSelector";
+ import { STRAVA_START_URL } from "../../../infrastructure/api/lepre-backend";
++import { HareLoader } from "../../ui";
+ 
+ export function LoadingHome(): JSX.Element {
+   const { t } = useTranslation();
+   return (
+     <main className="shell shell--centered">
++      <HareLoader className="loading-home__hare" />
+       <h1>lepre</h1>
+       <p>{t("home.opening")}</p>
+     </main>
+   );
+ }
+ 
+ export function DisconnectedHome(): JSX.Element {
+   const { t } = useTranslation();
+   return (
+     <main className="shell public-home">
+       <div className="public-settings">
+         <p className="wordmark">lepre</p>
+         <LanguageSelector />
+       </div>
+       <section className="public-hero">
+         <div className="public-hero__copy">
+           <p className="eyebrow">{t("home.eyebrow")}</p>
+           <h1>{t("home.heroTitle")}</h1>
+           <p className="lede">{t("home.heroDescription")}</p>
+           <p className="public-hero__contrast">{t("home.heroContrast")}</p>
+diff --git a/src/components/home/PublicHome/public-home.css b/src/components/home/PublicHome/public-home.css
+index 45eec3b..4044e24 100644
+--- a/src/components/home/PublicHome/public-home.css
++++ b/src/components/home/PublicHome/public-home.css
+@@ -438,20 +438,25 @@
+   .public-benefits__grid {
+     gap: 0.85rem;
+   }
+ 
+   .public-benefit {
+     min-height: 0;
+   }
+ 
+   .public-benefit h3 {
+     margin-top: 1.8rem;
+   }
+ 
+   .public-privacy {
+     align-items: start;
+   }
+ 
+   .public-privacy .primary-action {
+     grid-column: auto;
+   }
+ }
++
++.loading-home__hare {
++  width: 4.5rem;
++  margin-bottom: 1rem;
++}
+diff --git a/src/components/home/home-theme.css b/src/components/home/home-theme.css
+index 0268ef4..6d33b33 100644
+--- a/src/components/home/home-theme.css
++++ b/src/components/home/home-theme.css
+@@ -114,21 +114,27 @@
+   border: var(--border-heavy);
+   border-radius: var(--radius-panel);
+   background: var(--color-surface);
+   color: var(--color-carbon);
+   box-shadow: 3px 3px 0 var(--color-carbon);
+ }
+ 
+ .empty-state {
+   display: block;
+   margin: 0 0 1.5rem;
+   border: var(--border-heavy);
+   border-radius: var(--radius-control);
+   background: var(--color-threshold);
+   padding: 1rem 1.2rem;
+   color: var(--color-carbon);
+   box-shadow: 5px 5px 0 var(--color-carbon);
+ }
+ 
+ .empty-state {
+   background: var(--color-cyan);
++  animation: motion-settle-in var(--motion-duration-slow) var(--motion-ease-out) backwards;
++}
++
++.empty-state__hare {
++  width: 3.5rem;
++  margin-bottom: 0.5rem;
+ }
+diff --git a/src/components/ui/CountUp/CountUp.test.tsx b/src/components/ui/CountUp/CountUp.test.tsx
+new file mode 100644
+index 0000000..bca779d
+--- /dev/null
++++ b/src/components/ui/CountUp/CountUp.test.tsx
+@@ -0,0 +1,62 @@
++import { act, render, screen } from "@testing-library/react";
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { preferReducedMotion, stubAnimationFrames } from "../../../test/motion";
++import { CountUp } from "./CountUp";
++
++afterEach(() => {
++  vi.restoreAllMocks();
++  vi.unstubAllGlobals();
++});
++
++const runs = (value: number): string => `${Math.round(value)} runs`;
++
++function renderCount(value: number) {
++  const view = render(
++    <p>
++      <CountUp value={value} format={runs} />
++    </p>,
++  );
++  return (next: number) =>
++    view.rerender(
++      <p>
++        <CountUp value={next} format={runs} />
++      </p>,
++    );
++}
++
++describe("CountUp", () => {
++  it("renders the formatted value as plain text when nothing is counting", () => {
++    stubAnimationFrames();
++    renderCount(3);
++    expect(screen.getByText("3 runs")).not.toHaveAttribute("aria-hidden");
++  });
++
++  it("hides intermediate frames from assistive technology and exposes only the final value", () => {
++    const frames = stubAnimationFrames();
++    const update = renderCount(3);
++
++    update(30);
++    act(() => frames.runFrame(0));
++    act(() => frames.runFrame(100));
++
++    const animated = document.querySelector(".count-up");
++    expect(animated).toHaveAttribute("aria-hidden", "true");
++    expect(animated?.textContent).not.toBe("30 runs");
++    expect(screen.getByText("30 runs")).toHaveClass("visually-hidden");
++
++    act(() => frames.runFrame(400));
++    expect(document.querySelector(".count-up")).toBeNull();
++    expect(screen.getByText("30 runs")).not.toHaveClass("visually-hidden");
++  });
++
++  it("shows the final value at once when reduced motion is preferred", () => {
++    preferReducedMotion();
++    stubAnimationFrames();
++    const update = renderCount(3);
++
++    update(30);
++
++    expect(document.querySelector(".count-up")).toBeNull();
++    expect(screen.getByText("30 runs")).toBeInTheDocument();
++  });
++});
+diff --git a/src/components/ui/CountUp/CountUp.tsx b/src/components/ui/CountUp/CountUp.tsx
+new file mode 100644
+index 0000000..8eab399
+--- /dev/null
++++ b/src/components/ui/CountUp/CountUp.tsx
+@@ -0,0 +1,19 @@
++import type { ReactNode } from "react";
++import { useCountUp } from "../../../hooks/useCountUp";
++
++export function CountUp({
++  value,
++  format,
++}: Readonly<{ value: number; format: (value: number) => string }>): ReactNode {
++  const finalText = format(value);
++  const text = format(useCountUp(value));
++  if (text === finalText) return finalText;
++  return (
++    <>
++      <span className="count-up" aria-hidden="true">
++        {text}
++      </span>
++      <span className="visually-hidden">{finalText}</span>
++    </>
++  );
++}
+diff --git a/src/components/ui/HareLoader/HareLoader.test.tsx b/src/components/ui/HareLoader/HareLoader.test.tsx
+new file mode 100644
+index 0000000..a933655
+--- /dev/null
++++ b/src/components/ui/HareLoader/HareLoader.test.tsx
+@@ -0,0 +1,44 @@
++import { act, render } from "@testing-library/react";
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { preferReducedMotion, stubMediaQuery } from "../../../test/motion";
++import { HareLoader } from "./HareLoader";
++
++afterEach(() => {
++  vi.restoreAllMocks();
++});
++
++function renderHare() {
++  const { container } = render(<HareLoader className="sync-status__hare" />);
++  return container.querySelector("svg");
++}
++
++describe("HareLoader", () => {
++  it("draws a decorative hare that stays out of the accessibility tree", () => {
++    const hare = renderHare();
++    expect(hare).toHaveClass("hare-loader", "sync-status__hare");
++    expect(hare).toHaveAttribute("aria-hidden", "true");
++    expect(hare).toHaveAttribute("focusable", "false");
++  });
++
++  it("hops when the runner allows motion", () => {
++    stubMediaQuery(false);
++    expect(renderHare()).toHaveAttribute("data-motion", "full");
++  });
++
++  it("stands still when reduced motion is preferred, including after a live change", () => {
++    const query = stubMediaQuery(false);
++    const hare = renderHare();
++
++    act(() => {
++      Object.assign(query, { matches: true });
++      query.dispatchEvent(new Event("change"));
++    });
++
++    expect(hare).toHaveAttribute("data-motion", "reduced");
++  });
++
++  it("stands still from the first frame under reduced motion", () => {
++    preferReducedMotion();
++    expect(renderHare()).toHaveAttribute("data-motion", "reduced");
++  });
++});
+diff --git a/src/components/ui/HareLoader/HareLoader.tsx b/src/components/ui/HareLoader/HareLoader.tsx
+new file mode 100644
+index 0000000..eac5f9b
+--- /dev/null
++++ b/src/components/ui/HareLoader/HareLoader.tsx
+@@ -0,0 +1,26 @@
++import type { JSX } from "react";
++import { usePrefersReducedMotion } from "../../../hooks/usePrefersReducedMotion";
++
++export function HareLoader({ className }: Readonly<{ className?: string }>): JSX.Element {
++  const reducedMotion = usePrefersReducedMotion();
++  return (
++    <svg
++      className={["hare-loader", className].filter(Boolean).join(" ")}
++      data-motion={reducedMotion ? "reduced" : "full"}
++      viewBox="0 0 48 32"
++      aria-hidden="true"
++      focusable="false"
++    >
++      <ellipse className="hare-loader__ground" cx="24" cy="30" rx="13" ry="1.4" />
++      <g className="hare-loader__hare">
++        <path d="M33 11C30 4 31 1 33 2s3 5 3 9" />
++        <path d="M36 10c0-7 2-9 3.5-7.5S40 8 38.5 11" />
++        <ellipse cx="25" cy="19" rx="11" ry="7" />
++        <circle cx="38" cy="14.5" r="5" />
++        <circle className="hare-loader__tail" cx="13.5" cy="15.5" r="2.5" />
++        <path className="hare-loader__leg" d="M32 24l6 2.5M18 24c-4 1-6 2-9 2" />
++        <circle className="hare-loader__eye" cx="39.6" cy="13.4" r="0.9" />
++      </g>
++    </svg>
++  );
++}
+diff --git a/src/components/ui/HareLoader/hare-loader.css b/src/components/ui/HareLoader/hare-loader.css
+new file mode 100644
+index 0000000..3bf1178
+--- /dev/null
++++ b/src/components/ui/HareLoader/hare-loader.css
+@@ -0,0 +1,58 @@
++.hare-loader {
++  display: inline-block;
++  flex: none;
++  width: 3rem;
++  height: auto;
++  overflow: visible;
++}
++
++.hare-loader__hare {
++  fill: var(--color-kinetic);
++  stroke: var(--color-carbon);
++  stroke-width: 2;
++  stroke-linecap: round;
++  stroke-linejoin: round;
++  transform-box: fill-box;
++  transform-origin: 50% 100%;
++  animation: hare-hop var(--motion-duration-loop) var(--motion-ease-in-out)
++    var(--motion-loop-iterations);
++}
++
++.hare-loader__tail {
++  fill: var(--color-lab-paper);
++}
++
++.hare-loader__leg {
++  fill: none;
++}
++
++.hare-loader__eye {
++  fill: var(--color-carbon);
++  stroke: none;
++}
++
++.hare-loader__ground {
++  fill: var(--color-carbon);
++  opacity: 0.18;
++  transform-box: fill-box;
++  transform-origin: center;
++  animation: hare-ground var(--motion-duration-loop) var(--motion-ease-in-out)
++    var(--motion-loop-iterations);
++}
++
++.hare-loader[data-motion="reduced"] :is(.hare-loader__hare, .hare-loader__ground) {
++  animation: none;
++}
++
++@keyframes hare-hop {
++  50% {
++    transform: translateY(-22%) rotate(-8deg);
++  }
++}
++
++@keyframes hare-ground {
++  50% {
++    opacity: 0.08;
++    transform: scaleX(0.7);
++  }
++}
+diff --git a/src/components/ui/index.ts b/src/components/ui/index.ts
+index 4533dc5..4a8e972 100644
+--- a/src/components/ui/index.ts
++++ b/src/components/ui/index.ts
+@@ -1,4 +1,6 @@
+ export { Button } from "./Button/Button";
+ export { Card } from "./Card/Card";
++export { CountUp } from "./CountUp/CountUp";
++export { HareLoader } from "./HareLoader/HareLoader";
+ export { Pagination } from "./Pagination/Pagination";
+ export { Table } from "./Table/Table";
+diff --git a/src/components/weekly-overview/WeekRow/WeekRow.tsx b/src/components/weekly-overview/WeekRow/WeekRow.tsx
+index 6ddbf35..9d45c65 100644
+--- a/src/components/weekly-overview/WeekRow/WeekRow.tsx
++++ b/src/components/weekly-overview/WeekRow/WeekRow.tsx
+@@ -1,38 +1,42 @@
+ import type { JSX } from "react";
+ import { WeeklyDay } from "../WeeklyDay/WeeklyDay";
+ import { WeeklyDetail } from "../WeeklyDetail/WeeklyDetail";
+ import { WeeklySummary } from "../WeeklySummary/WeeklySummary";
+ import type { WorkoutWeek } from "../weeklyOverview";
++import { NO_ARRIVALS, type WorkoutArrivals } from "../workoutArrivals";
+ 
+ export function WeekRow({
+   week,
+   language,
+   selectedWorkoutId,
+   onSelect,
+   onClose,
+   weekdayFormatter,
++  arrivals = NO_ARRIVALS,
+ }: Readonly<{
+   week: WorkoutWeek;
+   language: string;
+   selectedWorkoutId: string | null;
+   onSelect: (workoutId: string) => void;
+   onClose: () => void;
+   weekdayFormatter: Intl.DateTimeFormat;
++  arrivals?: WorkoutArrivals;
+ }>): JSX.Element {
+   const selectedWorkout = week.workouts.find((workout) => workout.id === selectedWorkoutId) ?? null;
+   return (
+     <li className="weekly-grid__week" data-resting={week.workouts.length === 0} key={week.dateKey}>
+       <WeeklySummary week={week} language={language} weekdayFormatter={weekdayFormatter} />
+       {week.days.map((day) => (
+         <WeeklyDay
+           day={day}
+           language={language}
+           selectedWorkoutId={selectedWorkoutId}
+           onSelect={onSelect}
++          arrivals={arrivals}
+           key={day.dateKey}
+         />
+       ))}
+       {selectedWorkout && <WeeklyDetail workout={selectedWorkout} onClose={onClose} />}
+     </li>
+   );
+ }
+diff --git a/src/components/weekly-overview/WeeklyDay/WeeklyDay.tsx b/src/components/weekly-overview/WeeklyDay/WeeklyDay.tsx
+index 1ae99ad..7fe5bd5 100644
+--- a/src/components/weekly-overview/WeeklyDay/WeeklyDay.tsx
++++ b/src/components/weekly-overview/WeeklyDay/WeeklyDay.tsx
+@@ -1,53 +1,57 @@
+ import type { JSX } from "react";
+ import { useTranslation } from "react-i18next";
+ import { localeFor } from "../../../i18n/i18n";
+ import { WorkoutButton } from "../WorkoutButton/WorkoutButton";
+ import type { WorkoutDay } from "../weeklyOverview";
++import { NO_ARRIVALS, type WorkoutArrivals } from "../workoutArrivals";
+ 
+ export function WeeklyDay({
+   day,
+   language,
+   selectedWorkoutId,
+   onSelect,
++  arrivals = NO_ARRIVALS,
+ }: Readonly<{
+   day: WorkoutDay;
+   language: string;
+   selectedWorkoutId: string | null;
+   onSelect: (workoutId: string) => void;
++  arrivals?: WorkoutArrivals;
+ }>): JSX.Element {
+   const { t } = useTranslation();
+   const weekday = new Intl.DateTimeFormat(localeFor(language), { weekday: "short" });
+   const mobileDate = new Intl.DateTimeFormat(localeFor(language), {
+     day: "numeric",
+     month: "short",
+   });
+   return (
+     <div className="weekly-day" data-empty={day.workouts.length === 0}>
+       <time className="visually-hidden" dateTime={day.dateKey}>
+         {new Intl.DateTimeFormat(localeFor(language), { dateStyle: "full" }).format(day.date)}
+       </time>
+       {day.workouts.length > 0 && (
+         <div className="weekly-day__heading" aria-hidden="true">
+           <span>{weekday.format(day.date)}</span>
+           <time>{mobileDate.format(day.date)}</time>
+         </div>
+       )}
+       {day.workouts.length === 0 ? (
+         <span className="weekly-day__empty">
+           <span aria-hidden="true">—</span>
+           <span className="visually-hidden">{t("weekly.restDay")}</span>
+         </span>
+       ) : (
+         day.workouts.map((workout) => (
+           <WorkoutButton
+             workout={workout}
+             selected={workout.id === selectedWorkoutId}
+             language={language}
+             onSelect={() => onSelect(workout.id)}
++            arrivalOrder={arrivals.get(workout.id)}
+             key={workout.id}
+           />
+         ))
+       )}
+     </div>
+   );
+ }
+diff --git a/src/components/weekly-overview/WeeklyOverview/WeeklyOverview.tsx b/src/components/weekly-overview/WeeklyOverview/WeeklyOverview.tsx
+index 64ff825..f62b1f4 100644
+--- a/src/components/weekly-overview/WeeklyOverview/WeeklyOverview.tsx
++++ b/src/components/weekly-overview/WeeklyOverview/WeeklyOverview.tsx
+@@ -1,65 +1,68 @@
+ import { type JSX, useMemo, useState } from "react";
+ import { useTranslation } from "react-i18next";
+ import type { Workout } from "../../../domain/workout";
+ import { localeFor } from "../../../i18n/i18n";
+ import { Pagination } from "../../ui";
+ import { WeekRow } from "../WeekRow/WeekRow";
+ import { pageCount, weeksOnPage, workoutWeeks } from "../weeklyOverview";
++import { NO_ARRIVALS, type WorkoutArrivals } from "../workoutArrivals";
+ 
+ export function WeeklyOverview({
+   workouts,
+-}: Readonly<{ workouts: ReadonlyArray<Workout> }>): JSX.Element {
++  arrivals = NO_ARRIVALS,
++}: Readonly<{ workouts: ReadonlyArray<Workout>; arrivals?: WorkoutArrivals }>): JSX.Element {
+   const { t, i18n } = useTranslation();
+   const language = i18n.resolvedLanguage ?? i18n.language;
+   const weeks = useMemo(() => workoutWeeks(workouts), [workouts]);
+   const totalPages = pageCount(weeks);
+   const [page, setPage] = useState(0);
+   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
+   const visibleWeeks = weeksOnPage(weeks, Math.min(page, totalPages - 1));
+   const weekdays = new Intl.DateTimeFormat(localeFor(language), { weekday: "short" });
+   const changePage = (next: number): void => {
+     setPage(next);
+     setSelectedWorkoutId(null);
+   };
+   const selectWorkout = (id: string): void =>
+     setSelectedWorkoutId((current) => (current === id ? null : id));
+ 
+   return (
+     <section className="weekly-overview" aria-label={t("weekly.label")}>
+       <div className="weekly-overview__scroll">
+         <div className="weekly-grid">
+           <div className="weekly-grid__header" aria-hidden="true">
+             <span>{t("weekly.week")}</span>
+             {visibleWeeks[0]?.days.map((day) => (
+               <span key={day.dateKey}>{weekdays.format(day.date)}</span>
+             ))}
+           </div>
+           <ol className="weekly-grid__weeks">
+             {visibleWeeks.map((week) => (
+               <WeekRow
+                 week={week}
+                 language={language}
+                 selectedWorkoutId={selectedWorkoutId}
+                 onSelect={selectWorkout}
+                 onClose={() => setSelectedWorkoutId(null)}
+                 weekdayFormatter={weekdays}
++                arrivals={arrivals}
+                 key={week.dateKey}
+               />
+             ))}
+           </ol>
+         </div>
+       </div>
+       <Pagination
+         className="weekly-pagination"
+         ariaLabel={t("weekly.pagination")}
+         previousLabel={`← ${t("weekly.newer")}`}
+         nextLabel={`${t("weekly.older")} →`}
+         pageLabel={t("weekly.page", { current: page + 1, total: totalPages })}
+         previousDisabled={page === 0}
+         nextDisabled={page >= totalPages - 1}
+         onPrevious={() => changePage(page - 1)}
+         onNext={() => changePage(page + 1)}
+       />
+     </section>
+   );
+ }
+diff --git a/src/components/weekly-overview/WeeklyOverview/WeeklyOverviewArrivals.test.tsx b/src/components/weekly-overview/WeeklyOverview/WeeklyOverviewArrivals.test.tsx
+new file mode 100644
+index 0000000..f99d5e9
+--- /dev/null
++++ b/src/components/weekly-overview/WeeklyOverview/WeeklyOverviewArrivals.test.tsx
+@@ -0,0 +1,47 @@
++import { act, fireEvent, render, screen } from "@testing-library/react";
++import i18n from "i18next";
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import type { Workout } from "../../../domain/workout";
++import { useWorkoutArrivals } from "../../../hooks/useWorkoutArrivals";
++import { buildWeeklyWorkout } from "../../../test/weekly-builders";
++import { WeeklyOverview } from "./WeeklyOverview";
++
++beforeEach(async () => {
++  await i18n.changeLanguage("en");
++  vi.useFakeTimers();
++});
++
++afterEach(() => {
++  vi.useRealTimers();
++});
++
++function SynchronizedOverview({ workouts }: Readonly<{ workouts: ReadonlyArray<Workout> }>) {
++  return <WeeklyOverview workouts={workouts} arrivals={useWorkoutArrivals(workouts, true)} />;
++}
++
++const history = Array.from({ length: 6 }, (_, index) =>
++  buildWeeklyWorkout(
++    `workout:history-${index}`,
++    new Date(Date.UTC(2026, 6, 20 - index * 7, 6)).toISOString(),
++    `Week ${index + 1}`,
++  ),
++);
++
++describe("WeeklyOverview arrivals", () => {
++  it("does not replay the arrival animation after paging away and back", () => {
++    const arrived = buildWeeklyWorkout("workout:arrived", "2026-07-21T06:00:00Z", "Fresh run");
++    const { rerender } = render(<SynchronizedOverview workouts={history} />);
++    rerender(<SynchronizedOverview workouts={[arrived, ...history]} />);
++    expect(screen.getByRole("button", { name: /Open Fresh run/ })).toHaveAttribute(
++      "data-new",
++      "true",
++    );
++
++    act(() => vi.advanceTimersByTime(400));
++    fireEvent.click(screen.getByRole("button", { name: /Older weeks/ }));
++    fireEvent.click(screen.getByRole("button", { name: /Newer weeks/ }));
++
++    expect(screen.getByRole("button", { name: /Open Fresh run/ })).not.toHaveAttribute("data-new");
++    expect(screen.getByRole("button", { name: /Open Week 1/ })).not.toHaveAttribute("data-new");
++  });
++});
+diff --git a/src/components/weekly-overview/WeeklyOverview/weekly-overview-theme.css b/src/components/weekly-overview/WeeklyOverview/weekly-overview-theme.css
+index 236bdc5..6accd11 100644
+--- a/src/components/weekly-overview/WeeklyOverview/weekly-overview-theme.css
++++ b/src/components/weekly-overview/WeeklyOverview/weekly-overview-theme.css
+@@ -37,44 +37,43 @@
+ .weekly-summary__metric {
+   border-top: 2px solid var(--color-carbon);
+   padding-top: 0.35rem;
+ }
+ 
+ .weekly-day {
+   border-inline-start: 2px solid var(--color-carbon);
+   background: var(--color-surface);
+   padding: 0.7rem;
+ }
+ 
+ .weekly-day[data-empty="true"] {
+   background: var(--color-surface-muted);
+ }
+ 
+ .weekly-workout {
+   border: 2px solid var(--color-carbon);
+   border-radius: var(--radius-panel);
+   background: color-mix(in oklch, var(--weekly-accent) 22%, var(--color-surface));
+   box-shadow: 3px 3px 0 var(--color-carbon);
+-  transition:
+-    transform 110ms ease,
+-    box-shadow 110ms ease,
+-    background-color 110ms ease;
++  transition-property: transform, box-shadow, background-color;
++  transition-duration: var(--motion-duration-fast);
++  transition-timing-function: var(--motion-ease-in-out);
+ }
+ 
+ .weekly-workout[aria-expanded="true"] {
+   border-color: var(--color-carbon);
+   background: color-mix(in oklch, var(--weekly-accent) 38%, var(--color-surface));
+   box-shadow: 0 0 0 var(--color-carbon);
+   transform: translate(3px, 3px);
+ }
+ 
+ .weekly-workout__type,
+ .weekly-workout small {
+   color: var(--color-carbon);
+   font-weight: 700;
+ }
+ 
+ @media (hover: hover) {
+   .weekly-workout:not(:disabled):hover {
+     border-color: var(--color-carbon);
+     background: color-mix(in oklch, var(--weekly-accent) 34%, var(--color-surface));
+     color: var(--color-carbon);
+diff --git a/src/components/weekly-overview/WeeklyOverview/weekly-overview.css b/src/components/weekly-overview/WeeklyOverview/weekly-overview.css
+index 7be9a0b..20a6904 100644
+--- a/src/components/weekly-overview/WeeklyOverview/weekly-overview.css
++++ b/src/components/weekly-overview/WeeklyOverview/weekly-overview.css
+@@ -151,40 +151,45 @@
+ 
+ .weekly-workout[data-kind="progressive"],
+ .weekly-workout[data-kind="tempo"] {
+   --weekly-accent: var(--color-sunrise);
+ }
+ 
+ .weekly-workout[data-kind="intervals"],
+ .weekly-workout[data-kind="repeated-hills"] {
+   --weekly-accent: oklch(57% 0.15 250);
+ }
+ 
+ .weekly-workout[data-kind="race"] {
+   --weekly-accent: oklch(61% 0.18 28);
+ }
+ 
+ .weekly-workout[aria-expanded="true"] {
+   border-color: var(--weekly-accent);
+   background: color-mix(in oklch, var(--weekly-accent) 11%, var(--color-surface));
+ }
+ 
++.weekly-workout[data-new="true"] {
++  animation: motion-settle-in var(--motion-duration-base) var(--motion-ease-spring) backwards;
++  animation-delay: calc(var(--arrival-order, 0) * var(--motion-stagger-step));
++}
++
+ .weekly-workout__type {
+   width: fit-content;
+   color: color-mix(in oklch, var(--weekly-accent) 72%, var(--color-carbon));
+   font-family: var(--font-data);
+   font-size: 0.59rem;
+   font-weight: 800;
+   letter-spacing: 0.045em;
+   line-height: 1;
+   text-transform: uppercase;
+ }
+ 
+ .weekly-workout > strong {
+   overflow: hidden;
+   font-size: 0.78rem;
+   line-height: 1.25;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+ }
+ 
+ .weekly-workout__metrics {
+diff --git a/src/components/weekly-overview/WorkoutButton/WorkoutButton.test.tsx b/src/components/weekly-overview/WorkoutButton/WorkoutButton.test.tsx
+index c4fad7c..cd36c59 100644
+--- a/src/components/weekly-overview/WorkoutButton/WorkoutButton.test.tsx
++++ b/src/components/weekly-overview/WorkoutButton/WorkoutButton.test.tsx
+@@ -9,21 +9,42 @@ beforeEach(async () => {
+ });
+ 
+ describe("WorkoutButton", () => {
+   it("summarizes a workout and delegates selection", () => {
+     const onSelect = vi.fn();
+     render(
+       <WorkoutButton
+         workout={buildWeeklyWorkout("workout:button", "2026-07-20T06:00:00Z", "River loop")}
+         selected={false}
+         language="en"
+         onSelect={onSelect}
+       />,
+     );
+ 
+     const button = screen.getByRole("button", { name: /Open River loop, Free run/ });
+     expect(button).toHaveAttribute("aria-expanded", "false");
+     expect(button).toHaveTextContent("5.00 km");
+     fireEvent.click(button);
+     expect(onSelect).toHaveBeenCalledOnce();
+   });
++
++  it("marks a newly arrived workout with its stagger position", () => {
++    const workout = buildWeeklyWorkout("workout:arrived", "2026-07-20T06:00:00Z", "River loop");
++    const { rerender } = render(
++      <WorkoutButton workout={workout} selected={false} language="en" onSelect={vi.fn()} />,
++    );
++    const button = screen.getByRole("button", { name: /Open River loop/ });
++    expect(button).not.toHaveAttribute("data-new");
++
++    rerender(
++      <WorkoutButton
++        workout={workout}
++        selected={false}
++        language="en"
++        onSelect={vi.fn()}
++        arrivalOrder={2}
++      />,
++    );
++    expect(button).toHaveAttribute("data-new", "true");
++    expect(button.style.getPropertyValue("--arrival-order")).toBe("2");
++  });
+ });
+diff --git a/src/components/weekly-overview/WorkoutButton/WorkoutButton.tsx b/src/components/weekly-overview/WorkoutButton/WorkoutButton.tsx
+index 3128b9f..43c03e0 100644
+--- a/src/components/weekly-overview/WorkoutButton/WorkoutButton.tsx
++++ b/src/components/weekly-overview/WorkoutButton/WorkoutButton.tsx
+@@ -1,45 +1,53 @@
+-import type { JSX } from "react";
++import type { CSSProperties, JSX } from "react";
+ import { useTranslation } from "react-i18next";
+ import type { Workout } from "../../../domain/workout";
+ import { formatDistance, formatDuration } from "../../../i18n/formatters";
+ import { localeFor } from "../../../i18n/i18n";
+ import { workoutDetail, workoutKind, workoutType } from "../weeklyFormatters";
+ 
+ export function WorkoutButton({
+   workout,
+   selected,
+   language,
+   onSelect,
++  arrivalOrder,
+ }: Readonly<{
+   workout: Workout;
+   selected: boolean;
+   language: string;
+   onSelect: () => void;
++  arrivalOrder?: number;
+ }>): JSX.Element {
+   const { t } = useTranslation();
+   const type = workoutType(workout, t);
+   const date = new Intl.DateTimeFormat(localeFor(language), {
+     weekday: "long",
+     day: "numeric",
+     month: "long",
+   }).format(new Date(workout.performedAt));
+   return (
+     <button
+       className="weekly-workout"
+       data-kind={workoutKind(workout)}
++      data-new={arrivalOrder === undefined ? undefined : "true"}
++      style={arrivalOrder === undefined ? undefined : arrivalStyle(arrivalOrder)}
+       type="button"
+       aria-expanded={selected}
+       aria-controls={selected ? "weekly-workout-detail" : undefined}
+       aria-label={t("weekly.openWorkout", { name: workout.name, type, date })}
+       onClick={onSelect}
+     >
+       <span className="weekly-workout__type">{type}</span>
+       <strong>{workout.name}</strong>
+       <span className="weekly-workout__metrics">
+         <b>{formatDistance(workout.distanceMeters, language)}</b>
+         <b>{formatDuration(workout.durationSeconds)}</b>
+       </span>
+       <small>{workoutDetail(workout, t, language)}</small>
+     </button>
+   );
+ }
++
++function arrivalStyle(order: number): CSSProperties {
++  return { "--arrival-order": order } as CSSProperties;
++}
+diff --git a/src/components/weekly-overview/workoutArrivals.test.ts b/src/components/weekly-overview/workoutArrivals.test.ts
+new file mode 100644
+index 0000000..5202552
+--- /dev/null
++++ b/src/components/weekly-overview/workoutArrivals.test.ts
+@@ -0,0 +1,47 @@
++import { describe, expect, it } from "vitest";
++import { buildWeeklyWorkout } from "../../test/weekly-builders";
++import { arrivalOrder, newWorkoutIds } from "./workoutArrivals";
++
++const workoutOn = (day: number) =>
++  buildWeeklyWorkout(`workout:${day}`, `2026-07-${String(day).padStart(2, "0")}T06:00:00Z`);
++
++describe("newWorkoutIds", () => {
++  it("treats the initial IndexedDB hydration as already known", () => {
++    expect(newWorkoutIds(null, [workoutOn(1), workoutOn(2)]).size).toBe(0);
++  });
++
++  it("returns only workouts that were not present in the previous load", () => {
++    const known = new Set(["workout:1"]);
++    expect(Array.from(newWorkoutIds(known, [workoutOn(1), workoutOn(2), workoutOn(3)]))).toEqual([
++      "workout:2",
++      "workout:3",
++    ]);
++  });
++});
++
++describe("arrivalOrder", () => {
++  it("staggers the newest arrivals first", () => {
++    const workouts = [workoutOn(1), workoutOn(3), workoutOn(2)];
++    const order = arrivalOrder(new Set(workouts.map((workout) => workout.id)), workouts);
++    expect(Array.from(order)).toEqual([
++      ["workout:3", 0],
++      ["workout:2", 1],
++      ["workout:1", 2],
++    ]);
++  });
++
++  it("caps a large backfill batch at six staggered arrivals", () => {
++    const backfill = Array.from({ length: 200 }, (_, day) =>
++      buildWeeklyWorkout(
++        `workout:backfill-${day}`,
++        new Date(Date.UTC(2025, 6, 1 + day)).toISOString(),
++      ),
++    );
++    const order = arrivalOrder(new Set(backfill.map((workout) => workout.id)), backfill);
++
++    expect(order.size).toBe(6);
++    expect(Array.from(order.values())).toEqual([0, 1, 2, 3, 4, 5]);
++    expect(order.get("workout:backfill-199")).toBe(0);
++    expect(order.has("workout:backfill-0")).toBe(false);
++  });
++});
+diff --git a/src/components/weekly-overview/workoutArrivals.ts b/src/components/weekly-overview/workoutArrivals.ts
+new file mode 100644
+index 0000000..753d168
+--- /dev/null
++++ b/src/components/weekly-overview/workoutArrivals.ts
+@@ -0,0 +1,26 @@
++import type { Workout } from "../../domain/workout";
++
++const STAGGERED_ARRIVAL_LIMIT = 6;
++
++export type WorkoutArrivals = ReadonlyMap<string, number>;
++
++export const NO_ARRIVALS: WorkoutArrivals = new Map();
++
++export function newWorkoutIds(
++  previousIds: ReadonlySet<string> | null,
++  nextWorkouts: ReadonlyArray<Workout>,
++): ReadonlySet<string> {
++  if (previousIds === null) return new Set();
++  return new Set(nextWorkouts.map((workout) => workout.id).filter((id) => !previousIds.has(id)));
++}
++
++export function arrivalOrder(
++  arrivedIds: ReadonlySet<string>,
++  workouts: ReadonlyArray<Workout>,
++): WorkoutArrivals {
++  const newest = workouts
++    .filter((workout) => arrivedIds.has(workout.id))
++    .toSorted((left, right) => right.performedAt.localeCompare(left.performedAt))
++    .slice(0, STAGGERED_ARRIVAL_LIMIT);
++  return new Map(newest.map((workout, order) => [workout.id, order]));
++}
+diff --git a/src/components/workouts/SourceLapEvidence/source-lap-evidence.css b/src/components/workouts/SourceLapEvidence/source-lap-evidence.css
+index f25b3a1..105eecb 100644
+--- a/src/components/workouts/SourceLapEvidence/source-lap-evidence.css
++++ b/src/components/workouts/SourceLapEvidence/source-lap-evidence.css
+@@ -2,104 +2,99 @@
+   margin-top: 1.25rem;
+   border-top: 1px solid var(--color-line);
+   padding-top: 0.9rem;
+ }
+ 
+ .source-evidence summary {
+   color: var(--color-instrument);
+   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+   font-size: 0.67rem;
+   font-weight: 600;
+   letter-spacing: 0.04em;
+   text-transform: uppercase;
+ }
+ 
+ .source-evidence summary {
+   margin-inline: -0.45rem;
+   border-radius: calc(var(--radius-panel) - 2px);
+   padding: 0.4rem 0.45rem;
+   cursor: pointer;
+   list-style: none;
+-  transition:
+-    background-color 140ms ease,
+-    color 140ms ease;
++  transition-property: background-color, color;
++  transition-duration: var(--motion-duration-fast);
++  transition-timing-function: var(--motion-ease-in-out);
+ }
+ 
+ .source-evidence summary::-webkit-details-marker {
+   display: none;
+ }
+ 
+ .source-evidence__summary-meta,
+ .source-evidence__action {
+   display: inline-flex;
+   align-items: center;
+ }
+ 
+ .source-evidence__summary-meta {
+   flex: none;
+   gap: 0.8rem;
+ }
+ 
+ .source-evidence__action {
+   gap: 0.4rem;
+   justify-content: flex-end;
+   inline-size: 5.5rem;
+   color: var(--color-carbon);
+   font-weight: 700;
+ }
+ 
+ .source-evidence__chevron {
+   width: 0.42rem;
+   height: 0.42rem;
+   border-right: 1.5px solid currentColor;
+   border-bottom: 1.5px solid currentColor;
+   transform: translateY(-0.1rem) rotate(45deg);
+-  transition: transform 140ms ease;
++  transition-property: transform;
++  transition-duration: var(--motion-duration-fast);
++  transition-timing-function: var(--motion-ease-in-out);
+ }
+ 
+ .source-evidence[open] .source-evidence__chevron {
+   transform: translateY(0.1rem) rotate(225deg);
+ }
+ 
+ .source-evidence summary:focus-visible {
+   outline: 2px solid var(--color-kinetic);
+   outline-offset: 2px;
+ }
+ 
+ .source-evidence[open] summary {
+   margin-bottom: 0.45rem;
+ }
+ 
+ @media (hover: hover) {
+   .source-evidence summary:hover {
+     background: var(--color-interactive-muted);
+     color: var(--color-carbon);
+   }
+ }
+ 
+-@media (prefers-reduced-motion: reduce) {
+-  .source-evidence summary,
+-  .source-evidence__chevron {
+-    transition: none;
+-  }
+-}
+-
+ .evidence-table-scroll {
+   overflow-x: auto;
+ }
+ 
+ .evidence-table {
+   width: 100%;
+   min-width: 720px;
+   border-collapse: separate;
+   border-spacing: 0;
+   table-layout: fixed;
+ }
+ 
+ .evidence-table th {
+   background: color-mix(in oklch, var(--color-line) 55%, var(--color-surface));
+   padding: 0.48rem 0.65rem;
+   color: var(--color-instrument);
+   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+   font-size: 0.61rem;
+   font-weight: 500;
+   letter-spacing: 0.04em;
+diff --git a/src/hooks/countUp.test.ts b/src/hooks/countUp.test.ts
+new file mode 100644
+index 0000000..c75fc82
+--- /dev/null
++++ b/src/hooks/countUp.test.ts
+@@ -0,0 +1,24 @@
++import { describe, expect, it } from "vitest";
++import { countUpValue } from "./countUp";
++
++describe("countUpValue", () => {
++  it("starts on the previous value and ends exactly on the target", () => {
++    expect(countUpValue(10, 20, 0, 400)).toBe(10);
++    expect(countUpValue(10, 20, 400, 400)).toBe(20);
++    expect(countUpValue(10, 20, 900, 400)).toBe(20);
++  });
++
++  it("eases out so most of the change happens early", () => {
++    const halfway = countUpValue(0, 100, 200, 400);
++    expect(halfway).toBeCloseTo(87.5);
++    expect(countUpValue(0, 100, 100, 400)).toBeLessThan(halfway);
++  });
++
++  it("counts down as well as up", () => {
++    expect(countUpValue(100, 0, 200, 400)).toBeCloseTo(12.5);
++  });
++
++  it("jumps to the target when there is no duration", () => {
++    expect(countUpValue(3, 7, 0, 0)).toBe(7);
++  });
++});
+diff --git a/src/hooks/countUp.ts b/src/hooks/countUp.ts
+new file mode 100644
+index 0000000..f624d1b
+--- /dev/null
++++ b/src/hooks/countUp.ts
+@@ -0,0 +1,13 @@
++function easeOutCubic(progress: number): number {
++  return 1 - (1 - progress) ** 3;
++}
++
++export function countUpValue(
++  from: number,
++  to: number,
++  elapsedMs: number,
++  durationMs: number,
++): number {
++  if (durationMs <= 0 || elapsedMs >= durationMs) return to;
++  return from + (to - from) * easeOutCubic(Math.max(0, elapsedMs) / durationMs);
++}
+diff --git a/src/hooks/motionDurations.ts b/src/hooks/motionDurations.ts
+new file mode 100644
+index 0000000..11a8979
+--- /dev/null
++++ b/src/hooks/motionDurations.ts
+@@ -0,0 +1 @@
++export const MOTION_DURATION_SLOW_MS = 400;
+diff --git a/src/hooks/useCountUp.test.ts b/src/hooks/useCountUp.test.ts
+new file mode 100644
+index 0000000..3c77d63
+--- /dev/null
++++ b/src/hooks/useCountUp.test.ts
+@@ -0,0 +1,84 @@
++import { act, renderHook } from "@testing-library/react";
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { preferReducedMotion, stubAnimationFrames } from "../test/motion";
++import { useCountUp } from "./useCountUp";
++
++afterEach(() => {
++  vi.restoreAllMocks();
++  vi.unstubAllGlobals();
++});
++
++function renderCountUp(initial: number) {
++  return renderHook(({ value }) => useCountUp(value, { duration: 400 }), {
++    initialProps: { value: initial },
++  });
++}
++
++describe("useCountUp", () => {
++  it("shows the first value immediately without animating", () => {
++    const frames = stubAnimationFrames();
++    const { result } = renderCountUp(42);
++
++    expect(result.current).toBe(42);
++    expect(frames.pending()).toBe(0);
++  });
++
++  it("interpolates from the previous value and ends exactly on the new one", () => {
++    const frames = stubAnimationFrames();
++    const { result, rerender } = renderCountUp(10);
++
++    rerender({ value: 20 });
++    expect(result.current).toBe(10);
++    act(() => frames.runFrame(1_000));
++    expect(result.current).toBe(10);
++    act(() => frames.runFrame(1_200));
++    expect(result.current).toBeGreaterThan(10);
++    expect(result.current).toBeLessThan(20);
++    act(() => frames.runFrame(1_400));
++    expect(result.current).toBe(20);
++    expect(frames.pending()).toBe(0);
++  });
++
++  it("continues from the displayed value when the target changes mid-animation", () => {
++    const frames = stubAnimationFrames();
++    const { result, rerender } = renderCountUp(0);
++
++    rerender({ value: 100 });
++    act(() => frames.runFrame(0));
++    act(() => frames.runFrame(200));
++    const interrupted = result.current;
++    rerender({ value: 50 });
++    expect(result.current).toBe(interrupted);
++    act(() => frames.runFrame(300));
++    act(() => frames.runFrame(700));
++    expect(result.current).toBe(50);
++  });
++
++  it("jumps to the final value when reduced motion is preferred", () => {
++    preferReducedMotion();
++    const frames = stubAnimationFrames();
++    const { result, rerender } = renderCountUp(10);
++
++    rerender({ value: 20 });
++
++    expect(result.current).toBe(20);
++    expect(frames.pending()).toBe(0);
++  });
++
++  it("cancels the pending frame when unmounted mid-animation", () => {
++    const frames = stubAnimationFrames();
++    const errors = vi.spyOn(console, "error");
++    const { rerender, unmount } = renderCountUp(10);
++
++    rerender({ value: 20 });
++    act(() => frames.runFrame(0));
++    act(() => frames.runFrame(100));
++    expect(frames.pending()).toBe(1);
++    unmount();
++
++    expect(cancelAnimationFrame).toHaveBeenCalled();
++    expect(frames.pending()).toBe(0);
++    expect(() => frames.runFrame(400)).not.toThrow();
++    expect(errors).not.toHaveBeenCalled();
++  });
++});
+diff --git a/src/hooks/useCountUp.ts b/src/hooks/useCountUp.ts
+new file mode 100644
+index 0000000..3d6bff3
+--- /dev/null
++++ b/src/hooks/useCountUp.ts
+@@ -0,0 +1,46 @@
++import { useEffect, useRef, useState } from "react";
++import { countUpValue } from "./countUp";
++import { MOTION_DURATION_SLOW_MS } from "./motionDurations";
++import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
++
++type CountUpOptions = Readonly<{ duration?: number }>;
++
++function animateCountUp(
++  from: number,
++  to: number,
++  duration: number,
++  onFrame: (value: number) => void,
++): () => void {
++  const animation = { frame: 0, start: -1 };
++  const step = (now: number): void => {
++    if (animation.start < 0) animation.start = now;
++    const value = countUpValue(from, to, now - animation.start, duration);
++    onFrame(value);
++    if (value !== to) animation.frame = requestAnimationFrame(step);
++  };
++  animation.frame = requestAnimationFrame(step);
++  return () => cancelAnimationFrame(animation.frame);
++}
++
++export function useCountUp(
++  value: number,
++  { duration = MOTION_DURATION_SLOW_MS }: CountUpOptions = {},
++): number {
++  const reducedMotion = usePrefersReducedMotion();
++  const [displayed, setDisplayed] = useState(value);
++  const displayedRef = useRef(value);
++
++  useEffect(() => {
++    const show = (next: number): void => {
++      displayedRef.current = next;
++      setDisplayed(next);
++    };
++    if (reducedMotion || displayedRef.current === value) {
++      show(value);
++      return;
++    }
++    return animateCountUp(displayedRef.current, value, duration, show);
++  }, [value, duration, reducedMotion]);
++
++  return reducedMotion ? value : displayed;
++}
+diff --git a/src/hooks/usePrefersReducedMotion.test.ts b/src/hooks/usePrefersReducedMotion.test.ts
+new file mode 100644
+index 0000000..8d86210
+--- /dev/null
++++ b/src/hooks/usePrefersReducedMotion.test.ts
+@@ -0,0 +1,44 @@
++import { act, renderHook } from "@testing-library/react";
++import { afterEach, describe, expect, it, vi } from "vitest";
++import { preferReducedMotion, stubMediaQuery } from "../test/motion";
++import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
++
++afterEach(() => {
++  vi.restoreAllMocks();
++});
++
++describe("usePrefersReducedMotion", () => {
++  it("allows motion when the runner has no reduced-motion preference", () => {
++    stubMediaQuery(false);
++    const { result } = renderHook(() => usePrefersReducedMotion());
++    expect(result.current).toBe(false);
++  });
++
++  it("reports the reduced-motion preference and follows later changes", () => {
++    const query = preferReducedMotion();
++    const { result } = renderHook(() => usePrefersReducedMotion());
++    expect(window.matchMedia).toHaveBeenCalledWith("(prefers-reduced-motion: reduce)");
++    expect(result.current).toBe(true);
++
++    act(() => {
++      Object.assign(query, { matches: false });
++      query.dispatchEvent(new Event("change"));
++    });
++    expect(result.current).toBe(false);
++  });
++
++  it("falls back to allowing motion when matchMedia is unavailable", () => {
++    const original = window.matchMedia;
++    Object.defineProperty(window, "matchMedia", { configurable: true, value: undefined });
++    try {
++      const { result } = renderHook(() => usePrefersReducedMotion());
++      expect(result.current).toBe(false);
++    } finally {
++      Object.defineProperty(window, "matchMedia", {
++        configurable: true,
++        writable: true,
++        value: original,
++      });
++    }
++  });
++});
+diff --git a/src/hooks/usePrefersReducedMotion.ts b/src/hooks/usePrefersReducedMotion.ts
+new file mode 100644
+index 0000000..030d5ee
+--- /dev/null
++++ b/src/hooks/usePrefersReducedMotion.ts
+@@ -0,0 +1,21 @@
++import { useSyncExternalStore } from "react";
++
++const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
++
++function reducedMotionQuery(): MediaQueryList | null {
++  return typeof window.matchMedia === "function" ? window.matchMedia(REDUCED_MOTION_QUERY) : null;
++}
++
++function subscribe(onChange: () => void): () => void {
++  const query = reducedMotionQuery();
++  query?.addEventListener("change", onChange);
++  return () => query?.removeEventListener("change", onChange);
++}
++
++function prefersReducedMotion(): boolean {
++  return reducedMotionQuery()?.matches ?? false;
++}
++
++export function usePrefersReducedMotion(): boolean {
++  return useSyncExternalStore(subscribe, prefersReducedMotion, () => false);
++}
+diff --git a/src/hooks/useWorkoutArrivals.test.ts b/src/hooks/useWorkoutArrivals.test.ts
+new file mode 100644
+index 0000000..c23c420
+--- /dev/null
++++ b/src/hooks/useWorkoutArrivals.test.ts
+@@ -0,0 +1,83 @@
++import { act, renderHook } from "@testing-library/react";
++import { afterEach, describe, expect, it, vi } from "vitest";
++import type { Workout } from "../domain/workout";
++import { preferReducedMotion } from "../test/motion";
++import { buildWeeklyWorkout } from "../test/weekly-builders";
++import { useWorkoutArrivals } from "./useWorkoutArrivals";
++
++afterEach(() => {
++  vi.useRealTimers();
++  vi.restoreAllMocks();
++});
++
++const first = buildWeeklyWorkout("workout:first", "2026-07-20T06:00:00Z");
++const second = buildWeeklyWorkout("workout:second", "2026-07-21T06:00:00Z");
++const third = buildWeeklyWorkout("workout:third", "2026-07-22T06:00:00Z");
++
++function renderArrivals(workouts: ReadonlyArray<Workout>, hydrated: boolean) {
++  return renderHook((props) => useWorkoutArrivals(props.workouts, props.hydrated), {
++    initialProps: { workouts, hydrated },
++  });
++}
++
++describe("useWorkoutArrivals", () => {
++  it("does not animate workouts from the initial IndexedDB load", () => {
++    const { result, rerender } = renderArrivals([], false);
++    rerender({ workouts: [first, second], hydrated: false });
++    rerender({ workouts: [first, second], hydrated: true });
++
++    expect(result.current.size).toBe(0);
++  });
++
++  it("marks workouts added by a later synchronization batch", () => {
++    const { result, rerender } = renderArrivals([first], true);
++
++    rerender({ workouts: [first, second, third], hydrated: true });
++
++    expect(Array.from(result.current)).toEqual([
++      ["workout:third", 0],
++      ["workout:second", 1],
++    ]);
++  });
++
++  it("animates the first batch for a runner whose local store was empty", () => {
++    const { result, rerender } = renderArrivals([], true);
++
++    rerender({ workouts: [first], hydrated: true });
++
++    expect(result.current.get("workout:first")).toBe(0);
++  });
++
++  it("keeps settled arrivals stable across re-renders without new workouts", () => {
++    const { result, rerender } = renderArrivals([first], true);
++    const synchronized = [first, second];
++    rerender({ workouts: synchronized, hydrated: true });
++    const arrivals = result.current;
++
++    rerender({ workouts: synchronized, hydrated: true });
++    rerender({ workouts: [...synchronized], hydrated: true });
++
++    expect(result.current).toBe(arrivals);
++  });
++
++  it("does not mark arrivals when reduced motion is preferred", () => {
++    preferReducedMotion();
++    const { result, rerender } = renderArrivals([first], true);
++
++    rerender({ workouts: [first, second], hydrated: true });
++
++    expect(result.current.size).toBe(0);
++  });
++
++  it("clears arrival marks once the entrance animation has finished", () => {
++    vi.useFakeTimers();
++    const { result, rerender } = renderArrivals([first], true);
++    rerender({ workouts: [first, second], hydrated: true });
++    expect(result.current.size).toBe(1);
++
++    act(() => vi.advanceTimersByTime(399));
++    expect(result.current.size).toBe(1);
++    act(() => vi.advanceTimersByTime(1));
++    expect(result.current.size).toBe(0);
++  });
++});
+diff --git a/src/hooks/useWorkoutArrivals.ts b/src/hooks/useWorkoutArrivals.ts
+new file mode 100644
+index 0000000..1036d3b
+--- /dev/null
++++ b/src/hooks/useWorkoutArrivals.ts
+@@ -0,0 +1,64 @@
++import { useEffect, useState } from "react";
++import {
++  arrivalOrder,
++  NO_ARRIVALS,
++  newWorkoutIds,
++  type WorkoutArrivals,
++} from "../components/weekly-overview/workoutArrivals";
++import type { Workout } from "../domain/workout";
++import { MOTION_DURATION_SLOW_MS } from "./motionDurations";
++import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
++
++type ArrivalTracking = Readonly<{
++  workouts: ReadonlyArray<Workout> | null;
++  hydrated: boolean;
++  knownIds: ReadonlySet<string> | null;
++  arrivals: WorkoutArrivals;
++}>;
++
++const UNTRACKED: ArrivalTracking = {
++  workouts: null,
++  hydrated: false,
++  knownIds: null,
++  arrivals: NO_ARRIVALS,
++};
++
++function trackArrivals(
++  previous: ArrivalTracking,
++  workouts: ReadonlyArray<Workout>,
++  hydrated: boolean,
++): ArrivalTracking {
++  if (!hydrated) return { ...UNTRACKED, workouts };
++  const arrived = newWorkoutIds(previous.knownIds, workouts);
++  return {
++    workouts,
++    hydrated,
++    knownIds: new Set(workouts.map((workout) => workout.id)),
++    arrivals: arrived.size === 0 ? previous.arrivals : arrivalOrder(arrived, workouts),
++  };
++}
++
++export function useWorkoutArrivals(
++  workouts: ReadonlyArray<Workout>,
++  hydrated: boolean,
++): WorkoutArrivals {
++  const reducedMotion = usePrefersReducedMotion();
++  const [tracking, setTracking] = useState(() => trackArrivals(UNTRACKED, workouts, hydrated));
++  const changed = tracking.workouts !== workouts || tracking.hydrated !== hydrated;
++  const current = changed ? trackArrivals(tracking, workouts, hydrated) : tracking;
++  if (changed) setTracking(current);
++  useEffect(() => {
++    if (current.arrivals.size === 0) return;
++    const settled = current.arrivals;
++    const timeout = window.setTimeout(
++      () => setTracking((latest) => settleArrivals(latest, settled)),
++      MOTION_DURATION_SLOW_MS,
++    );
++    return () => window.clearTimeout(timeout);
++  }, [current.arrivals]);
++  return reducedMotion ? NO_ARRIVALS : current.arrivals;
++}
++
++function settleArrivals(tracking: ArrivalTracking, settled: WorkoutArrivals): ArrivalTracking {
++  return tracking.arrivals === settled ? { ...tracking, arrivals: NO_ARRIVALS } : tracking;
++}
+diff --git a/src/i18n/locales/en.ts b/src/i18n/locales/en.ts
+index 33e995a..c3dc337 100644
+--- a/src/i18n/locales/en.ts
++++ b/src/i18n/locales/en.ts
+@@ -34,43 +34,44 @@ export const english = {
+     disconnectWarning:
+       "This will disconnect Strava and remove every workout downloaded to this device. You can reconnect later.",
+   },
+   notices: {
+     synchronizationError: "Could not synchronize workouts right now.",
+     backfill: "Your recent reports are ready. Older runs will be imported gradually.",
+     queued: "Waiting for a fair synchronization turn…",
+     rateLimited_one:
+       "Strava’s request limit was reached. Import paused and will resume automatically in about {{count}} minute.",
+     rateLimited_other:
+       "Strava’s request limit was reached. Import paused and will resume automatically in about {{count}} minutes.",
+     disconnectError: "Could not disconnect Strava.",
+     offline: "You are offline. Showing workouts stored on this device.",
+     reauthorization: "Reconnect Strava to synchronize. Local workouts remain available.",
+   },
+   feed: {
+     eyebrow: "Running journal",
+     title: "Weekly training",
+     storedCount_one: "{{count}} stored locally",
+     storedCount_other: "{{count}} stored locally",
+-    importing: "Importing your recent runs…",
+-    emptyTitle: "No runs found",
+-    emptyDescription: "Completed workouts will appear here after their laps have been classified.",
++    importing: "The hare is fetching your recent runs…",
++    emptyTitle: "No tracks here yet",
++    emptyDescription:
++      "Head out for a run: completed workouts hop in here as soon as their laps have been classified.",
+   },
+   dashboard: englishDashboard,
+   weekly: {
+     label: "Weekly training overview",
+     week: "Week",
+     runCount_one: "{{count}} run",
+     runCount_other: "{{count}} runs",
+     zeroDistance: "0 km",
+     restDay: "Rest day",
+     restWeek: "Rest week",
+     openWorkout: "Open {{name}}, {{type}}, {{date}}",
+     pagination: "Weekly training pages",
+     newer: "Newer weeks",
+     older: "Older weeks",
+     page: "{{current}} of {{total}}",
+     selectedEyebrow: "Selected run",
+     selectedTitle: "Workout details",
+     closeDetails: "Close details",
+     types: {
+       tempo: "Tempo",
+diff --git a/src/i18n/locales/it.ts b/src/i18n/locales/it.ts
+index a430e43..183b204 100644
+--- a/src/i18n/locales/it.ts
++++ b/src/i18n/locales/it.ts
+@@ -35,43 +35,44 @@ export const italian = {
+       "Strava verrà disconnesso e tutti gli allenamenti scaricati su questo dispositivo saranno rimossi. Potrai riconnetterti in seguito.",
+   },
+   notices: {
+     synchronizationError: "Al momento non è possibile sincronizzare gli allenamenti.",
+     backfill: "I report recenti sono pronti. Le corse precedenti verranno importate gradualmente.",
+     queued: "In attesa del turno di sincronizzazione…",
+     rateLimited_one:
+       "Strava ha raggiunto il limite di richieste. L’importazione è in pausa e riprenderà automaticamente tra circa {{count}} minuto.",
+     rateLimited_other:
+       "Strava ha raggiunto il limite di richieste. L’importazione è in pausa e riprenderà automaticamente tra circa {{count}} minuti.",
+     disconnectError: "Non è stato possibile disconnettere Strava.",
+     offline: "Sei offline. Stai visualizzando gli allenamenti salvati su questo dispositivo.",
+     reauthorization:
+       "Riconnetti Strava per sincronizzare. Gli allenamenti locali restano disponibili.",
+   },
+   feed: {
+     eyebrow: "Diario di corsa",
+     title: "Allenamento settimanale",
+     storedCount_one: "{{count}} allenamento salvato in locale",
+     storedCount_other: "{{count}} allenamenti salvati in locale",
+-    importing: "Importazione delle corse recenti…",
+-    emptyTitle: "Nessuna corsa trovata",
+-    emptyDescription: "Gli allenamenti completati appariranno qui dopo la classificazione dei lap.",
++    importing: "La lepre sta recuperando le tue corse recenti…",
++    emptyTitle: "Ancora nessuna traccia",
++    emptyDescription:
++      "Esci a correre: gli allenamenti completati arriveranno qui di corsa non appena i lap sono stati classificati.",
+   },
+   dashboard: italianDashboard,
+   weekly: {
+     label: "Panoramica settimanale degli allenamenti",
+     week: "Settimana",
+     runCount_one: "{{count}} corsa",
+     runCount_other: "{{count}} corse",
+     zeroDistance: "0 km",
+     restDay: "Giorno di riposo",
+     restWeek: "Settimana di riposo",
+     openWorkout: "Apri {{name}}, {{type}}, {{date}}",
+     pagination: "Pagine degli allenamenti settimanali",
+     newer: "Settimane recenti",
+     older: "Settimane precedenti",
+     page: "{{current}} di {{total}}",
+     selectedEyebrow: "Corsa selezionata",
+     selectedTitle: "Dettagli allenamento",
+     closeDetails: "Chiudi dettagli",
+     types: {
+       tempo: "Medio",
+diff --git a/src/pages/Home.test.tsx b/src/pages/Home.test.tsx
+index 5a73e5b..749d9fe 100644
+--- a/src/pages/Home.test.tsx
++++ b/src/pages/Home.test.tsx
+@@ -1,27 +1,28 @@
+ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+ import i18n from "i18next";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { application } from "../composition/application";
+ import type { User } from "../domain/user";
+ import { STRAVA_START_URL } from "../infrastructure/api/lepre-backend";
+ import { mockUser } from "../mocks/fixtures";
++import { buildWeeklyWorkout } from "../test/weekly-builders";
+ import { Home } from "./Home";
+ 
+ const LANGUAGE_STORAGE_KEY = "lepre.language";
+ 
+ vi.mock("../composition/application", () => ({
+   application: {
+     disconnectProvider: vi.fn().mockResolvedValue({ kind: "disconnected" }),
+     loadUser: vi.fn().mockResolvedValue({ kind: "disconnected" }),
+     listWorkouts: vi.fn().mockResolvedValue({ kind: "loaded", workouts: [] }),
+     synchronizeWorkouts: vi.fn().mockResolvedValue({ kind: "synchronized" }),
+   },
+ }));
+ 
+ const user = mockUser as unknown as User;
+ 
+ beforeEach(async () => {
+   window.localStorage.removeItem(LANGUAGE_STORAGE_KEY);
+   await i18n.changeLanguage("en");
+   vi.mocked(application.disconnectProvider).mockReset().mockResolvedValue({ kind: "disconnected" });
+   vi.mocked(application.loadUser).mockReset().mockResolvedValue({ kind: "disconnected" });
+@@ -124,20 +125,45 @@ describe("Home", () => {
+ 
+     render(<Home />);
+     await screen.findByText("Up to date");
+     const synchronizationCalls = vi.mocked(application.synchronizeWorkouts).mock.calls.length;
+ 
+     fireEvent.click(screen.getByRole("button", { name: "Account" }));
+     expect(screen.getByRole("button", { name: "English" })).toHaveAttribute("aria-pressed", "true");
+     fireEvent.click(screen.getByRole("button", { name: "Italiano" }));
+ 
+     expect(await screen.findByText("Tutto aggiornato")).toBeInTheDocument();
+     expect(screen.getByText("Lingua")).toBeInTheDocument();
+     expect(screen.getByRole("button", { name: "Italiano" })).toHaveAttribute(
+       "aria-pressed",
+       "true",
+     );
+     expect(window.localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe("it");
+     expect(document.documentElement).toHaveAttribute("lang", "it");
+     expect(application.synchronizeWorkouts).toHaveBeenCalledTimes(synchronizationCalls);
+   });
+ });
++
++describe("Home workout arrivals", () => {
++  it("animates only workouts that arrive after the initial local load", async () => {
++    const stored = buildWeeklyWorkout("workout:stored", "2026-07-20T06:00:00Z", "Stored run");
++    const arrived = buildWeeklyWorkout("workout:arrived", "2026-07-21T06:00:00Z", "Arrived run");
++    vi.mocked(application.loadUser).mockResolvedValue({ kind: "connected", user });
++    vi.mocked(application.listWorkouts)
++      .mockResolvedValueOnce({ kind: "loaded", workouts: [stored] })
++      .mockResolvedValue({ kind: "loaded", workouts: [arrived, stored] });
++    vi.mocked(application.synchronizeWorkouts).mockImplementation(async (refreshWorkouts) => {
++      await new Promise((resolve) => setTimeout(resolve, 0));
++      await refreshWorkouts();
++      return { kind: "synchronized" };
++    });
++
++    render(<Home />);
++    await screen.findByText("Up to date");
++
++    expect(screen.getByRole("button", { name: /Open Arrived run/ })).toHaveAttribute(
++      "data-new",
++      "true",
++    );
++    expect(screen.getByRole("button", { name: /Open Stored run/ })).not.toHaveAttribute("data-new");
++  });
++});
+diff --git a/src/pages/Home.tsx b/src/pages/Home.tsx
+index e0a88f2..815a920 100644
+--- a/src/pages/Home.tsx
++++ b/src/pages/Home.tsx
+@@ -1,35 +1,37 @@
+ import { type JSX, useState } from "react";
+-import { useTranslation } from "react-i18next";
+ import { ConditionDashboard } from "../components/dashboard/ConditionDashboard/ConditionDashboard";
+ import { AccountPanel } from "../components/home/AccountPanel/AccountPanel";
+ import { AppHeader } from "../components/home/AppHeader/AppHeader";
+ import { DownloadPanel } from "../components/home/DownloadPanel/DownloadPanel";
++import { EmptyWorkoutFeed } from "../components/home/EmptyWorkoutFeed/EmptyWorkoutFeed";
+ import { FeedHeader } from "../components/home/FeedHeader/FeedHeader";
+ import { DisconnectedHome, LoadingHome } from "../components/home/PublicHome/PublicHome";
+ import { WeeklyOverview } from "../components/weekly-overview/WeeklyOverview/WeeklyOverview";
+ import { useHomeController } from "../hooks/useHomeController";
++import { useWorkoutArrivals } from "../hooks/useWorkoutArrivals";
+ import { useWorkoutExport } from "../hooks/useWorkoutExport";
+ 
+ export function Home(): JSX.Element {
+   const controller = useHomeController();
+   const workoutExport = useWorkoutExport(controller.workouts);
++  const arrivals = useWorkoutArrivals(controller.workouts, controller.screen.kind === "ready");
+   const [accountOpen, setAccountOpen] = useState(false);
+ 
+   if (controller.screen.kind === "checking") return <LoadingHome />;
+   if (controller.screen.kind === "disconnected") return <DisconnectedHome />;
+   const screen = controller.screen;
+   const disconnect = async (): Promise<void> => {
+     if (await controller.disconnect()) setAccountOpen(false);
+   };
+ 
+   return (
+     <main className="shell">
+       <AppHeader
+         screen={screen}
+         status={controller.status}
+         notice={controller.notice}
+         syncing={controller.syncing}
+         accountOpen={accountOpen}
+         onRetry={() => void controller.sync()}
+         onToggleAccount={() => setAccountOpen((open) => !open)}
+       />
+@@ -41,35 +43,25 @@ export function Home(): JSX.Element {
+         />
+       )}
+       {controller.workouts.length > 0 && <ConditionDashboard workouts={controller.workouts} />}
+       <FeedHeader workoutCount={controller.workouts.length} onDownload={workoutExport.show} />
+       {workoutExport.open && (
+         <DownloadPanel
+           from={workoutExport.from}
+           to={workoutExport.to}
+           earliest={workoutExport.bounds.earliest}
+           latest={workoutExport.bounds.latest}
+           workoutCount={workoutExport.selectedCount}
+           onFromChange={workoutExport.setFrom}
+           onToChange={workoutExport.setTo}
+           onDownload={workoutExport.download}
+           onClose={workoutExport.close}
+         />
+       )}
+       {controller.workouts.length === 0 ? (
+         <EmptyWorkoutFeed syncing={controller.syncing} />
+       ) : (
+-        <WeeklyOverview workouts={controller.workouts} />
++        <WeeklyOverview workouts={controller.workouts} arrivals={arrivals} />
+       )}
+     </main>
+   );
+ }
+-
+-function EmptyWorkoutFeed({ syncing }: Readonly<{ syncing: boolean }>): JSX.Element {
+-  const { t } = useTranslation();
+-  return (
+-    <div className="empty-state">
+-      <h2>{syncing ? t("feed.importing") : t("feed.emptyTitle")}</h2>
+-      <p>{t("feed.emptyDescription")}</p>
+-    </div>
+-  );
+-}
+diff --git a/src/styles.css b/src/styles.css
+index 2ca7483..7776992 100644
+--- a/src/styles.css
++++ b/src/styles.css
+@@ -1,22 +1,23 @@
+ @import "./styles/foundation.css";
+ @import "./styles/shell.css";
++@import "./components/ui/HareLoader/hare-loader.css";
+ @import "./components/home/AppHeader/app-header.css";
+ @import "./components/home/AccountPanel/account-panel.css";
+ @import "./components/home/FeedHeader/feed-header.css";
+ @import "./components/home/DownloadPanel/download-panel.css";
+ @import "./components/home/PublicHome/public-home.css";
+ @import "./components/weekly-overview/WeeklyOverview/weekly-overview.css";
+ @import "./components/workouts/WorkoutCard/workout-card.css";
+ @import "./components/workouts/SourceLapEvidence/source-lap-evidence.css";
+ @import "./styles/responsive.css";
+ @import "./components/dashboard/ConditionDashboard/condition-dashboard.css";
+ @import "./components/workouts/JournalWorkoutCard/journal-workout-card.css";
+ 
+ @import "./styles/neo-brutalist-foundation.css";
+ @import "./styles/neo-brutalist-shell.css";
+ @import "./components/home/home-theme.css";
+ @import "./components/weekly-overview/WeeklyOverview/weekly-overview-theme.css";
+ @import "./components/workouts/WorkoutCard/workout-card-theme.css";
+ @import "./components/workouts/JournalWorkoutCard/journal-workout-card-theme.css";
+ @import "./styles/neo-brutalist-responsive.css";
+ 
+diff --git a/src/styles/foundation.css b/src/styles/foundation.css
+index c55c2a4..ebeadc6 100644
+--- a/src/styles/foundation.css
++++ b/src/styles/foundation.css
+@@ -13,40 +13,50 @@
+   --color-work: #a8d8ff;
+   --color-work-ink: #18181b;
+   --color-recovery: #fff4a8;
+   --color-sunrise: #ff9d66;
+   --color-sunrise-glow: rgb(255 157 102 / 18%);
+   --color-shadow: #18181b;
+   --color-kinetic-glow: rgb(184 255 97 / 22%);
+   --color-violet: #a8a6ff;
+   --color-pink: #ffa6f6;
+   --color-cyan: #a6faff;
+   --color-interactive-muted: color-mix(in oklch, var(--color-kinetic) 12%, var(--color-surface));
+   --radius-card: 5px;
+   --radius-panel: 3px;
+   --radius-control: 3px;
+   --shadow-card: 6px 6px 0 var(--color-shadow);
+   --shadow-control: 3px 3px 0 var(--color-shadow);
+   --border-heavy: 3px solid var(--color-carbon);
+   --font-display: "Barlow", "Avenir Next", "Segoe UI Variable Display", sans-serif;
+   --font-journal: "Barlow", "Avenir Next", "Segoe UI", sans-serif;
+   --font-data: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
++  --motion-duration-fast: 150ms;
++  --motion-duration-base: 250ms;
++  /* Mirrored in JavaScript by MOTION_DURATION_SLOW_MS (src/hooks/motionDurations.ts). */
++  --motion-duration-slow: 400ms;
++  --motion-duration-loop: 600ms;
++  --motion-stagger-step: 30ms;
++  --motion-loop-iterations: infinite;
++  --motion-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
++  --motion-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
++  --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+ 
+   color: var(--color-carbon);
+   background: var(--color-surface);
+   font-family:
+     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+   font-synthesis: none;
+   font-variant-numeric: tabular-nums;
+ }
+ 
+ * {
+   box-sizing: border-box;
+ }
+ 
+ .visually-hidden {
+   position: absolute;
+   width: 1px;
+   height: 1px;
+   overflow: hidden;
+   clip: rect(0 0 0 0);
+   clip-path: inset(50%);
+@@ -57,44 +67,43 @@ body {
+   margin: 0;
+   min-width: 320px;
+   min-height: 100vh;
+   background: var(--color-surface);
+ }
+ 
+ button,
+ a {
+   font: inherit;
+ }
+ 
+ button,
+ .primary-action {
+   border: 1px solid var(--color-carbon);
+   border-radius: var(--radius-control);
+   background: var(--color-carbon);
+   color: var(--color-lab-paper);
+   padding: 0.7rem 1rem;
+   font-weight: 700;
+   cursor: pointer;
+-  transition:
+-    border-color 140ms ease,
+-    background-color 140ms ease,
+-    color 140ms ease;
++  transition-property: border-color, background-color, color;
++  transition-duration: var(--motion-duration-fast);
++  transition-timing-function: var(--motion-ease-in-out);
+ }
+ 
+ button:disabled {
+   cursor: default;
+   opacity: 0.48;
+ }
+ 
+ button:focus-visible,
+ .primary-action:focus-visible,
+ input:focus-visible {
+   outline: 2px solid var(--color-kinetic);
+   outline-offset: 2px;
+ }
+ 
+ .quiet-action {
+   background: transparent;
+   color: var(--color-carbon);
+ }
+ 
+ .primary-action {
+@@ -126,20 +135,54 @@ input:focus-visible {
+ 
+   .danger-action--solid:not(:disabled):hover {
+     background: color-mix(in oklch, var(--color-danger) 88%, var(--color-carbon));
+     color: var(--color-surface);
+   }
+ 
+   .language-selector__options button:not([aria-pressed="true"]):not(:disabled):hover {
+     background: var(--color-interactive-muted);
+     color: var(--color-carbon);
+   }
+ 
+   .language-selector__options button[aria-pressed="true"]:hover {
+     background: var(--color-carbon);
+   }
+ 
+   .primary-action:hover {
+     border-color: var(--color-carbon);
+     background: color-mix(in oklch, var(--color-kinetic) 82%, var(--color-carbon));
+   }
+ }
++
++@keyframes motion-settle-in {
++  from {
++    opacity: 0;
++    transform: translateY(6px);
++  }
++}
++
++@media (prefers-reduced-motion: reduce) {
++  :root {
++    --motion-duration-fast: 1ms;
++    --motion-duration-base: 1ms;
++    --motion-duration-slow: 1ms;
++    --motion-duration-loop: 1ms;
++    --motion-stagger-step: 0ms;
++    --motion-loop-iterations: 1;
++  }
++
++  html {
++    scroll-behavior: auto;
++  }
++
++  *,
++  *::before,
++  *::after {
++    /* biome-ignore-start lint/complexity/noImportantStyles: reduced motion must beat component animations that hard-code durations. */
++    animation-duration: 1ms !important;
++    animation-iteration-count: 1 !important;
++    animation-delay: 0ms !important;
++    transition-duration: 1ms !important;
++    transition-delay: 0ms !important;
++    /* biome-ignore-end lint/complexity/noImportantStyles: end of the reduced-motion overrides. */
++  }
++}
+diff --git a/src/styles/neo-brutalist-foundation.css b/src/styles/neo-brutalist-foundation.css
+index 171e6cf..d6ca1f2 100644
+--- a/src/styles/neo-brutalist-foundation.css
++++ b/src/styles/neo-brutalist-foundation.css
+@@ -1,44 +1,42 @@
+ /* Neo-brutalist skin: bold outlines, flat color, and physical interaction states. */
+ 
+ body {
+   background-color: var(--color-surface-muted);
+   background-image:
+     linear-gradient(rgb(24 24 27 / 4%) 1px, transparent 1px),
+     linear-gradient(90deg, rgb(24 24 27 / 4%) 1px, transparent 1px);
+   background-size: 28px 28px;
+ }
+ 
+ button,
+ .primary-action {
+   border: var(--border-heavy);
+   border-radius: var(--radius-control);
+   box-shadow: var(--shadow-control);
+   font-family: var(--font-display);
+   font-weight: 700;
+   letter-spacing: 0.035em;
+   text-transform: uppercase;
+-  transition:
+-    transform 110ms ease,
+-    box-shadow 110ms ease,
+-    background-color 110ms ease,
+-    color 110ms ease;
++  transition-property: transform, box-shadow, background-color, color;
++  transition-duration: var(--motion-duration-fast);
++  transition-timing-function: var(--motion-ease-in-out);
+ }
+ 
+ button:not(:disabled):active,
+ .primary-action:active {
+   box-shadow: 0 0 0 var(--color-carbon);
+   transform: translate(3px, 3px);
+ }
+ 
+ button:disabled {
+   filter: grayscale(0.35);
+ }
+ 
+ .quiet-action {
+   background: var(--color-surface);
+   color: var(--color-carbon);
+ }
+ 
+ .primary-action {
+   border-color: var(--color-carbon);
+   background: var(--color-kinetic);
+diff --git a/src/test-setup.ts b/src/test-setup.ts
+index 539f7ea..fecc6bb 100644
+--- a/src/test-setup.ts
++++ b/src/test-setup.ts
+@@ -4,23 +4,39 @@ import { initializeI18n } from "./i18n/i18n";
+ 
+ function createMemoryStorage(): Storage {
+   const values = new Map<string, string>();
+   return {
+     get length() {
+       return values.size;
+     },
+     clear: () => values.clear(),
+     getItem: (key) => values.get(key) ?? null,
+     key: (index) => Array.from(values.keys())[index] ?? null,
+     removeItem: (key) => values.delete(key),
+     setItem: (key, value) => values.set(key, value),
+   };
+ }
+ 
+ Object.defineProperty(window, "localStorage", {
+   configurable: true,
+   value: createMemoryStorage(),
+ });
+ 
++Object.defineProperty(window, "matchMedia", {
++  configurable: true,
++  writable: true,
++  value: (query: string): MediaQueryList =>
++    ({
++      matches: false,
++      media: query,
++      onchange: null,
++      addEventListener: () => undefined,
++      removeEventListener: () => undefined,
++      addListener: () => undefined,
++      removeListener: () => undefined,
++      dispatchEvent: () => false,
++    }) as MediaQueryList,
++});
++
+ beforeAll(async () => {
+   await initializeI18n();
+ });
+diff --git a/src/test/motion.ts b/src/test/motion.ts
+new file mode 100644
+index 0000000..b1d0543
+--- /dev/null
++++ b/src/test/motion.ts
+@@ -0,0 +1,56 @@
++import { vi } from "vitest";
++
++type MediaListener = (event: MediaQueryListEvent) => void;
++
++export function stubMediaQuery(matches: boolean): MediaQueryList {
++  const listeners = new Set<MediaListener>();
++  const list = {
++    matches,
++    media: "",
++    onchange: null,
++    addEventListener: (_type: string, listener: MediaListener) => listeners.add(listener),
++    removeEventListener: (_type: string, listener: MediaListener) => listeners.delete(listener),
++    addListener: vi.fn(),
++    removeListener: vi.fn(),
++    dispatchEvent: (event: Event) => {
++      for (const listener of listeners) listener(event as MediaQueryListEvent);
++      return true;
++    },
++  } as unknown as MediaQueryList;
++  vi.spyOn(window, "matchMedia").mockImplementation((query) =>
++    Object.assign(list, { media: query }),
++  );
++  return list;
++}
++
++export function preferReducedMotion(): MediaQueryList {
++  return stubMediaQuery(true);
++}
++
++export function stubAnimationFrames(): Readonly<{
++  runFrame: (time: number) => void;
++  pending: () => number;
++}> {
++  const callbacks = new Map<number, FrameRequestCallback>();
++  const ids = { next: 1 };
++  vi.stubGlobal(
++    "requestAnimationFrame",
++    vi.fn((callback: FrameRequestCallback) => {
++      const id = ids.next++;
++      callbacks.set(id, callback);
++      return id;
++    }),
++  );
++  vi.stubGlobal(
++    "cancelAnimationFrame",
++    vi.fn((id: number) => callbacks.delete(id)),
++  );
++  return {
++    runFrame: (time) => {
++      const due = Array.from(callbacks.entries());
++      callbacks.clear();
++      for (const [, callback] of due) callback(time);
++    },
++    pending: () => callbacks.size,
++  };
++}

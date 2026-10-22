@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Workout } from "../domain/workout";
 import { preferReducedMotion } from "../test/motion";
 import { buildWeeklyWorkout } from "../test/weekly-builders";
+import { ARRIVAL_EXPIRY_MS } from "./motionDurations";
 import { useWorkoutArrivals } from "./useWorkoutArrivals";
 
 afterEach(() => {
@@ -75,7 +76,7 @@ describe("useWorkoutArrivals", () => {
     rerender({ workouts: [first, second], hydrated: true });
     expect(result.current.size).toBe(1);
 
-    act(() => vi.advanceTimersByTime(399));
+    act(() => vi.advanceTimersByTime(ARRIVAL_EXPIRY_MS - 1));
     expect(result.current.size).toBe(1);
     act(() => vi.advanceTimersByTime(1));
     expect(result.current.size).toBe(0);

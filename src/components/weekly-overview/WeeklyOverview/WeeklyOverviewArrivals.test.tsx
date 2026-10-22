@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import i18n from "i18next";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Workout } from "../../../domain/workout";
+import { ARRIVAL_EXPIRY_MS } from "../../../hooks/motionDurations";
 import { useWorkoutArrivals } from "../../../hooks/useWorkoutArrivals";
 import { buildWeeklyWorkout } from "../../../test/weekly-builders";
 import { WeeklyOverview } from "./WeeklyOverview";
@@ -37,7 +38,7 @@ describe("WeeklyOverview arrivals", () => {
       "true",
     );
 
-    act(() => vi.advanceTimersByTime(400));
+    act(() => vi.advanceTimersByTime(ARRIVAL_EXPIRY_MS));
     fireEvent.click(screen.getByRole("button", { name: /Older weeks/ }));
     fireEvent.click(screen.getByRole("button", { name: /Newer weeks/ }));
 

@@ -6,7 +6,7 @@ import {
   type WorkoutArrivals,
 } from "../components/weekly-overview/workoutArrivals";
 import type { Workout } from "../domain/workout";
-import { MOTION_DURATION_SLOW_MS } from "./motionDurations";
+import { ARRIVAL_EXPIRY_MS } from "./motionDurations";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 
 type ArrivalTracking = Readonly<{
@@ -52,7 +52,7 @@ export function useWorkoutArrivals(
     const settled = current.arrivals;
     const timeout = window.setTimeout(
       () => setTracking((latest) => settleArrivals(latest, settled)),
-      MOTION_DURATION_SLOW_MS,
+      ARRIVAL_EXPIRY_MS,
     );
     return () => window.clearTimeout(timeout);
   }, [current.arrivals]);
