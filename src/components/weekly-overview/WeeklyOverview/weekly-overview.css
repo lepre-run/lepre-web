@@ -169,7 +169,7 @@
 }
 
 .weekly-workout[data-new="true"] {
-  animation: weekly-workout-arrive var(--motion-duration-base) var(--motion-ease-spring) backwards;
+  animation: motion-settle-in var(--motion-duration-base) var(--motion-ease-spring) backwards;
   animation-delay: calc(var(--arrival-order, 0) * var(--motion-stagger-step));
 }
 
@@ -265,11 +265,4 @@
   font-family: var(--font-display);
   font-size: 1.55rem;
   letter-spacing: -0.04em;
-}
-
-@keyframes weekly-workout-arrive {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
 }

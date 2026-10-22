@@ -153,6 +153,13 @@ input:focus-visible {
   }
 }
 
+@keyframes motion-settle-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --motion-duration-fast: 1ms;
