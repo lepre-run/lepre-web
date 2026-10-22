@@ -92,12 +92,3 @@
     opacity: 1;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  button,
-  .primary-action,
-  .sync-status__indicator {
-    transition: none;
-    animation: none;
-  }
-}
