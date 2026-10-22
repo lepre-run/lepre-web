@@ -3,6 +3,7 @@ import { WeeklyDay } from "../WeeklyDay/WeeklyDay";
 import { WeeklyDetail } from "../WeeklyDetail/WeeklyDetail";
 import { WeeklySummary } from "../WeeklySummary/WeeklySummary";
 import type { WorkoutWeek } from "../weeklyOverview";
+import { NO_ARRIVALS, type WorkoutArrivals } from "../workoutArrivals";
 
 export function WeekRow({
   week,
@@ -11,6 +12,7 @@ export function WeekRow({
   onSelect,
   onClose,
   weekdayFormatter,
+  arrivals = NO_ARRIVALS,
 }: Readonly<{
   week: WorkoutWeek;
   language: string;
@@ -18,6 +20,7 @@ export function WeekRow({
   onSelect: (workoutId: string) => void;
   onClose: () => void;
   weekdayFormatter: Intl.DateTimeFormat;
+  arrivals?: WorkoutArrivals;
 }>): JSX.Element {
   const selectedWorkout = week.workouts.find((workout) => workout.id === selectedWorkoutId) ?? null;
   return (
@@ -29,6 +32,7 @@ export function WeekRow({
           language={language}
           selectedWorkoutId={selectedWorkoutId}
           onSelect={onSelect}
+          arrivals={arrivals}
           key={day.dateKey}
         />
       ))}

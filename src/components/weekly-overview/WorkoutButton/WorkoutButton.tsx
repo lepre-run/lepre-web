@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { CSSProperties, JSX } from "react";
 import { useTranslation } from "react-i18next";
 import type { Workout } from "../../../domain/workout";
 import { formatDistance, formatDuration } from "../../../i18n/formatters";
@@ -10,11 +10,13 @@ export function WorkoutButton({
   selected,
   language,
   onSelect,
+  arrivalOrder,
 }: Readonly<{
   workout: Workout;
   selected: boolean;
   language: string;
   onSelect: () => void;
+  arrivalOrder?: number;
 }>): JSX.Element {
   const { t } = useTranslation();
   const type = workoutType(workout, t);
@@ -27,6 +29,8 @@ export function WorkoutButton({
     <button
       className="weekly-workout"
       data-kind={workoutKind(workout)}
+      data-new={arrivalOrder === undefined ? undefined : "true"}
+      style={arrivalOrder === undefined ? undefined : arrivalStyle(arrivalOrder)}
       type="button"
       aria-expanded={selected}
       aria-controls={selected ? "weekly-workout-detail" : undefined}
@@ -42,4 +46,8 @@ export function WorkoutButton({
       <small>{workoutDetail(workout, t, language)}</small>
     </button>
   );
+}
+
+function arrivalStyle(order: number): CSSProperties {
+  return { "--arrival-order": order } as CSSProperties;
 }

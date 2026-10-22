@@ -5,6 +5,7 @@ import { application } from "../composition/application";
 import type { User } from "../domain/user";
 import { STRAVA_START_URL } from "../infrastructure/api/lepre-backend";
 import { mockUser } from "../mocks/fixtures";
+import { buildWeeklyWorkout } from "../test/weekly-builders";
 import { Home } from "./Home";
 
 const LANGUAGE_STORAGE_KEY = "lepre.language";
@@ -139,5 +140,28 @@ describe("Home", () => {
     expect(window.localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe("it");
     expect(document.documentElement).toHaveAttribute("lang", "it");
     expect(application.synchronizeWorkouts).toHaveBeenCalledTimes(synchronizationCalls);
+  });
+
+  it("animates only workouts that arrive after the initial local load", async () => {
+    const stored = buildWeeklyWorkout("workout:stored", "2026-07-20T06:00:00Z", "Stored run");
+    const arrived = buildWeeklyWorkout("workout:arrived", "2026-07-21T06:00:00Z", "Arrived run");
+    vi.mocked(application.loadUser).mockResolvedValue({ kind: "connected", user });
+    vi.mocked(application.listWorkouts)
+      .mockResolvedValueOnce({ kind: "loaded", workouts: [stored] })
+      .mockResolvedValue({ kind: "loaded", workouts: [arrived, stored] });
+    vi.mocked(application.synchronizeWorkouts).mockImplementation(async (refreshWorkouts) => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await refreshWorkouts();
+      return { kind: "synchronized" };
+    });
+
+    render(<Home />);
+    await screen.findByText("Up to date");
+
+    expect(screen.getByRole("button", { name: /Open Arrived run/ })).toHaveAttribute(
+      "data-new",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: /Open Stored run/ })).not.toHaveAttribute("data-new");
   });
 });
