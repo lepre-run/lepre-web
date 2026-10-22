@@ -55,7 +55,7 @@ export const italian = {
     importing: "La lepre sta recuperando le tue corse recenti…",
     emptyTitle: "Ancora nessuna traccia",
     emptyDescription:
-      "Esci a correre: gli allenamenti completati arrivano qui di corsa, appena classificati i lap.",
+      "Esci a correre: gli allenamenti completati arriveranno qui di corsa non appena i lap sono stati classificati.",
   },
   dashboard: italianDashboard,
   weekly: {

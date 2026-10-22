@@ -29,6 +29,7 @@ describe("EmptyWorkoutFeed", () => {
       screen.getByRole("heading", { name: "The hare is fetching your recent runs…" }),
     ).toBeInTheDocument();
     expect(container.querySelector(".hare-loader")).toHaveAttribute("aria-hidden", "true");
+    expect(screen.queryByText(/Head out for a run/)).not.toBeInTheDocument();
   });
 
   it("speaks Italian when the interface is Italian", async () => {
@@ -38,7 +39,7 @@ describe("EmptyWorkoutFeed", () => {
     expect(screen.getByRole("heading", { name: "Ancora nessuna traccia" })).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Esci a correre: gli allenamenti completati arrivano qui di corsa, appena classificati i lap.",
+        "Esci a correre: gli allenamenti completati arriveranno qui di corsa non appena i lap sono stati classificati.",
       ),
     ).toBeInTheDocument();
   });

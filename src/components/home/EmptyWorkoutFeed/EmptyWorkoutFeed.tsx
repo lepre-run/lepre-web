@@ -8,7 +8,7 @@ export function EmptyWorkoutFeed({ syncing }: Readonly<{ syncing: boolean }>): J
     <div className="empty-state">
       {syncing && <HareLoader className="empty-state__hare" />}
       <h2>{syncing ? t("feed.importing") : t("feed.emptyTitle")}</h2>
-      <p>{t("feed.emptyDescription")}</p>
+      {!syncing && <p>{t("feed.emptyDescription")}</p>}
     </div>
   );
 }
