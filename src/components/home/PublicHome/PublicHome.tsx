@@ -2,11 +2,13 @@ import type { JSX } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguageSelector } from "../../../i18n/LanguageSelector";
 import { STRAVA_START_URL } from "../../../infrastructure/api/lepre-backend";
+import { HareLoader } from "../../ui";
 
 export function LoadingHome(): JSX.Element {
   const { t } = useTranslation();
   return (
     <main className="shell shell--centered">
+      <HareLoader className="loading-home__hare" />
       <h1>lepre</h1>
       <p>{t("home.opening")}</p>
     </main>

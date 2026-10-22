@@ -30,6 +30,16 @@
   --font-display: "Barlow", "Avenir Next", "Segoe UI Variable Display", sans-serif;
   --font-journal: "Barlow", "Avenir Next", "Segoe UI", sans-serif;
   --font-data: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  /* --motion-duration-slow, --motion-duration-base and --motion-stagger-step are mirrored in src/hooks/motionDurations.ts. */
+  --motion-duration-fast: 150ms;
+  --motion-duration-base: 250ms;
+  --motion-duration-slow: 400ms;
+  --motion-duration-loop: 600ms;
+  --motion-stagger-step: 30ms;
+  --motion-loop-iterations: infinite;
+  --motion-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   color: var(--color-carbon);
   background: var(--color-surface);
@@ -74,10 +84,9 @@ button,
   padding: 0.7rem 1rem;
   font-weight: 700;
   cursor: pointer;
-  transition:
-    border-color 140ms ease,
-    background-color 140ms ease,
-    color 140ms ease;
+  transition-property: border-color, background-color, color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-in-out);
 }
 
 button:disabled {
@@ -141,5 +150,51 @@ input:focus-visible {
   .primary-action:hover {
     border-color: var(--color-carbon);
     background: color-mix(in oklch, var(--color-kinetic) 82%, var(--color-carbon));
+  }
+}
+
+@keyframes motion-settle-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes motion-grow-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes motion-draw-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-fast: 1ms;
+    --motion-duration-base: 1ms;
+    --motion-duration-slow: 1ms;
+    --motion-duration-loop: 1ms;
+    --motion-stagger-step: 0ms;
+    --motion-loop-iterations: 1;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore-start lint/complexity/noImportantStyles: reduced motion must beat component animations that hard-code durations. */
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+    /* biome-ignore-end lint/complexity/noImportantStyles: end of the reduced-motion overrides. */
   }
 }

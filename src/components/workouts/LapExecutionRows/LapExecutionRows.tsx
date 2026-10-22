@@ -70,7 +70,7 @@ export function LapExecutionRows<Role>({
           detail={detail(lap, index)}
           className={rowClassName}
           testId={testId}
-          style={styles[index]}
+          style={{ ...styles[index], "--stage-order": index } as CSSProperties}
           dataRole={dataRole?.(lap)}
         />
       ))}

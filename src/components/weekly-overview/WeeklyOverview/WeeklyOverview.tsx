@@ -5,10 +5,12 @@ import { localeFor } from "../../../i18n/i18n";
 import { Pagination } from "../../ui";
 import { WeekRow } from "../WeekRow/WeekRow";
 import { pageCount, weeksOnPage, workoutWeeks } from "../weeklyOverview";
+import { NO_ARRIVALS, type WorkoutArrivals } from "../workoutArrivals";
 
 export function WeeklyOverview({
   workouts,
-}: Readonly<{ workouts: ReadonlyArray<Workout> }>): JSX.Element {
+  arrivals = NO_ARRIVALS,
+}: Readonly<{ workouts: ReadonlyArray<Workout>; arrivals?: WorkoutArrivals }>): JSX.Element {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage ?? i18n.language;
   const weeks = useMemo(() => workoutWeeks(workouts), [workouts]);
@@ -43,6 +45,7 @@ export function WeeklyOverview({
                 onSelect={selectWorkout}
                 onClose={() => setSelectedWorkoutId(null)}
                 weekdayFormatter={weekdays}
+                arrivals={arrivals}
                 key={week.dateKey}
               />
             ))}

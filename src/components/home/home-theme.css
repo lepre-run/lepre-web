@@ -131,4 +131,10 @@
 
 .empty-state {
   background: var(--color-cyan);
+  animation: motion-settle-in var(--motion-duration-slow) var(--motion-ease-out) backwards;
+}
+
+.empty-state__hare {
+  width: 3.5rem;
+  margin-bottom: 0.5rem;
 }

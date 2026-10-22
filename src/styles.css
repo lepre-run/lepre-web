@@ -1,5 +1,6 @@
 @import "./styles/foundation.css";
 @import "./styles/shell.css";
+@import "./components/ui/HareLoader/hare-loader.css";
 @import "./components/home/AppHeader/app-header.css";
 @import "./components/home/AccountPanel/account-panel.css";
 @import "./components/home/FeedHeader/feed-header.css";

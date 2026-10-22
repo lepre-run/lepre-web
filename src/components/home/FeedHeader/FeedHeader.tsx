@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "../../ui";
+import { Button, CountUp } from "../../ui";
 
 export function FeedHeader({
   workoutCount,
@@ -14,7 +14,12 @@ export function FeedHeader({
         <h1>{t("feed.title")}</h1>
       </div>
       <div className="feed-actions">
-        <p className="workout-count">{t("feed.storedCount", { count: workoutCount })}</p>
+        <p className="workout-count">
+          <CountUp
+            value={workoutCount}
+            format={(count) => t("feed.storedCount", { count: Math.round(count) })}
+          />
+        </p>
         <Button variant="quiet" onClick={onDownload} disabled={workoutCount === 0}>
           {t("actions.download")}
         </Button>

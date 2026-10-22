@@ -227,11 +227,16 @@
 }
 
 .workout-card--intervals .interval-cell__stroke {
+  --rep-step: calc(3 * var(--motion-stagger-step));
+  --rep-start: calc(min(var(--rep-order, 0), 8) * 2 * var(--rep-step));
+
   width: 72%;
   height: 0.55rem;
   grid-column: 1;
   grid-row: 3;
   transform: rotate(-0.6deg);
+  animation: motion-draw-in var(--motion-duration-slow) var(--motion-ease-out) backwards;
+  animation-delay: var(--rep-start);
 }
 
 .workout-card--intervals .interval-cell__stroke path {
@@ -245,6 +250,9 @@
   width: 46%;
   color: color-mix(in oklch, var(--color-card-accent) 44%, var(--color-line-strong));
   transform: rotate(0.7deg);
+  animation-duration: var(--motion-duration-base);
+  animation-timing-function: var(--motion-ease-in-out);
+  animation-delay: calc(var(--rep-start) + var(--rep-step));
 }
 
 .workout-card--intervals .repetition-cell--recovery .interval-cell__stroke path {

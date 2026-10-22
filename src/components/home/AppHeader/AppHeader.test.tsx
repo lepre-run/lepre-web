@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import i18n from "i18next";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { renderHeader } from "../../../test/app-header";
 import { readyScreen } from "../../../test/home-builders";
 import { AppHeader } from "./AppHeader";
 
@@ -86,5 +87,30 @@ describe("AppHeader", () => {
       "href",
       "https://api.lepre.run/v1/auth/strava/start",
     );
+  });
+});
+
+describe("AppHeader synchronization indicator", () => {
+  it.each([
+    ["checking", "Checking for updates…"],
+    ["syncing", "Updating workouts…"],
+  ] as const)("shows the hopping hare while %s", (status, message) => {
+    const { container } = renderHeader(status);
+
+    const region = screen.getByRole("status");
+    expect(region).toHaveAttribute("aria-live", "polite");
+    expect(region).toHaveTextContent(message);
+    expect(region.querySelector(".sync-status__slot .hare-loader")).toBeInTheDocument();
+    expect(region.querySelector(".sync-status__slot")).toHaveAttribute("aria-hidden", "true");
+    expect(container.querySelector(".sync-status__indicator")).toBeNull();
+  });
+
+  it("keeps the coloured dot once synchronization settles", () => {
+    const { container } = renderHeader("current");
+
+    expect(
+      container.querySelector(".sync-status__slot .sync-status__indicator"),
+    ).toBeInTheDocument();
+    expect(container.querySelector(".hare-loader")).toBeNull();
   });
 });

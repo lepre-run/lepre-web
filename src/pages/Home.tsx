@@ -1,18 +1,20 @@
 import { type JSX, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { ConditionDashboard } from "../components/dashboard/ConditionDashboard/ConditionDashboard";
 import { AccountPanel } from "../components/home/AccountPanel/AccountPanel";
 import { AppHeader } from "../components/home/AppHeader/AppHeader";
 import { DownloadPanel } from "../components/home/DownloadPanel/DownloadPanel";
+import { EmptyWorkoutFeed } from "../components/home/EmptyWorkoutFeed/EmptyWorkoutFeed";
 import { FeedHeader } from "../components/home/FeedHeader/FeedHeader";
 import { DisconnectedHome, LoadingHome } from "../components/home/PublicHome/PublicHome";
 import { WeeklyOverview } from "../components/weekly-overview/WeeklyOverview/WeeklyOverview";
 import { useHomeController } from "../hooks/useHomeController";
+import { useWorkoutArrivals } from "../hooks/useWorkoutArrivals";
 import { useWorkoutExport } from "../hooks/useWorkoutExport";
 
 export function Home(): JSX.Element {
   const controller = useHomeController();
   const workoutExport = useWorkoutExport(controller.workouts);
+  const arrivals = useWorkoutArrivals(controller.workouts, controller.screen.kind === "ready");
   const [accountOpen, setAccountOpen] = useState(false);
 
   if (controller.screen.kind === "checking") return <LoadingHome />;
@@ -58,18 +60,8 @@ export function Home(): JSX.Element {
       {controller.workouts.length === 0 ? (
         <EmptyWorkoutFeed syncing={controller.syncing} />
       ) : (
-        <WeeklyOverview workouts={controller.workouts} />
+        <WeeklyOverview workouts={controller.workouts} arrivals={arrivals} />
       )}
     </main>
-  );
-}
-
-function EmptyWorkoutFeed({ syncing }: Readonly<{ syncing: boolean }>): JSX.Element {
-  const { t } = useTranslation();
-  return (
-    <div className="empty-state">
-      <h2>{syncing ? t("feed.importing") : t("feed.emptyTitle")}</h2>
-      <p>{t("feed.emptyDescription")}</p>
-    </div>
   );
 }

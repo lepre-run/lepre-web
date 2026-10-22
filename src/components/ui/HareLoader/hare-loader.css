@@ -1,0 +1,58 @@
+.hare-loader {
+  display: inline-block;
+  flex: none;
+  width: 3rem;
+  height: auto;
+  overflow: visible;
+}
+
+.hare-loader__hare {
+  fill: var(--color-kinetic);
+  stroke: var(--color-carbon);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: hare-hop var(--motion-duration-loop) var(--motion-ease-in-out)
+    var(--motion-loop-iterations);
+}
+
+.hare-loader__tail {
+  fill: var(--color-lab-paper);
+}
+
+.hare-loader__leg {
+  fill: none;
+}
+
+.hare-loader__eye {
+  fill: var(--color-carbon);
+  stroke: none;
+}
+
+.hare-loader__ground {
+  fill: var(--color-carbon);
+  opacity: 0.18;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hare-ground var(--motion-duration-loop) var(--motion-ease-in-out)
+    var(--motion-loop-iterations);
+}
+
+.hare-loader[data-motion="reduced"] :is(.hare-loader__hare, .hare-loader__ground) {
+  animation: none;
+}
+
+@keyframes hare-hop {
+  50% {
+    transform: translateY(-22%) rotate(-8deg);
+  }
+}
+
+@keyframes hare-ground {
+  50% {
+    opacity: 0.08;
+    transform: scaleX(0.7);
+  }
+}

@@ -17,17 +17,27 @@ button,
   font-weight: 700;
   letter-spacing: 0.035em;
   text-transform: uppercase;
-  transition:
-    transform 110ms ease,
-    box-shadow 110ms ease,
-    background-color 110ms ease,
-    color 110ms ease;
+  transition-property: transform, box-shadow, background-color, color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-in-out);
 }
 
 button:not(:disabled):active,
 .primary-action:active {
   box-shadow: 0 0 0 var(--color-carbon);
   transform: translate(3px, 3px);
+}
+
+.workout-card--journal,
+.condition-card {
+  --card-lift: 0px;
+  --card-lift-shadow: calc(var(--card-shadow-offset) + var(--card-lift))
+    calc(var(--card-shadow-offset) + var(--card-lift)) 0 var(--color-carbon);
+
+  transform: translate(calc(-1 * var(--card-lift)), calc(-1 * var(--card-lift)));
+  transition-property: transform, box-shadow;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-out);
 }
 
 button:disabled {
@@ -45,6 +55,11 @@ button:disabled {
 }
 
 @media (hover: hover) {
+  .workout-card--journal:hover,
+  .condition-card:hover {
+    --card-lift: 2px;
+  }
+
   button:not(:disabled):hover {
     border-color: var(--color-carbon);
     background: var(--color-violet);

@@ -3,17 +3,20 @@ import { useTranslation } from "react-i18next";
 import { localeFor } from "../../../i18n/i18n";
 import { WorkoutButton } from "../WorkoutButton/WorkoutButton";
 import type { WorkoutDay } from "../weeklyOverview";
+import { NO_ARRIVALS, type WorkoutArrivals } from "../workoutArrivals";
 
 export function WeeklyDay({
   day,
   language,
   selectedWorkoutId,
   onSelect,
+  arrivals = NO_ARRIVALS,
 }: Readonly<{
   day: WorkoutDay;
   language: string;
   selectedWorkoutId: string | null;
   onSelect: (workoutId: string) => void;
+  arrivals?: WorkoutArrivals;
 }>): JSX.Element {
   const { t } = useTranslation();
   const weekday = new Intl.DateTimeFormat(localeFor(language), { weekday: "short" });
@@ -44,6 +47,7 @@ export function WeeklyDay({
             selected={workout.id === selectedWorkoutId}
             language={language}
             onSelect={() => onSelect(workout.id)}
+            arrivalOrder={arrivals.get(workout.id)}
             key={workout.id}
           />
         ))
