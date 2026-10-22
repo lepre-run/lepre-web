@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 import { WeeklyDay } from "../WeeklyDay/WeeklyDay";
-import { WeeklyDetail } from "../WeeklyDetail/WeeklyDetail";
+import { WeeklyDetailPanel } from "../WeeklyDetail/WeeklyDetailPanel";
 import { WeeklySummary } from "../WeeklySummary/WeeklySummary";
 import type { WorkoutWeek } from "../weeklyOverview";
 import { NO_ARRIVALS, type WorkoutArrivals } from "../workoutArrivals";
@@ -36,7 +36,7 @@ export function WeekRow({
           key={day.dateKey}
         />
       ))}
-      {selectedWorkout && <WeeklyDetail workout={selectedWorkout} onClose={onClose} />}
+      <WeeklyDetailPanel workout={selectedWorkout} onClose={onClose} />
     </li>
   );
 }
