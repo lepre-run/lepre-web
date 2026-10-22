@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { createTrainingDashboard } from "../../../domain/training-dashboard";
 import type { Workout } from "../../../domain/workout";
 import { localeFor } from "../../../i18n/i18n";
+import { CountUp } from "../../ui";
 import { EasyPaceCard } from "../EasyPaceCard/EasyPaceCard";
 import { IntervalsCard } from "../IntervalsCard/IntervalsCard";
 import { TrainingMixCard } from "../TrainingMixCard/TrainingMixCard";
@@ -28,7 +29,10 @@ export function ConditionDashboard({
           <p className="eyebrow">{t("dashboard.eyebrow")}</p>
           <h1 id="condition-dashboard-title">{t("dashboard.title")}</h1>
           <p className="condition-dashboard__summary">
-            {t("dashboard.summary", { count: dashboard.workoutCount })}
+            <CountUp
+              value={dashboard.workoutCount}
+              format={(count) => t("dashboard.summary", { count: Math.round(count) })}
+            />
           </p>
         </div>
         <div className="condition-dashboard__window">

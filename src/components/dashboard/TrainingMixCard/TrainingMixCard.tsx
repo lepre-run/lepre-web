@@ -1,6 +1,7 @@
 import type { JSX } from "react";
 import { useTranslation } from "react-i18next";
 import type { TrainingMixInsight } from "../../../domain/training-dashboard";
+import { CountUp } from "../../ui";
 import { DashboardCard } from "../DashboardCard/DashboardCard";
 
 export function TrainingMixCard({ mix }: Readonly<{ mix: TrainingMixInsight }>): JSX.Element {
@@ -14,7 +15,11 @@ export function TrainingMixCard({ mix }: Readonly<{ mix: TrainingMixInsight }>):
       badge={<span className="condition-card__period">{t("dashboard.mix.sessionPurpose")}</span>}
     >
       <p className="condition-card__metric">
-        {mix.lowSharePercent === null ? "—" : Math.round(mix.lowSharePercent)}
+        {mix.lowSharePercent === null ? (
+          "—"
+        ) : (
+          <CountUp value={mix.lowSharePercent} format={(percent) => `${Math.round(percent)}`} />
+        )}
         <small>% {t("dashboard.mix.low")}</small>
       </p>
       <div
@@ -38,7 +43,10 @@ export function TrainingMixCard({ mix }: Readonly<{ mix: TrainingMixInsight }>):
       </p>
       <footer>
         <span>
-          {t("dashboard.mix.coverage", { value: Math.round(mix.classifiedSharePercent) })}
+          <CountUp
+            value={mix.classifiedSharePercent}
+            format={(percent) => t("dashboard.mix.coverage", { value: Math.round(percent) })}
+          />
         </span>
         <span className="condition-card__trend">{t("dashboard.mix.reference")}</span>
       </footer>
