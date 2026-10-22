@@ -54,10 +54,9 @@
   border-radius: var(--radius-panel);
   background: color-mix(in oklch, var(--weekly-accent) 22%, var(--color-surface));
   box-shadow: 3px 3px 0 var(--color-carbon);
-  transition:
-    transform var(--motion-duration-fast) var(--motion-ease-in-out),
-    box-shadow var(--motion-duration-fast) var(--motion-ease-in-out),
-    background-color var(--motion-duration-fast) var(--motion-ease-in-out);
+  transition-property: transform, box-shadow, background-color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-in-out);
 }
 
 .weekly-workout[aria-expanded="true"] {

@@ -87,10 +87,9 @@ button,
   padding: 0.7rem 1rem;
   font-weight: 700;
   cursor: pointer;
-  transition:
-    border-color var(--motion-duration-fast) var(--motion-ease-in-out),
-    background-color var(--motion-duration-fast) var(--motion-ease-in-out),
-    color var(--motion-duration-fast) var(--motion-ease-in-out);
+  transition-property: border-color, background-color, color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-in-out);
 }
 
 button:disabled {

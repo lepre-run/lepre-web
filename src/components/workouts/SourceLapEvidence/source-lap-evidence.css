@@ -19,9 +19,9 @@
   padding: 0.4rem 0.45rem;
   cursor: pointer;
   list-style: none;
-  transition:
-    background-color var(--motion-duration-fast) var(--motion-ease-in-out),
-    color var(--motion-duration-fast) var(--motion-ease-in-out);
+  transition-property: background-color, color;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-in-out);
 }
 
 .source-evidence summary::-webkit-details-marker {
@@ -53,7 +53,9 @@
   border-right: 1.5px solid currentColor;
   border-bottom: 1.5px solid currentColor;
   transform: translateY(-0.1rem) rotate(45deg);
-  transition: transform var(--motion-duration-fast) var(--motion-ease-in-out);
+  transition-property: transform;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-in-out);
 }
 
 .source-evidence[open] .source-evidence__chevron {
