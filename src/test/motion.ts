@@ -26,3 +26,31 @@ export function stubMediaQuery(matches: boolean): MediaQueryList {
 export function preferReducedMotion(): MediaQueryList {
   return stubMediaQuery(true);
 }
+
+export function stubAnimationFrames(): Readonly<{
+  runFrame: (time: number) => void;
+  pending: () => number;
+}> {
+  const callbacks = new Map<number, FrameRequestCallback>();
+  const ids = { next: 1 };
+  vi.stubGlobal(
+    "requestAnimationFrame",
+    vi.fn((callback: FrameRequestCallback) => {
+      const id = ids.next++;
+      callbacks.set(id, callback);
+      return id;
+    }),
+  );
+  vi.stubGlobal(
+    "cancelAnimationFrame",
+    vi.fn((id: number) => callbacks.delete(id)),
+  );
+  return {
+    runFrame: (time) => {
+      const due = Array.from(callbacks.entries());
+      callbacks.clear();
+      for (const [, callback] of due) callback(time);
+    },
+    pending: () => callbacks.size,
+  };
+}
