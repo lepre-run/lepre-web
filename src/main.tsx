@@ -30,7 +30,7 @@ async function resetStaleMockData(): Promise<void> {
 async function enableMocking(): Promise<void> {
   if (import.meta.env.MODE !== "mock") return;
   const { worker } = await import("./mocks/browser");
-  await worker.start({ onUnhandledRequest: "bypass" });
+  await worker.start({ onUnhandledFrame: "bypass" });
 }
 
 async function bootstrap(): Promise<void> {

@@ -43,7 +43,7 @@
     "husky": "^9.1.7",
     "jscpd": "5.4.2",
     "knip": "6.42.1",
-    "msw": "^2.15.0",
+    "msw": "^3.0.3",
     "patch-package": "^8.0.1",
     "typescript": "^7.0.2",
     "typescript-compiler": "npm:typescript@6.0.3",
