@@ -1,12 +1,11 @@
 import { type JSX, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { ConditionDashboard } from "../components/dashboard/ConditionDashboard/ConditionDashboard";
 import { AccountPanel } from "../components/home/AccountPanel/AccountPanel";
 import { AppHeader } from "../components/home/AppHeader/AppHeader";
 import { DownloadPanel } from "../components/home/DownloadPanel/DownloadPanel";
+import { EmptyWorkoutFeed } from "../components/home/EmptyWorkoutFeed/EmptyWorkoutFeed";
 import { FeedHeader } from "../components/home/FeedHeader/FeedHeader";
 import { DisconnectedHome, LoadingHome } from "../components/home/PublicHome/PublicHome";
-import { HareLoader } from "../components/ui";
 import { WeeklyOverview } from "../components/weekly-overview/WeeklyOverview/WeeklyOverview";
 import { useHomeController } from "../hooks/useHomeController";
 import { useWorkoutArrivals } from "../hooks/useWorkoutArrivals";
@@ -64,16 +63,5 @@ export function Home(): JSX.Element {
         <WeeklyOverview workouts={controller.workouts} arrivals={arrivals} />
       )}
     </main>
-  );
-}
-
-function EmptyWorkoutFeed({ syncing }: Readonly<{ syncing: boolean }>): JSX.Element {
-  const { t } = useTranslation();
-  return (
-    <div className="empty-state">
-      {syncing && <HareLoader className="empty-state__hare" />}
-      <h2>{syncing ? t("feed.importing") : t("feed.emptyTitle")}</h2>
-      <p>{t("feed.emptyDescription")}</p>
-    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import i18n from "i18next";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { application } from "../composition/application";
@@ -141,7 +141,9 @@ describe("Home", () => {
     expect(document.documentElement).toHaveAttribute("lang", "it");
     expect(application.synchronizeWorkouts).toHaveBeenCalledTimes(synchronizationCalls);
   });
+});
 
+describe("Home workout arrivals", () => {
   it("animates only workouts that arrive after the initial local load", async () => {
     const stored = buildWeeklyWorkout("workout:stored", "2026-07-20T06:00:00Z", "Stored run");
     const arrived = buildWeeklyWorkout("workout:arrived", "2026-07-21T06:00:00Z", "Arrived run");
@@ -163,46 +165,5 @@ describe("Home", () => {
       "true",
     );
     expect(screen.getByRole("button", { name: /Open Stored run/ })).not.toHaveAttribute("data-new");
-  });
-
-  it("shows the hopping hare in the empty state while the first import runs", async () => {
-    const finish: Array<() => void> = [];
-    vi.mocked(application.loadUser).mockResolvedValue({ kind: "connected", user });
-    vi.mocked(application.synchronizeWorkouts).mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          finish.push(() => resolve({ kind: "synchronized" }));
-        }),
-    );
-
-    const { container } = render(<Home />);
-
-    expect(
-      await screen.findByRole("heading", { name: "The hare is fetching your recent runs…" }),
-    ).toBeInTheDocument();
-    expect(container.querySelector(".empty-state .hare-loader")).toBeInTheDocument();
-
-    await act(async () => {
-      for (const resolve of finish) resolve();
-    });
-
-    expect(await screen.findByRole("heading", { name: "No tracks here yet" })).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Head out for a run: completed workouts hop in here as soon as their laps have been classified.",
-      ),
-    ).toBeInTheDocument();
-    expect(container.querySelector(".empty-state .hare-loader")).toBeNull();
-  });
-
-  it("explains the empty state in Italian", async () => {
-    await i18n.changeLanguage("it");
-    vi.mocked(application.loadUser).mockResolvedValue({ kind: "connected", user });
-
-    render(<Home />);
-
-    expect(
-      await screen.findByRole("heading", { name: "Ancora nessuna traccia" }),
-    ).toBeInTheDocument();
   });
 });
