@@ -82,3 +82,41 @@ describe("useWorkoutArrivals", () => {
     expect(result.current.size).toBe(0);
   });
 });
+
+describe("useWorkoutArrivals expiry", () => {
+  it("leaves no pending timer or late state update when unmounted before expiry", () => {
+    vi.useFakeTimers();
+    const errors = vi.spyOn(console, "error");
+    const { result, rerender, unmount } = renderArrivals([first], true);
+    rerender({ workouts: [first, second], hydrated: true });
+    expect(result.current.size).toBe(1);
+    expect(vi.getTimerCount()).toBe(1);
+
+    unmount();
+
+    expect(vi.getTimerCount()).toBe(0);
+    act(() => vi.advanceTimersByTime(ARRIVAL_EXPIRY_MS));
+    expect(errors).not.toHaveBeenCalled();
+  });
+
+  it("restarts expiry for a second batch that arrives before the first expires", () => {
+    vi.useFakeTimers();
+    const halfway = Math.floor(ARRIVAL_EXPIRY_MS / 2);
+    const { result, rerender } = renderArrivals([first], true);
+    rerender({ workouts: [first, second], hydrated: true });
+    act(() => vi.advanceTimersByTime(halfway));
+
+    rerender({ workouts: [first, second, third], hydrated: true });
+    expect(Array.from(result.current)).toEqual([["workout:third", 0]]);
+    expect(vi.getTimerCount()).toBe(1);
+
+    act(() => vi.advanceTimersByTime(ARRIVAL_EXPIRY_MS - halfway));
+    expect(Array.from(result.current)).toEqual([["workout:third", 0]]);
+
+    act(() => vi.advanceTimersByTime(halfway - 1));
+    expect(result.current.size).toBe(1);
+    act(() => vi.advanceTimersByTime(1));
+    expect(result.current.size).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+});
