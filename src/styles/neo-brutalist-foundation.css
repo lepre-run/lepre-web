@@ -28,6 +28,18 @@ button:not(:disabled):active,
   transform: translate(3px, 3px);
 }
 
+.workout-card--journal,
+.condition-card {
+  --card-lift: 0px;
+  --card-lift-shadow: calc(var(--card-shadow-offset) + var(--card-lift))
+    calc(var(--card-shadow-offset) + var(--card-lift)) 0 var(--color-carbon);
+
+  transform: translate(calc(-1 * var(--card-lift)), calc(-1 * var(--card-lift)));
+  transition-property: transform, box-shadow;
+  transition-duration: var(--motion-duration-fast);
+  transition-timing-function: var(--motion-ease-out);
+}
+
 button:disabled {
   filter: grayscale(0.35);
 }
@@ -43,6 +55,11 @@ button:disabled {
 }
 
 @media (hover: hover) {
+  .workout-card--journal:hover,
+  .condition-card:hover {
+    --card-lift: 2px;
+  }
+
   button:not(:disabled):hover {
     border-color: var(--color-carbon);
     background: var(--color-violet);

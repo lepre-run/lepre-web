@@ -1,14 +1,34 @@
-import { type JSX, useEffect, useRef, useState } from "react";
+import { type JSX, type RefObject, useEffect, useRef, useState } from "react";
 import type { Workout } from "../../../domain/workout";
 import { MOTION_DURATION_BASE_MS } from "../../../hooks/motionDurations";
 import { usePrefersReducedMotion } from "../../../hooks/usePrefersReducedMotion";
 import { WeeklyDetail } from "./WeeklyDetail";
+
+function useDetailFocus(
+  workoutId: string | null,
+  panelRef: RefObject<HTMLElement | null>,
+  detailRef: RefObject<HTMLElement | null>,
+): void {
+  const openerRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const focused = document.activeElement;
+    const focusInPanel = focused === document.body || panelRef.current?.contains(focused);
+    if (workoutId !== null) {
+      if (focused instanceof HTMLElement && !focusInPanel) openerRef.current = focused;
+      detailRef.current?.focus({ preventScroll: true });
+    } else if (focusInPanel) {
+      openerRef.current?.focus();
+      openerRef.current = null;
+    }
+  }, [workoutId, panelRef, detailRef]);
+}
 
 export function WeeklyDetailPanel({
   workout,
   onClose,
 }: Readonly<{ workout: Workout | null; onClose: () => void }>): JSX.Element {
   const reducedMotion = usePrefersReducedMotion();
+  const panelRef = useRef<HTMLDivElement>(null);
   const detailRef = useRef<HTMLElement>(null);
   const [lastWorkout, setLastWorkout] = useState(workout);
   if (workout !== null && workout !== lastWorkout) setLastWorkout(workout);
@@ -16,9 +36,7 @@ export function WeeklyDetailPanel({
   const open = workoutId !== null;
   const shown = workout ?? lastWorkout;
 
-  useEffect(() => {
-    if (workoutId !== null) detailRef.current?.focus({ preventScroll: true });
-  }, [workoutId]);
+  useDetailFocus(workoutId, panelRef, detailRef);
 
   useEffect(() => {
     const settle = () => {
@@ -36,7 +54,7 @@ export function WeeklyDetailPanel({
   }, [workoutId, reducedMotion]);
 
   return (
-    <div className="weekly-detail-panel" data-open={open} inert={!open}>
+    <div className="weekly-detail-panel" data-open={open} inert={!open} ref={panelRef}>
       <div className="weekly-detail-panel__clip">
         {shown && <WeeklyDetail workout={shown} onClose={onClose} active={open} ref={detailRef} />}
       </div>

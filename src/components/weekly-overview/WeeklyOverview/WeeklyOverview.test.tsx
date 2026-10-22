@@ -21,6 +21,24 @@ describe("WeeklyOverview", () => {
     expect(screen.queryByRole("region", { name: "Workout details" })).not.toBeInTheDocument();
   });
 
+  it("returns focus to the workout that opened the details", () => {
+    render(
+      <WeeklyOverview
+        workouts={[buildWeeklyWorkout("workout:focus", "2026-07-20T06:00:00Z", "Track night")]}
+      />,
+    );
+    const opener = screen.getByRole("button", { name: /Open Track night/ });
+    opener.focus();
+    fireEvent.click(opener);
+    expect(screen.getByRole("region", { name: "Workout details" })).toHaveFocus();
+
+    const close = screen.getByRole("button", { name: "Close details" });
+    close.focus();
+    fireEvent.click(close);
+
+    expect(opener).toHaveFocus();
+  });
+
   it("moves between groups of weeks", () => {
     const workouts = Array.from({ length: 6 }, (_, index) =>
       buildWeeklyWorkout(

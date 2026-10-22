@@ -2,6 +2,22 @@
   margin-top: 1.25rem;
   border-top: 1px solid var(--color-line);
   padding-top: 0.9rem;
+  interpolate-size: allow-keywords;
+}
+
+.source-evidence::details-content {
+  block-size: 0;
+  overflow: clip;
+  opacity: 0;
+  transition-property: block-size, opacity, content-visibility;
+  transition-duration: var(--motion-duration-base);
+  transition-timing-function: var(--motion-ease-out);
+  transition-behavior: allow-discrete;
+}
+
+.source-evidence[open]::details-content {
+  block-size: auto;
+  opacity: 1;
 }
 
 .source-evidence summary {

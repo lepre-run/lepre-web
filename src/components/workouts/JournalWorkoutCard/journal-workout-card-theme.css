@@ -15,10 +15,12 @@
 }
 
 .workout-card--journal {
+  --card-shadow-offset: 7px;
+
   overflow: visible;
   border: var(--border-heavy);
   border-radius: var(--radius-card);
-  box-shadow: 7px 7px 0 var(--color-carbon);
+  box-shadow: var(--card-lift-shadow);
 }
 
 .journal-card__outline,

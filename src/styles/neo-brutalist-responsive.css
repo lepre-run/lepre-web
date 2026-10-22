@@ -328,8 +328,9 @@
   }
 
   .workout-card--journal {
+    --card-shadow-offset: 5px;
+
     border-radius: var(--radius-card);
-    box-shadow: 5px 5px 0 var(--color-carbon);
   }
 
   .journal-card__type {
