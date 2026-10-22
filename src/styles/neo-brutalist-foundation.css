@@ -18,10 +18,10 @@ button,
   letter-spacing: 0.035em;
   text-transform: uppercase;
   transition:
-    transform 110ms ease,
-    box-shadow 110ms ease,
-    background-color 110ms ease,
-    color 110ms ease;
+    transform var(--motion-duration-fast) var(--motion-ease-in-out),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-in-out),
+    background-color var(--motion-duration-fast) var(--motion-ease-in-out),
+    color var(--motion-duration-fast) var(--motion-ease-in-out);
 }
 
 button:not(:disabled):active,
