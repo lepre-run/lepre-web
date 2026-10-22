@@ -23,6 +23,17 @@ function useDetailFocus(
   }, [workoutId, panelRef, detailRef]);
 }
 
+function useCloseOnEscape(open: boolean, onClose: () => void): void {
+  useEffect(() => {
+    if (!open) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !event.defaultPrevented) onClose();
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [open, onClose]);
+}
+
 export function WeeklyDetailPanel({
   workout,
   onClose,
@@ -37,6 +48,7 @@ export function WeeklyDetailPanel({
   const shown = workout ?? lastWorkout;
 
   useDetailFocus(workoutId, panelRef, detailRef);
+  useCloseOnEscape(open, onClose);
 
   useEffect(() => {
     const settle = () => {
