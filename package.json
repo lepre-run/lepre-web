@@ -42,7 +42,7 @@
     "happy-dom": "^20.14.6",
     "husky": "^9.1.7",
     "jscpd": "5.0.16",
-    "knip": "6.32.2",
+    "knip": "6.42.1",
     "msw": "^2.15.0",
     "patch-package": "^8.0.1",
     "typescript": "^7.0.2",
