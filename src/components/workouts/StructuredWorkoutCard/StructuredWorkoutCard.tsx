@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import type { CSSProperties, JSX } from "react";
 import { useTranslation } from "react-i18next";
 import type { DistanceMeters, DurationSeconds } from "../../../domain/identity";
 import { appearanceForLap, type LapAppearance } from "../../../domain/lap-appearance";
@@ -69,10 +69,15 @@ function stageRows(
   if (laps.length === 0) return null;
   return (
     <ol className="stage-matrix">
-      {laps.map((lap) => {
+      {laps.map((lap, order) => {
         const appearance = appearanceForLap(workout, lap);
         return (
-          <li className="stage-row" data-testid="structured-lap-row" key={lap.index}>
+          <li
+            className="stage-row"
+            data-testid="structured-lap-row"
+            key={lap.index}
+            style={{ "--stage-order": order } as CSSProperties}
+          >
             <div className="stage-row__identity">
               <span>{formatLapRole(appearance, t)}</span>
               <small>{t("workout.lapNumber", { number: lap.index })}</small>

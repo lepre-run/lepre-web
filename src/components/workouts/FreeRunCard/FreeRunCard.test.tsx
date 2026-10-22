@@ -54,7 +54,9 @@ it("renders its complete, strict summary contract", () => {
   expect(card).toHaveTextContent("52:00");
   expect(card).toHaveTextContent("84 m");
   expect(card).toHaveTextContent("142 bpm");
-  expect(screen.getAllByTestId("free-run-lap-row")).toHaveLength(2);
+  const rows = screen.getAllByTestId("free-run-lap-row");
+  expect(rows).toHaveLength(2);
+  expect(rows.map((row) => row.style.getPropertyValue("--stage-order"))).toEqual(["0", "1"]);
   expect(screen.getByRole("region", { name: "Lap execution" })).toBeInTheDocument();
 });
 

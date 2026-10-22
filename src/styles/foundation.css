@@ -160,6 +160,12 @@ input:focus-visible {
   }
 }
 
+@keyframes motion-grow-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --motion-duration-fast: 1ms;
