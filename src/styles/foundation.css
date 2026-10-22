@@ -170,4 +170,16 @@ input:focus-visible {
   html {
     scroll-behavior: auto;
   }
+
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore-start lint/complexity/noImportantStyles: reduced motion must beat component animations that hard-code durations. */
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+    /* biome-ignore-end lint/complexity/noImportantStyles: end of the reduced-motion overrides. */
+  }
 }
