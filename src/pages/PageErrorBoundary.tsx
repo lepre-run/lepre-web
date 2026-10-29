@@ -9,10 +9,12 @@ function PageErrorFallback(): JSX.Element {
   const { t } = useTranslation();
 
   return (
-    <main className="shell shell--centered" role="alert">
+    <main className="shell shell--centered">
       <p className="wordmark">lepre</p>
-      <h1>{t("pageError.title")}</h1>
-      <p>{t("pageError.description")}</p>
+      <div className="page-error__message" role="alert">
+        <h1>{t("pageError.title")}</h1>
+        <p>{t("pageError.description")}</p>
+      </div>
       <p>
         <Button onClick={() => window.location.reload()}>{t("pageError.reload")}</Button>
       </p>

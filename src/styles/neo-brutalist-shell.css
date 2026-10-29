@@ -22,7 +22,8 @@
   text-wrap: balance;
 }
 
-.shell--centered > p:not(.lede) {
+.shell--centered > p:not(.lede),
+.page-error__message > p {
   max-width: 42rem;
   line-height: 1.55;
 }
