@@ -1,6 +1,10 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { expect, it } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { createWorkout, type Lap, type Workout } from "../../../domain/workout";
+import {
+  inconsistentRecoveryFirstIntervalWorkout,
+  recoveryFirstIntervalWorkout,
+} from "../../../test/fixtures/recovery-first-interval-core";
 import { expectIntervalExecution } from "../../../test/workout-card-assertions";
 import { WorkoutCard } from "./WorkoutCard";
 
@@ -57,6 +61,10 @@ function intervalLaps(includeCooldown = true): ReadonlyArray<Lap> {
   ];
   return includeCooldown ? [...core, lap(7, "Cool down", 2_000, 680)] : core;
 }
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 it("shows each interval beside its recovery", () => {
   const value = workout(intervalLaps());
@@ -138,4 +146,55 @@ it("shows progressive stages as an ordered execution sequence", () => {
   expect(screen.getAllByTestId("progressive-lap-row")).toHaveLength(4);
   expect(screen.queryByText("Stage execution")).not.toBeInTheDocument();
   expect(screen.queryByText("Slower → faster")).not.toBeInTheDocument();
+});
+
+it("renders the reclassified recovery-first fixture as warm-up, three reps and cool-down", () => {
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+  render(<WorkoutCard workout={recoveryFirstIntervalWorkout()} />);
+
+  const repetitions = screen.getAllByTestId("interval-repetition-row");
+  expect(repetitions).toHaveLength(3);
+  expect(within(repetitions[2]).getByText("No recovery lap")).toBeInTheDocument();
+  expect(screen.getAllByTestId("interval-boundary-lap-row")).toHaveLength(3);
+  expect(warn).not.toHaveBeenCalled();
+});
+
+it("falls back to the structured card when a stored interval core starts with recovery", () => {
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  const value = inconsistentRecoveryFirstIntervalWorkout();
+
+  render(<WorkoutCard workout={value} />);
+
+  const article = screen.getByRole("heading", { name: value.name }).closest("article");
+  expect(article).toHaveClass("workout-card", "workout-card--intervals");
+  expect(screen.queryByTestId("interval-repetition-row")).not.toBeInTheDocument();
+  expect(warn).toHaveBeenCalledTimes(1);
+  expect(warn.mock.calls[0][0]).toContain(value.id);
+  expect(warn.mock.calls[0][0]).toContain("interval core lap 2 must be a work lap");
+});
+
+it("falls back to the structured card when progressive stages are inconsistent", () => {
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  const progressive = workout(
+    [
+      lap(1, "Stage 1", 2_000, 660),
+      lap(2, "Stage 2", 2_000, 620),
+      lap(3, "Stage 3", 2_000, 580),
+      lap(4, "Stage 4", 2_000, 540),
+    ],
+    "Broken progressive",
+  );
+  const value = {
+    ...progressive,
+    structure: { ...progressive.structure, stageCount: 9 },
+  } as Workout;
+
+  render(<WorkoutCard workout={value} />);
+
+  const article = screen.getByRole("heading", { name: "Broken progressive" }).closest("article");
+  expect(article).toHaveClass("workout-card--progressive");
+  expect(screen.queryByTestId("progressive-lap-row")).not.toBeInTheDocument();
+  expect(warn).toHaveBeenCalledTimes(1);
+  expect(warn.mock.calls[0][0]).toContain("strava:Broken progressive");
 });

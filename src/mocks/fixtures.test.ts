@@ -83,7 +83,7 @@ describe("mock workout fixtures", () => {
     expect(result.kind).toBe("created");
     if (result.kind !== "created") throw new Error("expected workout");
     expect(result.workout.structure).toMatchObject({
-      classifierVersion: 2,
+      classifierVersion: 3,
       kind: "hill-circuit",
       repetitions: 2,
       coreLapIndexes: HILL_CIRCUIT_CORE_LAPS,

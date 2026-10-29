@@ -7,6 +7,10 @@ import { createProviderConnection } from "../../domain/provider-connection";
 import { createUser } from "../../domain/user";
 import { createWorkout } from "../../domain/workout";
 import { buildWorkout } from "../../test/builders";
+import {
+  recoveryFirstIntervalWorkout,
+  storedV2RecoveryFirstStructure,
+} from "../../test/fixtures/recovery-first-interval-core";
 import { indexedDbLocalStore } from "./local-store";
 
 function connectedUser(id: string, connectionId: string) {
@@ -69,6 +73,19 @@ function readWorkoutRecord(store: IDBObjectStore, id: string): Promise<Record<st
   });
 }
 
+async function replaceStoredStructure(id: string, structure: unknown): Promise<void> {
+  const database = await openTestDatabase();
+  const downgrade = database.transaction("workouts", "readwrite");
+  const store = downgrade.objectStore("workouts");
+  const record = await readWorkoutRecord(store, id);
+  store.put({ ...record, structure });
+  await new Promise<void>((resolve, reject) => {
+    downgrade.oncomplete = () => resolve();
+    downgrade.onerror = () => reject(downgrade.error);
+  });
+  database.close();
+}
+
 describe("IndexedDB local store", () => {
   afterEach(async () => indexedDbLocalStore.clear());
 
@@ -119,16 +136,7 @@ describe("IndexedDB local store", () => {
       continuation: { kind: "complete", checkpoint: "complete" as SynchronizationCheckpoint },
     });
 
-    const database = await openTestDatabase();
-    const downgrade = database.transaction("workouts", "readwrite");
-    const store = downgrade.objectStore("workouts");
-    const record = await readWorkoutRecord(store, "strava:legacy");
-    store.put({ ...record, structure: { classifierVersion: 0 } });
-    await new Promise<void>((resolve, reject) => {
-      downgrade.oncomplete = () => resolve();
-      downgrade.onerror = () => reject(downgrade.error);
-    });
-    database.close();
+    await replaceStoredStructure("strava:legacy", { classifierVersion: 0 });
 
     const loaded = await indexedDbLocalStore.listWorkouts();
     expect(loaded[0].structure).toEqual(created.workout.structure);
@@ -138,6 +146,25 @@ describe("IndexedDB local store", () => {
     const migrated = await readWorkoutRecord(verification.objectStore("workouts"), "strava:legacy");
     expect(migrated.structure).toEqual(created.workout.structure);
     verificationDatabase.close();
+  });
+
+  it("reclassifies a cached v2 interval whose core starts with recovery", async () => {
+    const workout = recoveryFirstIntervalWorkout();
+    await indexedDbLocalStore.applySynchronizationBatch({
+      upserted: [workout],
+      removed: [],
+      continuation: { kind: "complete", checkpoint: "complete" as SynchronizationCheckpoint },
+    });
+    await replaceStoredStructure(workout.id, storedV2RecoveryFirstStructure);
+
+    const [loaded] = await indexedDbLocalStore.listWorkouts();
+
+    expect(loaded.structure).toEqual(workout.structure);
+    expect(loaded.structure).toMatchObject({
+      kind: "intervals",
+      coreLapIndexes: [3, 4, 5, 6, 7],
+      lapRoles: { warmup: [1, 2], recovery: [4, 6] },
+    });
   });
 
   it("clears workouts when the singleton user changes", async () => {

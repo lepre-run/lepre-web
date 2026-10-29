@@ -37,7 +37,7 @@ describe("workout classifier", () => {
 
     expect(classifyWorkout(laps)).toMatchObject({
       schemaVersion: 1,
-      classifierVersion: 2,
+      classifierVersion: 3,
       source: "inferred_from_strava_laps",
       confidence: 0.98,
       kind: "intervals",
@@ -105,7 +105,7 @@ describe("workout classifier", () => {
 
     expect(structure).toMatchObject({
       schemaVersion: 1,
-      classifierVersion: 2,
+      classifierVersion: 3,
       kind: "hill-circuit",
       repetitions: 2,
       coreLapIndexes: HILL_CIRCUIT_CORE_LAPS,
@@ -123,7 +123,7 @@ describe("workout classifier", () => {
       ]),
     ).toMatchObject({
       schemaVersion: 1,
-      classifierVersion: 2,
+      classifierVersion: 3,
       source: "inferred_from_strava_laps",
       confidence: 0.9,
       kind: "free-run",

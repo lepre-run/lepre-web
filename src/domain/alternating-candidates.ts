@@ -78,12 +78,16 @@ function repeatedHillsCandidate(input: AlternatingLaps, score: number): Candidat
   };
 }
 
+function startsWithWork(input: AlternatingLaps): boolean {
+  const [firstCoreLap] = input.core;
+  return input.work.includes(firstCoreLap);
+}
+
 function alternatingCandidate(input: AlternatingLaps): Candidate | undefined {
   const assessment = alternatingScore(input);
   if (!assessment) return undefined;
-  return assessment.workIsFaster
-    ? intervalCandidate(input, assessment.score)
-    : repeatedHillsCandidate(input, assessment.score);
+  if (!assessment.workIsFaster) return repeatedHillsCandidate(input, assessment.score);
+  return startsWithWork(input) ? intervalCandidate(input, assessment.score) : undefined;
 }
 
 export function alternatingCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<Candidate> {
