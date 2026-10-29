@@ -79,6 +79,7 @@ function repeatedHillsCandidate(input: AlternatingLaps, score: number): Candidat
 }
 
 function startsWithWork(input: AlternatingLaps): boolean {
+  // work is filtered from core, so the same Lap object first in both means core opens on a work lap.
   return input.core[0] === input.work[0];
 }
 
