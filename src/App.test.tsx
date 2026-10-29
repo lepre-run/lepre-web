@@ -3,6 +3,7 @@ import type { JSX } from "react";
 import { MemoryRouter, useNavigate } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
+import { expectPageErrorFallback } from "./test/page-error-assertions";
 
 vi.mock("./pages/Home", () => ({
   Home: (): never => {
@@ -38,14 +39,7 @@ describe("App", () => {
 
     renderAt(url);
 
-    expect(screen.getByRole("alert")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Something went wrong" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Reload" })).toBeInTheDocument();
-    expect(error).toHaveBeenCalledWith(
-      "The page failed to render.",
-      expect.objectContaining({ message: "interval core lap 2 must be a work lap" }),
-      expect.any(String),
-    );
+    expectPageErrorFallback(error, "interval core lap 2 must be a work lap");
   });
 
   it("clears the fallback after navigating to another page", () => {

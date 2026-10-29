@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { expectPageErrorFallback } from "../test/page-error-assertions";
 import { PageErrorBoundary } from "./PageErrorBoundary";
 
 function BrokenCard(): never {
@@ -31,13 +32,6 @@ describe("PageErrorBoundary", () => {
       </PageErrorBoundary>,
     );
 
-    expect(screen.getByRole("alert")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Something went wrong" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Reload" })).toBeInTheDocument();
-    expect(error).toHaveBeenCalledWith(
-      "The page failed to render.",
-      expect.objectContaining({ message: "interval core lap 2 must be a work lap" }),
-      expect.any(String),
-    );
+    expectPageErrorFallback(error, "interval core lap 2 must be a work lap");
   });
 });
