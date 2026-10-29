@@ -1,0 +1,102 @@
+{
+  "description": "Sanitized laps of a real 3x(3' fast / 6' easy) run whose v2 classification starts the interval core with a recovery lap. No GPS, HR, ids, names or dates.",
+  "laps": [
+    {
+      "index": 1,
+      "name": "Lap 0",
+      "movingDurationSeconds": 1052,
+      "elapsedDurationSeconds": 1086,
+      "distanceMeters": 3112.52,
+      "averageHeartRateBpm": null,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 2,
+      "name": "Lap 1",
+      "movingDurationSeconds": 359,
+      "elapsedDurationSeconds": 359,
+      "distanceMeters": 1067.74,
+      "averageHeartRateBpm": null,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 3,
+      "name": "Lap 2",
+      "movingDurationSeconds": 180,
+      "elapsedDurationSeconds": 180,
+      "distanceMeters": 703.95,
+      "averageHeartRateBpm": null,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 4,
+      "name": "Lap 3",
+      "movingDurationSeconds": 360,
+      "elapsedDurationSeconds": 360,
+      "distanceMeters": 1043.94,
+      "averageHeartRateBpm": null,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 5,
+      "name": "Lap 4",
+      "movingDurationSeconds": 180,
+      "elapsedDurationSeconds": 200,
+      "distanceMeters": 643.62,
+      "averageHeartRateBpm": null,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 6,
+      "name": "Lap 5",
+      "movingDurationSeconds": 360,
+      "elapsedDurationSeconds": 360,
+      "distanceMeters": 1080.09,
+      "averageHeartRateBpm": null,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 7,
+      "name": "Lap 6",
+      "movingDurationSeconds": 181,
+      "elapsedDurationSeconds": 220,
+      "distanceMeters": 679.57,
+      "averageHeartRateBpm": null,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 8,
+      "name": "Lap 7",
+      "movingDurationSeconds": 939,
+      "elapsedDurationSeconds": 970,
+      "distanceMeters": 3086.67,
+      "averageHeartRateBpm": null,
+      "maxHeartRateBpm": null
+    }
+  ],
+  "classifierV2Structure": {
+    "schemaVersion": 1,
+    "classifierVersion": 2,
+    "source": "inferred_from_strava_laps",
+    "confidence": 0.98,
+    "kind": "intervals",
+    "repetitions": 3,
+    "work": {
+      "kind": "distance",
+      "meters": 675.7133333333335
+    },
+    "recovery": {
+      "kind": "distance",
+      "meters": 1063.9233333333334
+    },
+    "coreLapIndexes": [2, 3, 4, 5, 6, 7],
+    "lapRoles": {
+      "warmup": [1],
+      "work": [3, 5, 7],
+      "recovery": [2, 4, 6],
+      "cooldown": [8],
+      "main": [],
+      "unknown": []
+    }
+  }
+}
