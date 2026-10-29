@@ -1,5 +1,5 @@
 {
-  "description": "Sanitized laps of a real 3x(3' fast / 6' easy) run whose v2 classification starts the interval core with a recovery lap. No GPS, HR, ids, names or dates.",
+  "description": "Sanitized laps of a real 3x(3' fast / 6' easy) run whose v2 classification starts the interval core with a recovery lap. No GPS, HR, ids, activity name or dates.",
   "laps": [
     {
       "index": 1,
