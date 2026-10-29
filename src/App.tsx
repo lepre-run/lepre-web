@@ -9,7 +9,7 @@ export function App(): JSX.Element {
   const { pathname } = useLocation();
 
   return (
-    <PageErrorBoundary key={pathname}>
+    <PageErrorBoundary resetKey={pathname}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/connected" element={<Connected />} />

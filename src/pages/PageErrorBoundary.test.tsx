@@ -34,4 +34,28 @@ describe("PageErrorBoundary", () => {
 
     expectPageErrorFallback(error, "interval core lap 2 must be a work lap");
   });
+
+  it("stays on the fallback until its reset key changes", () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { rerender } = render(
+      <PageErrorBoundary resetKey="/connected">
+        <BrokenCard />
+      </PageErrorBoundary>,
+    );
+
+    rerender(
+      <PageErrorBoundary resetKey="/connected">
+        <h1>Weekly overview</h1>
+      </PageErrorBoundary>,
+    );
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+
+    rerender(
+      <PageErrorBoundary resetKey="/connect-failed">
+        <h1>Weekly overview</h1>
+      </PageErrorBoundary>,
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Weekly overview" })).toBeInTheDocument();
+  });
 });

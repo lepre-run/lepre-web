@@ -2,7 +2,7 @@ import { Component, type ErrorInfo, type JSX, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "../components/ui";
 
-type PageErrorBoundaryProps = Readonly<{ children: ReactNode }>;
+type PageErrorBoundaryProps = Readonly<{ children: ReactNode; resetKey?: string }>;
 type PageErrorBoundaryState = Readonly<{ failed: boolean }>;
 
 function PageErrorFallback(): JSX.Element {
@@ -25,6 +25,12 @@ export class PageErrorBoundary extends Component<PageErrorBoundaryProps, PageErr
 
   static getDerivedStateFromError(): PageErrorBoundaryState {
     return { failed: true };
+  }
+
+  componentDidUpdate(previous: PageErrorBoundaryProps): void {
+    if (this.state.failed && previous.resetKey !== this.props.resetKey) {
+      this.setState({ failed: false });
+    }
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
