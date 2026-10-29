@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { buildWorkout } from "../../../test/builders";
+import { inconsistentRecoveryFirstIntervalWorkout } from "../../../test/fixtures/recovery-first-interval-core";
 import { WorkoutCard } from "./WorkoutCard";
 
 const builders = vi.hoisted(() => ({ raceFails: false, freeRunFails: false }));
@@ -66,4 +67,19 @@ it("falls back to the structured card when the free-run builder rejects a free r
   expect(warn).toHaveBeenCalledTimes(1);
   expect(warn.mock.calls[0][0]).toContain("strava:broken-free-run");
   expect(warn.mock.calls[0][0]).toContain("free-run laps are inconsistent");
+});
+
+it("warns once per workout instead of on every render", () => {
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  const value = inconsistentRecoveryFirstIntervalWorkout();
+  const { rerender } = render(<WorkoutCard workout={value} />);
+
+  rerender(<WorkoutCard workout={value} />);
+  rerender(<WorkoutCard workout={value} />);
+
+  expect(warn).toHaveBeenCalledTimes(1);
+
+  rerender(<WorkoutCard workout={{ ...value }} />);
+
+  expect(warn).toHaveBeenCalledTimes(2);
 });
