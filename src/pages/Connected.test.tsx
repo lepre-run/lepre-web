@@ -29,7 +29,7 @@ const workout = vi.hoisted(() => ({
   ],
   structure: {
     schemaVersion: 1,
-    classifierVersion: 2,
+    classifierVersion: 3,
     source: "inferred_from_strava_laps",
     confidence: 1,
     kind: "free-run",

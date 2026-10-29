@@ -137,7 +137,7 @@ it("shows every lap when the structure is unknown", () => {
   const workout = buildWorkout({
     structure: {
       schemaVersion: 1,
-      classifierVersion: 2,
+      classifierVersion: 3,
       source: "inferred_from_strava_laps",
       confidence: 0.2,
       kind: "unknown",

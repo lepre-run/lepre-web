@@ -1,5 +1,5 @@
 export const ACTUAL_WORKOUT_STRUCTURE_SCHEMA_VERSION = 1 as const;
-export const WORKOUT_CLASSIFIER_VERSION = 2 as const;
+export const WORKOUT_CLASSIFIER_VERSION = 3 as const;
 
 export type StageMeasure =
   | Readonly<{ kind: "distance"; meters: number }>
