@@ -7,17 +7,12 @@ import { PageErrorBoundary } from "./pages/PageErrorBoundary";
 
 export function App(): JSX.Element {
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <PageErrorBoundary>
-            <Home />
-          </PageErrorBoundary>
-        }
-      />
-      <Route path="/connected" element={<Connected />} />
-      <Route path="/connect-failed" element={<ConnectFailed />} />
-    </Routes>
+    <PageErrorBoundary>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/connected" element={<Connected />} />
+        <Route path="/connect-failed" element={<ConnectFailed />} />
+      </Routes>
+    </PageErrorBoundary>
   );
 }
