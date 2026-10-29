@@ -58,7 +58,6 @@ function selectCard(workout: Workout): CardSelection {
 }
 
 export function WorkoutCard({ workout }: Readonly<{ workout: Workout }>): JSX.Element {
-  // Memoized so a rejected builder warns once per workout, not on every render.
   const card = useMemo(() => selectCard(workout), [workout]);
 
   switch (card.kind) {
