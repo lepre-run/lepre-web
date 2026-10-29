@@ -169,6 +169,11 @@ export const english = {
     freeRun: "Free run",
     unknown: "Unknown workout",
   },
+  pageError: {
+    title: "Something went wrong",
+    description: "This page could not be displayed. Your workouts are still stored on this device.",
+    reload: "Reload",
+  },
   connectFailed: {
     title: "Connect failed",
     tryAgain: "Try again",

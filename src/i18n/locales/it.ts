@@ -170,6 +170,12 @@ export const italian = {
     freeRun: "Corsa libera",
     unknown: "Allenamento non classificato",
   },
+  pageError: {
+    title: "Si è verificato un problema",
+    description:
+      "Non è stato possibile visualizzare questa pagina. I tuoi allenamenti restano salvati su questo dispositivo.",
+    reload: "Ricarica",
+  },
   connectFailed: {
     title: "Connessione non riuscita",
     tryAgain: "Riprova",
