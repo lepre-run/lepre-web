@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { intervalRunCardPropsFromWorkout } from "../components/workouts/IntervalRunCard/intervalRunCardData";
+import { buildWorkout } from "../test/builders";
 import {
   recoveryFirstIntervalLaps,
   recoveryFirstIntervalWorkout,
@@ -30,10 +32,12 @@ describe("interval core start", () => {
     const random = seededRandom(6);
     let intervalCount = 0;
     for (let sample = 0; sample < 300; sample += 1) {
-      const structure = classifyWorkout(randomAlternatingLaps(random));
+      const workout = buildWorkout({ laps: randomAlternatingLaps(random) });
+      const { structure } = workout;
       if (structure.kind !== "intervals") continue;
       intervalCount += 1;
       expect(structure.lapRoles.work).toContain(structure.coreLapIndexes[0]);
+      expect(() => intervalRunCardPropsFromWorkout(workout)).not.toThrow();
     }
     expect(intervalCount).toBeGreaterThan(50);
   });
