@@ -25,9 +25,39 @@ function alternatingLaps(
   return work.length >= 3 && recovery.length >= 2 ? { core, work, recovery } : undefined;
 }
 
-function alternatingScore(
+const MIN_PACE_SEPARATION = 0.12;
+const MIN_HEART_RATE_SEPARATION = 0.05;
+
+type Assessment = Readonly<{
+  score: number;
+  workIsFaster: boolean;
+  workHasHigherHeartRate: boolean | undefined;
+}>;
+
+function relativeSeparation(left: number, right: number): number {
+  return Math.abs(left - right) / Math.max(left, right);
+}
+
+function averageHeartRate(laps: ReadonlyArray<Lap>): number | undefined {
+  const heartRates = laps.map((lap) => lap.averageHeartRateBpm);
+  if (!heartRates.every((value): value is number => value !== null && value > 0)) {
+    return undefined;
+  }
+  return mean(heartRates);
+}
+
+function heartRateContrast(
   input: AlternatingLaps,
-): Readonly<{ score: number; workIsFaster: boolean }> | undefined {
+): Readonly<{ separation: number; workHasHigherHeartRate: boolean }> | undefined {
+  const workHeartRate = averageHeartRate(input.work);
+  const recoveryHeartRate = averageHeartRate(input.recovery);
+  if (workHeartRate === undefined || recoveryHeartRate === undefined) return undefined;
+  const separation = relativeSeparation(workHeartRate, recoveryHeartRate);
+  if (separation < MIN_HEART_RATE_SEPARATION) return undefined;
+  return { separation, workHasHigherHeartRate: workHeartRate > recoveryHeartRate };
+}
+
+function alternatingScore(input: AlternatingLaps): Assessment | undefined {
   const workPaces = input.work.map(pace);
   const recoveryPaces = input.recovery.map(pace);
   const workConsistency = coefficientOfVariation(workPaces);
@@ -43,12 +73,15 @@ function alternatingScore(
     return undefined;
   const workPace = mean(workPaces);
   const recoveryPace = mean(recoveryPaces);
-  const separation = Math.abs(recoveryPace - workPace) / Math.max(workPace, recoveryPace);
-  if (separation < 0.12) return undefined;
+  const paceSeparation = relativeSeparation(workPace, recoveryPace);
+  const heartRate = heartRateContrast(input);
+  if (paceSeparation < MIN_PACE_SEPARATION && !heartRate) return undefined;
+  const separation = Math.max(paceSeparation, heartRate?.separation ?? 0);
   const consistencyScore = 1 - Math.min(1, workConsistency + workStageConsistency / 2);
   return {
     score: Math.min(0.98, 0.67 + separation + consistencyScore * 0.12),
     workIsFaster: workPace < recoveryPace,
+    workHasHigherHeartRate: heartRate?.workHasHigherHeartRate,
   };
 }
 
@@ -83,11 +116,39 @@ function startsWithWork(input: AlternatingLaps): boolean {
   return input.work.includes(firstCoreLap);
 }
 
-function alternatingCandidate(input: AlternatingLaps): Candidate | undefined {
-  const assessment = alternatingScore(input);
-  if (!assessment) return undefined;
+function paceOnlyCandidate(input: AlternatingLaps, assessment: Assessment): Candidate | undefined {
   if (!assessment.workIsFaster) return repeatedHillsCandidate(input, assessment.score);
   return startsWithWork(input) ? intervalCandidate(input, assessment.score) : undefined;
+}
+
+function effortLedAlternatingCandidate(input: AlternatingLaps): Candidate | undefined {
+  const assessment = alternatingScore(input);
+  if (!assessment) return undefined;
+  if (assessment.workHasHigherHeartRate === undefined) return paceOnlyCandidate(input, assessment);
+  if (!assessment.workHasHigherHeartRate) return undefined;
+  if (assessment.workIsFaster || !startsWithWork(input)) {
+    return paceOnlyCandidate(input, assessment);
+  }
+  return (
+    repeatedHillsCandidate(input, assessment.score) ?? intervalCandidate(input, assessment.score)
+  );
+}
+
+function addsTrailingRecovery(longer: Candidate, shorter: Candidate): boolean {
+  return (
+    longer.kind === "intervals" &&
+    longer.coreLapIndexes.length === shorter.coreLapIndexes.length + 1 &&
+    longer.coreLapIndexes[0] === shorter.coreLapIndexes[0] &&
+    longer.workLapIndexes.join() === shorter.workLapIndexes.join()
+  );
+}
+
+function withoutTruncatedRecoveries(candidates: ReadonlyArray<Candidate>): Candidate[] {
+  return candidates.filter(
+    (candidate) =>
+      candidate.kind !== "intervals" ||
+      !candidates.some((other) => addsTrailingRecovery(other, candidate)),
+  );
 }
 
 export function alternatingCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<Candidate> {
@@ -97,10 +158,10 @@ export function alternatingCandidates(laps: ReadonlyArray<Lap>): ReadonlyArray<C
       for (const workParity of [0, 1]) {
         const alternating = alternatingLaps(laps, start, end, workParity);
         if (!alternating) continue;
-        const candidate = alternatingCandidate(alternating);
+        const candidate = effortLedAlternatingCandidate(alternating);
         if (candidate) candidates.push(candidate);
       }
     }
   }
-  return candidates;
+  return withoutTruncatedRecoveries(candidates);
 }
