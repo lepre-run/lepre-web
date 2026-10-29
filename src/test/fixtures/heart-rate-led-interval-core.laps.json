@@ -1,0 +1,77 @@
+{
+  "description": "Sanitized laps (distance, moving time, average heart rate) of a real 3x(6' work / 3' rest) run where the short rest laps have a faster pace than the work laps (issue #8). No GPS, polyline, ids, activity name, dates or max heart rate.",
+  "laps": [
+    {
+      "index": 1,
+      "name": "Lap 1",
+      "movingDurationSeconds": 1052,
+      "elapsedDurationSeconds": 1052,
+      "distanceMeters": 3110,
+      "averageHeartRateBpm": 89,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 2,
+      "name": "Lap 2",
+      "movingDurationSeconds": 359,
+      "elapsedDurationSeconds": 359,
+      "distanceMeters": 1070,
+      "averageHeartRateBpm": 162,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 3,
+      "name": "Lap 3",
+      "movingDurationSeconds": 180,
+      "elapsedDurationSeconds": 180,
+      "distanceMeters": 704,
+      "averageHeartRateBpm": 153,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 4,
+      "name": "Lap 4",
+      "movingDurationSeconds": 360,
+      "elapsedDurationSeconds": 360,
+      "distanceMeters": 1040,
+      "averageHeartRateBpm": 170,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 5,
+      "name": "Lap 5",
+      "movingDurationSeconds": 180,
+      "elapsedDurationSeconds": 180,
+      "distanceMeters": 644,
+      "averageHeartRateBpm": 144,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 6,
+      "name": "Lap 6",
+      "movingDurationSeconds": 360,
+      "elapsedDurationSeconds": 360,
+      "distanceMeters": 1080,
+      "averageHeartRateBpm": 171,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 7,
+      "name": "Lap 7",
+      "movingDurationSeconds": 181,
+      "elapsedDurationSeconds": 181,
+      "distanceMeters": 680,
+      "averageHeartRateBpm": 144,
+      "maxHeartRateBpm": null
+    },
+    {
+      "index": 8,
+      "name": "Lap 8",
+      "movingDurationSeconds": 939,
+      "elapsedDurationSeconds": 939,
+      "distanceMeters": 3090,
+      "averageHeartRateBpm": 153,
+      "maxHeartRateBpm": null
+    }
+  ]
+}

@@ -54,7 +54,7 @@ describe("domain entities", () => {
         ...input,
         structure: {
           schemaVersion: 1,
-          classifierVersion: 3,
+          classifierVersion: 4,
           source: "inferred_from_strava_laps",
           confidence: 1,
           kind: "free-run",

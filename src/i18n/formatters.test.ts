@@ -14,7 +14,7 @@ import {
 
 const intervalWorkout = {
   schemaVersion: 1,
-  classifierVersion: 3,
+  classifierVersion: 4,
   source: "inferred_from_strava_laps",
   confidence: 0.94,
   kind: "intervals",
@@ -34,7 +34,7 @@ const intervalWorkout = {
 
 const hillCircuitWorkout = {
   schemaVersion: 1,
-  classifierVersion: 3,
+  classifierVersion: 4,
   source: "inferred_from_strava_laps",
   confidence: 0.95,
   kind: "hill-circuit",

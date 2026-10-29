@@ -35,7 +35,7 @@ const TEMPO_WORKOUT = {
   ],
   structure: {
     schemaVersion: 1,
-    classifierVersion: 3,
+    classifierVersion: 4,
     source: "inferred_from_strava_laps",
     confidence: 0.94,
     kind: "tempo",
@@ -91,7 +91,7 @@ const REPEATED_HILLS_WORKOUT = {
   ],
   structure: {
     schemaVersion: 1,
-    classifierVersion: 3,
+    classifierVersion: 4,
     source: "inferred_from_strava_laps",
     confidence: 0.9,
     kind: "repeated-hills",
