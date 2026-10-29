@@ -14,6 +14,7 @@ import { StructuredWorkoutCard } from "../StructuredWorkoutCard/StructuredWorkou
 
 function cardPropsOrFallback<Props>(
   workout: Workout,
+  card: string,
   build: (workout: Workout) => Props,
 ): Props | undefined {
   try {
@@ -21,7 +22,7 @@ function cardPropsOrFallback<Props>(
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     console.warn(
-      `Workout ${workout.id} has an inconsistent ${workout.structure.kind} classification; ` +
+      `Workout ${workout.id} has inconsistent ${card} data; ` +
         `showing the structured workout card instead: ${reason}`,
     );
     return undefined;
@@ -30,17 +31,16 @@ function cardPropsOrFallback<Props>(
 
 export function WorkoutCard({ workout }: Readonly<{ workout: Workout }>): JSX.Element {
   if (workout.type === "race") {
-    return <RaceCard {...raceCardPropsFromWorkout(workout)} />;
-  }
-  if (workout.structure.kind === "free-run") {
-    return <FreeRunCard {...freeRunCardPropsFromWorkout(workout)} />;
-  }
-  if (workout.structure.kind === "progressive") {
-    const props = cardPropsOrFallback(workout, progressiveRunCardPropsFromWorkout);
+    const props = cardPropsOrFallback(workout, "race", raceCardPropsFromWorkout);
+    if (props) return <RaceCard {...props} />;
+  } else if (workout.structure.kind === "free-run") {
+    const props = cardPropsOrFallback(workout, "free-run", freeRunCardPropsFromWorkout);
+    if (props) return <FreeRunCard {...props} />;
+  } else if (workout.structure.kind === "progressive") {
+    const props = cardPropsOrFallback(workout, "progressive", progressiveRunCardPropsFromWorkout);
     if (props) return <ProgressiveRunCard {...props} />;
-  }
-  if (workout.structure.kind === "intervals") {
-    const props = cardPropsOrFallback(workout, intervalRunCardPropsFromWorkout);
+  } else if (workout.structure.kind === "intervals") {
+    const props = cardPropsOrFallback(workout, "intervals", intervalRunCardPropsFromWorkout);
     if (props) return <IntervalRunCard {...props} />;
   }
   return <StructuredWorkoutCard workout={workout} />;
