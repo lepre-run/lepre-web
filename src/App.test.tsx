@@ -1,5 +1,6 @@
-import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { fireEvent, render, screen } from "@testing-library/react";
+import type { JSX } from "react";
+import { MemoryRouter, useNavigate } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 
@@ -9,10 +10,20 @@ vi.mock("./pages/Home", () => ({
   },
 }));
 
+function GoToConnectFailed(): JSX.Element {
+  const navigate = useNavigate();
+  return (
+    <button type="button" onClick={() => navigate("/connect-failed")}>
+      Go to connect failed
+    </button>
+  );
+}
+
 function renderAt(url: string): void {
   render(
     <MemoryRouter initialEntries={[url]}>
       <App />
+      <GoToConnectFailed />
     </MemoryRouter>,
   );
 }
@@ -35,5 +46,16 @@ describe("App", () => {
       expect.objectContaining({ message: "interval core lap 2 must be a work lap" }),
       expect.any(String),
     );
+  });
+
+  it("clears the fallback after navigating to another page", () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    renderAt("/connected");
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Go to connect failed" }));
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /try again/i })).toHaveAttribute("href", "/");
   });
 });
