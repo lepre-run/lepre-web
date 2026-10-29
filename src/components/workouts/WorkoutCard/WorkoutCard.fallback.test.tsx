@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { StrictMode } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 import { buildWorkout } from "../../../test/builders";
 import { inconsistentRecoveryFirstIntervalWorkout } from "../../../test/fixtures/recovery-first-interval-core";
@@ -69,7 +70,7 @@ it("falls back to the structured card when the free-run builder rejects a free r
   expect(warn.mock.calls[0][0]).toContain("free-run laps are inconsistent");
 });
 
-it("warns once per workout instead of on every render", () => {
+it("warns once per workout object instead of on every render", () => {
   const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
   const value = inconsistentRecoveryFirstIntervalWorkout();
   const { rerender } = render(<WorkoutCard workout={value} />);
@@ -82,4 +83,19 @@ it("warns once per workout instead of on every render", () => {
   rerender(<WorkoutCard workout={{ ...value }} />);
 
   expect(warn).toHaveBeenCalledTimes(2);
+});
+
+it("warns once per workout under StrictMode double rendering", () => {
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  const value = inconsistentRecoveryFirstIntervalWorkout();
+
+  render(
+    <StrictMode>
+      <WorkoutCard workout={value} />
+    </StrictMode>,
+  );
+
+  expect(screen.queryByTestId("interval-repetition-row")).not.toBeInTheDocument();
+  expect(warn).toHaveBeenCalledTimes(1);
+  expect(warn.mock.calls[0][0]).toContain(value.id);
 });
